@@ -2,7 +2,7 @@ name: Update universes
 
 on:
   schedule:
-    - cron: '27 5 * * *'
+    - cron: '27 7 * * *'
   # FIXME: remove
   push:
     branches:
@@ -10,7 +10,7 @@ on:
 
 jobs:
 
-  run-update:
+  run-demo-update:
     runs-on: ubuntu-latest
 
     steps:
@@ -33,6 +33,36 @@ jobs:
       run: |
         python -u feed-universe.py universe-demo.yaml --dry-run 2>&1 | tee logs/run_log_demo.txt
 
+    - name: Commit Run Logs
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add logs/run_log_demo.txt
+        git commit -m "Update daily run log for demo"
+
+    - name: Push changes
+      run: |
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+  run-prod-update:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+
     - name: Update prod universe
       env:
         DATAGOUV_URL: https://www.data.gouv.fr
@@ -44,8 +74,8 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add logs/
-        git commit -m "Update daily run logs"
+        git add logs/run_log_prod.txt
+        git commit -m "Update daily run log for prod"
 
     - name: Push changes
       run: |
