@@ -1,0 +1,44 @@
+name: Daily Python Command
+
+on:
+  schedule:
+    - cron: '27 5 * * *'
+  # FIXME: remove
+  push:
+    branches:
+      - feat/ci
+
+jobs:
+
+  # FIXME: duplicate on prod
+  run-demo-update:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    # FIXME: remove dry-run
+    - name: Update demo universe
+      env:
+        DATAGOUV_URL: https://demo.data.gouv.fr
+        DATAGOUV_API_KEY: ${{ secrets.DATAGOUV_API_KEY_DEMO }}
+      run: |
+        python feed-universe.py universe-demo.yaml --dry-run > logs/run_log_demo.txt
+
+    - name: Commit Run Logs
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add logs/run_log_demo.txt
+        git commit -m "Update daily run log for demo"
+
+    - name: Push changes
+      run: |
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
