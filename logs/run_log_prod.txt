@@ -1,4 +1,4 @@
-Starting at Wed Nov 13 15:58:08 2024
+Starting at Wed Nov 13 16:42:44 2024
 *** DRY RUN ***
 Processing 175 organizations...
 Updating topic 'univers-ecospheres'
@@ -25,14 +25,14 @@ Skipping empty organization 'ddt-aveyron'
 Skipping empty organization 'ddt-cote-dor'
 Skipping empty organization 'ddt-creuse'
 Skipping empty organization 'ddt-de-la-loire'
-Skipping empty organization 'ddt-de-la-meuse'
+Feeding 34 datasets from 'ddt-de-la-meuse'...
 Skipping empty organization 'ddt-de-la-moselle'
 Skipping empty organization 'ddt-de-lain'
 Skipping empty organization 'ddt-de-lardeche'
-Feeding 1 datasets from 'ddt-de-meurthe-et-moselle'...
+Feeding 783 datasets from 'ddt-de-meurthe-et-moselle'...
 Skipping empty organization 'ddt-deux-sevres'
 Skipping empty organization 'ddt-dordogne'
-Skipping empty organization 'ddt-drome'
+Feeding 416 datasets from 'ddt-drome'...
 Skipping empty organization 'ddt-haute-garonne'
 Feeding 88 datasets from 'ddt-haute-marne'...
 Skipping empty organization 'ddt-haute-vienne'
@@ -61,14 +61,14 @@ Feeding 109 datasets from 'ddtm-finistere'...
 Skipping empty organization 'ddtm-gard'
 Skipping empty organization 'ddtm-gironde'
 Skipping empty organization 'ddtm-haute-corse'
-Skipping empty organization 'ddtm-herault'
+Feeding 98 datasets from 'ddtm-herault'...
 Skipping empty organization 'ddtm-manche'
 Skipping empty organization 'ddtm-morbihan'
 Skipping empty organization 'ddtm-nord'
 Skipping empty organization 'ddtm-pas-de-calais'
 Skipping empty organization 'ddtm-pyrenees-orientales'
 Skipping empty organization 'ddtm-seine-maritime'
-Skipping empty organization 'ddtm-vendee'
+Feeding 133 datasets from 'ddtm-vendee'...
 Skipping empty organization 'deal-guadeloupe'
 Skipping empty organization 'deal-mayotte'
 Skipping empty organization 'deal-reunion'
@@ -87,7 +87,7 @@ Skipping empty organization 'direction-departementale-des-territoires-de-laube'
 Skipping empty organization 'direction-departementale-des-territoires-de-lessonne'
 Feeding 322 datasets from 'direction-departementale-des-territoires-de-lisere'...
 Skipping empty organization 'direction-departementale-des-territoires-de-loir-et-cher'
-Skipping empty organization 'direction-departementale-des-territoires-de-lorne'
+Feeding 605 datasets from 'direction-departementale-des-territoires-de-lorne'...
 Skipping empty organization 'direction-departementale-des-territoires-de-lot-et-garonne'
 Skipping empty organization 'direction-departementale-des-territoires-de-saone-et-loire'
 Skipping empty organization 'direction-departementale-des-territoires-de-seine-et-marne'
@@ -99,7 +99,7 @@ Feeding 24 datasets from 'direction-departementale-des-territoires-du-bas-rhin-6
 Skipping empty organization 'direction-departementale-des-territoires-du-cher'
 Feeding 20 datasets from 'direction-departementale-des-territoires-du-doubs'...
 Skipping empty organization 'direction-departementale-des-territoires-du-gers'
-Skipping empty organization 'direction-departementale-des-territoires-du-haut-rhin-68'
+Feeding 116 datasets from 'direction-departementale-des-territoires-du-haut-rhin-68'...
 Skipping empty organization 'direction-departementale-des-territoires-du-loiret'
 Feeding 4 datasets from 'direction-departementale-des-territoires-du-rhone-1'...
 Skipping empty organization 'direction-departementale-des-territoires-du-val-doise'
@@ -108,11 +108,11 @@ Skipping empty organization 'direction-departementale-des-territoires-et-de-la-m
 Skipping empty organization 'direction-departementale-des-territoires-et-de-la-mer-de-leure'
 Feeding 1 datasets from 'direction-departementale-des-territoires-et-de-la-mer-de-loire-atlantique'...
 Skipping empty organization 'direction-departementale-des-territoires-et-de-la-mer-des-bouches-du-rhone'
-Skipping empty organization 'direction-departementale-des-territoires-et-de-la-mer-des-landes'
+Feeding 243 datasets from 'direction-departementale-des-territoires-et-de-la-mer-des-landes'...
 Skipping empty organization 'direction-departementale-des-territoires-et-de-la-mer-des-pyrenees-atlantiques'
 Skipping empty organization 'direction-departementale-des-territoires-et-de-la-mer-dille-et-vilaine'
 Skipping empty organization 'direction-departementale-des-territoires-et-de-la-mer-du-calvados'
-Skipping empty organization 'direction-departementale-des-territoires-et-de-la-mer-du-var'
+Feeding 334 datasets from 'direction-departementale-des-territoires-et-de-la-mer-du-var'...
 Skipping empty organization 'direction-departementale-et-des-territoires-du-cantal'
 Feeding 3 datasets from 'direction-regionale-de-lenvironnement-de-lamenagement-et-du-logement-de-normandie'...
 Skipping empty organization 'direction-regionale-de-lenvironnement-de-lamenagement-et-du-logement-du-centre-val-de-loire'
@@ -177,7 +177,7 @@ Feeding 20 datasets from 'syndicat-mixte-eptb-meurthe-madon'...
 Feeding 629 datasets from 'systeme-d-information-sur-l-eau'...
 Feeding 29 datasets from 'systeme-dinformation-sur-la-biodiversite'...
 Feeding 23 datasets from 'twisto'...
-Total count: 5080, elapsed: 77.30 s
+Total count: 7841, elapsed: 89.13 s
 List of organizations for ecospheres/config.yaml:
 organizations:
   - ademe
@@ -197,16 +197,24 @@ organizations:
   - cerema
   - commission-de-regulation-de-lenergie
   - datagrandest
+  - ddt-de-la-meuse
   - ddt-de-meurthe-et-moselle
+  - ddt-drome
   - ddt-haute-marne
   - ddtm-finistere
+  - ddtm-herault
+  - ddtm-vendee
   - direction-departementale-des-territoires-de-haute-saone
   - direction-departementale-des-territoires-de-la-marne
   - direction-departementale-des-territoires-de-lisere
+  - direction-departementale-des-territoires-de-lorne
   - direction-departementale-des-territoires-du-bas-rhin-67
   - direction-departementale-des-territoires-du-doubs
+  - direction-departementale-des-territoires-du-haut-rhin-68
   - direction-departementale-des-territoires-du-rhone-1
   - direction-departementale-des-territoires-et-de-la-mer-de-loire-atlantique
+  - direction-departementale-des-territoires-et-de-la-mer-des-landes
+  - direction-departementale-des-territoires-et-de-la-mer-du-var
   - direction-regionale-de-lenvironnement-de-lamenagement-et-du-logement-de-normandie
   - direction-regionale-de-lenvironnement-et-du-logement-bourgogne-franche-comte
   - do-terr-geo-centre
@@ -258,4 +266,4 @@ organizations:
   - systeme-dinformation-sur-la-biodiversite
   - twisto
 
-Done at Wed Nov 13 15:59:26 2024
+Done at Wed Nov 13 16:44:13 2024
