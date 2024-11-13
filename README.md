@@ -1,8 +1,8 @@
-### Universe
+# ecospheres-universe
 
-#### Mise en place
+## Mise en place
 
-Éditer `universe.yaml` pour y configurer l'environnement, ou utiliser un ficher d'environnement séparé.
+Éditer `universe-{env}.yaml` pour y configurer l'environnement, ou utiliser un ficher d'environnement séparé.
 
 Dans le cas d'un fichier d'environnement séparé (`env.yaml` dans les exemples ci-dessous), le fichier doit uniquement contenir la section `api` de la config :
 
@@ -12,10 +12,10 @@ api:
   token: ...
 ```
 
-#### Créer ou mettre à jour un univers
+## Créer ou mettre à jour un univers
 
 ```shell
-python feed-universe.py [--dry-run] [options] universe.yaml [env.yaml]
+python feed-universe.py [--dry-run] [options] universe-{env}.yaml [env.yaml]
 ```
 
 Options :
@@ -25,7 +25,7 @@ Options :
 - `--slow` : À combiner avec `--reset` si l'univers contient beaucoup de jeux de données (milliers+) pour éviter les timeouts de l'API data.gouv.
 
 
-#### Mettre à jour le déploiement correspondant
+## Mettre à jour le déploiement correspondant
 
 Une fois le script terminé, il faut mettre à jour la section `organizations` du fichier de config [`udata-front-kit`](https://github.com/opendatateam/udata-front-kit/blob/main/configs/ecospheres/config.yaml) correspondant à l'environnement data.gouv mis à jour.
 

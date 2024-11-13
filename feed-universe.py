@@ -2,11 +2,10 @@ import argparse
 import datetime
 import functools
 import json
-import requests
-import sys
 import time
+
+import requests
 import yaml
-from itertools import chain
 
 # TODO:
 # - (optionally) update site config.yaml with new org list
@@ -210,20 +209,20 @@ if __name__ == "__main__":
     url = conf['api']['url']
     token = conf['api']['token']
     api = ApiHelper(url, token, fail_on_errors=args.fail_on_errors, dry_run=args.dry_run)
-        
+
     topic = conf['topic']
-    
+
     queries = conf['organizations'].get('queries', [])
     slugs = set(conf['organizations'].get('slugs', []))
     skip = set(conf['organizations'].get('skip', []))
-    
+
     if args.verbose:
         verbose = print
 
     print(f"Starting at {datetime.datetime.now():%c}")
     if args.dry_run:
         print("*** DRY RUN ***")
-    
+
     t_count = 0
     t_all = time.time()
     try:
@@ -270,6 +269,6 @@ if __name__ == "__main__":
     finally:
         print(f"Total count: {t_count}, elapsed: {time.time() - t_all:.2f} s")
 
-print("List of organizations for ecospheres/config.yaml:")
-print(yaml.dump({'organizations': active_orgs}, Dumper=IndentedDumper))
-print(f"Done at {datetime.datetime.now():%c}")
+    print("List of organizations for ecospheres/config.yaml:")
+    print(yaml.dump({'organizations': active_orgs}, Dumper=IndentedDumper))
+    print(f"Done at {datetime.datetime.now():%c}")
