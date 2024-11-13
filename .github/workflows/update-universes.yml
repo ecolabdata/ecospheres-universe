@@ -33,7 +33,7 @@ jobs:
         DATAGOUV_URL: https://demo.data.gouv.fr
         DATAGOUV_API_KEY: ${{ secrets.DATAGOUV_API_KEY_DEMO }}
       run: |
-        python feed-universe.py universe-demo.yaml --dry-run | tee logs/run_log_demo.txt
+        python -u feed-universe.py universe-demo.yaml --dry-run 2>&1 | tee logs/run_log_demo.txt
 
     - name: Commit Run Logs
       run: |
