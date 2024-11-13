@@ -37,6 +37,7 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
+        git pull --rebase origin ${{ github.ref_name }}
         git add logs/run_log_demo.txt
         git commit -m "Update daily run log for demo"
 
@@ -74,6 +75,7 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
+        git pull --rebase origin ${{ github.ref_name }}
         git add logs/run_log_prod.txt
         git commit -m "Update daily run log for prod"
 
