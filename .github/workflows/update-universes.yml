@@ -22,15 +22,18 @@ jobs:
       with:
         python-version: '3.x'
 
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+
     # FIXME: remove dry-run
     - name: Update demo universe
       env:
         DATAGOUV_URL: https://demo.data.gouv.fr
         DATAGOUV_API_KEY: ${{ secrets.DATAGOUV_API_KEY_DEMO }}
       run: |
-        pip install --upgrade pip
-        pip install -r requirements.txt
-        python feed-universe.py universe-demo.yaml --dry-run > logs/run_log_demo.txt
+        python feed-universe.py universe-demo.yaml --dry-run | tee logs/run_log_demo.txt
 
     - name: Commit Run Logs
       run: |
