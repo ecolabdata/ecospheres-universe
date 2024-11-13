@@ -37,12 +37,12 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git pull --rebase origin ${{ github.ref_name }}
         git add logs/run_log_demo.txt
         git commit -m "Update daily run log for demo"
 
     - name: Push changes
       run: |
+        git pull --rebase origin ${{ github.ref_name }}
         git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -75,12 +75,12 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git pull --rebase origin ${{ github.ref_name }}
         git add logs/run_log_prod.txt
         git commit -m "Update daily run log for prod"
 
     - name: Push changes
       run: |
+        git pull --rebase origin ${{ github.ref_name }}
         git push
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
