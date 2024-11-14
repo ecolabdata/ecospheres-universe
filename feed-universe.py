@@ -229,12 +229,12 @@ if __name__ == "__main__":
     try:
         orgs = set()
 
-        for org in slugs:
+        for org in sorted(slugs):
             verbose(f"Checking organization '{org}'")
             try:
                 api.get_organization(org)
                 orgs.add(org)
-            except:
+            except Exception:
                 print(f"Unknown organization '{org}'")
 
         for q in queries:
