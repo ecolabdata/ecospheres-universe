@@ -1,0 +1,82 @@
+name: Update universes
+
+on:
+  schedule:
+    - cron: '27 7 * * *'
+
+jobs:
+
+  run-demo-update:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Update demo universe
+      env:
+        DATAGOUV_URL: https://demo.data.gouv.fr
+        DATAGOUV_API_KEY: ${{ secrets.DATAGOUV_API_KEY_DEMO }}
+      run: |
+        python -u feed-universe.py universe-demo.yaml 2>&1 | tee logs/run_log_demo.txt
+
+    - name: Commit Run Logs
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add logs/run_log_demo.txt
+        git commit -m "Update daily run log for demo"
+
+    - name: Push changes
+      run: |
+        git pull --rebase origin ${{ github.ref_name }}
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+  run-prod-update:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Update prod universe
+      env:
+        DATAGOUV_URL: https://www.data.gouv.fr
+        DATAGOUV_API_KEY: ${{ secrets.DATAGOUV_API_KEY_PROD }}
+      run: |
+        python -u feed-universe.py universe-prod.yaml 2>&1 | tee logs/run_log_prod.txt
+
+    - name: Commit Run Logs
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add logs/run_log_prod.txt
+        git commit -m "Update daily run log for prod"
+
+    - name: Push changes
+      run: |
+        git pull --rebase origin ${{ github.ref_name }}
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

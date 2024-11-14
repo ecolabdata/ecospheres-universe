@@ -2,6 +2,7 @@ import argparse
 import datetime
 import functools
 import json
+import os
 import time
 
 import requests
@@ -206,8 +207,8 @@ if __name__ == "__main__":
     for u in args.universe:
         conf.update(yaml.safe_load(u))
 
-    url = conf['api']['url']
-    token = conf['api']['token']
+    url = os.getenv("DATAGOUV_URL", conf['api']['url'])
+    token = os.getenv("DATAGOUV_API_KEY", conf['api']['token'])
     api = ApiHelper(url, token, fail_on_errors=args.fail_on_errors, dry_run=args.dry_run)
 
     topic = conf['topic']
@@ -228,12 +229,12 @@ if __name__ == "__main__":
     try:
         orgs = set()
 
-        for org in slugs:
+        for org in sorted(slugs):
             verbose(f"Checking organization '{org}'")
             try:
                 api.get_organization(org)
                 orgs.add(org)
-            except:
+            except Exception:
                 print(f"Unknown organization '{org}'")
 
         for q in queries:
