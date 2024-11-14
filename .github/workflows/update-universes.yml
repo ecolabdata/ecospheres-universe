@@ -3,10 +3,6 @@ name: Update universes
 on:
   schedule:
     - cron: '27 7 * * *'
-  # FIXME: remove
-  push:
-    branches:
-      - feat/ci
 
 jobs:
 
