@@ -3,6 +3,7 @@ name: Update universes
 on:
   schedule:
     - cron: '27 7 * * *'
+  workflow_dispatch:
 
 jobs:
 
