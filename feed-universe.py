@@ -86,6 +86,12 @@ class ApiHelper:
         r.raise_for_status()
         return r.json()
 
+    def get_topic_id(self, topic_slug: str):
+        url = f"{self.base_url}/api/2/topics/{topic_slug}/"
+        r = session.get(url)
+        r.raise_for_status()
+        return r.json()['id']
+
     @elapsed_and_count
     def get_organizations(self, query):
         orgs = set()
@@ -121,6 +127,14 @@ class ApiHelper:
         xfields = 'datasets{id}'
         func = lambda c: {d['id'] for d in c['datasets']}
         return self.get_datasets(url, func, xfields=xfields)
+
+    def search_datasets_count(self, topic_id: str, organization_id: str = ""):
+        url = f"{self.base_url}/api/2/datasets/search/?topic={topic_id}"
+        if organization_id:
+            url += f"&organization={organization_id}"
+        r = session.get(url)
+        r.raise_for_status()
+        return r.json()['total']
 
     @elapsed_and_count
     def put_topic_datasets(self, topic, datasets):
@@ -217,6 +231,7 @@ if __name__ == "__main__":
     api = ApiHelper(url, token, fail_on_errors=args.fail_on_errors, dry_run=args.dry_run)
 
     topic = conf['topic']
+    topic_id = "xxx"
 
     queries = conf['organizations'].get('queries', [])
     slugs = set(conf['organizations'].get('slugs', []))
@@ -230,6 +245,7 @@ if __name__ == "__main__":
         print("*** DRY RUN ***")
     elif args.check:
         print("*** CHECKING ***")
+        topic_id = api.get_topic_id(topic)
 
     t_count = 0
     t_all = time.time()
@@ -266,20 +282,22 @@ if __name__ == "__main__":
             verbose(f"Fetching datasets for organization '{org}'...")
             datasets = api.get_organization_datasets(org)
             if not datasets and not args.keep_empty:
-                print(f"Skipping empty organization '{org}'")
+                verbose(f"Skipping empty organization '{org}'")
                 continue
 
             t_count += len(datasets)
             active_orgs.append(org)
 
             if args.check:
-                existing_datasets = api.get_topic_datasets(topic, organization_id=org_ids[org])
-                if len(existing_datasets) != len(datasets):
-                    print(f"Datasets for '{org}' are NOT in sync: {len(existing_datasets)} (existing) != {len(datasets)} (expected)", file=sys.stderr)
-                    print(f"\tExisting vs expected {set(existing_datasets) - set(datasets)}", file=sys.stderr)
-                    print(f"\tExpected vs existing {set(datasets) - set(existing_datasets)}", file=sys.stderr)
+                topic_datasets = api.get_topic_datasets(topic, organization_id=org_ids[org])
+                datasets_search_count = api.search_datasets_count(topic_id, organization_id=org_ids[org])
+                if not(len(topic_datasets) == len(datasets) == datasets_search_count):
+                    print(f"Datasets for '{org}' are NOT in sync", file=sys.stderr)
+                    print(f"  - topic datasets : {len(topic_datasets)}")
+                    print(f"  - universe       : {len(datasets)}")
+                    print(f"  - search datasets: {datasets_search_count}")
                 else:
-                    print(f"Datasets for '{org}' are in sync ({len(datasets)} datasets)")
+                    verbose(f"Datasets for '{org}' are in sync ({len(datasets)} datasets)")
             else:
                 print(f"Feeding {len(datasets)} datasets from '{org}'...")
                 for batch in batched(datasets, 1000):
