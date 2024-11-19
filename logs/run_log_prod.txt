@@ -1,4 +1,4 @@
-Starting at Tue Nov 19 07:03:57 2024
+Starting at Tue Nov 19 07:33:54 2024
 Processing 178 organizations...
 Updating topic 'univers-ecospheres'
 Feeding 108 datasets from 'ademe'...
@@ -179,7 +179,7 @@ Feeding 20 datasets from 'syndicat-mixte-eptb-meurthe-madon'...
 Feeding 627 datasets from 'systeme-d-information-sur-l-eau'...
 Feeding 30 datasets from 'systeme-dinformation-sur-la-biodiversite'...
 Feeding 23 datasets from 'twisto'...
-Total count: 23469, elapsed: 241.57 s
+Total count: 23469, elapsed: 218.00 s
 List of organizations for ecospheres/config.yaml:
 organizations:
   - ademe
@@ -338,4 +338,4 @@ organizations:
   - systeme-dinformation-sur-la-biodiversite
   - twisto
 
-Done at Tue Nov 19 07:07:58 2024
+Done at Tue Nov 19 07:37:32 2024
