@@ -1,4 +1,4 @@
-Starting at Mon Dec  2 07:35:16 2024
+Starting at Tue Dec  3 07:34:51 2024
 Unknown organization 'agence-de-leau-seine-normandie-1'
 Unknown organization 'agence-nationale-de-lhabitat'
 Unknown organization 'engie-mobilites-electriques'
@@ -179,7 +179,7 @@ Feeding 36 datasets from 'syndicat-mixte-des-mobilites-de-laire-grenobloise'...
 Skipping empty organization 'syndicat-mixte-eptb-meurthe-madon'
 Feeding 646 datasets from 'systeme-d-information-sur-l-eau'...
 Feeding 47 datasets from 'twisto'...
-Total count: 23902, elapsed: 305.65 s
+Total count: 23902, elapsed: 342.23 s
 List of organizations for ecospheres/config.yaml:
 organizations:
   - ademe
@@ -337,4 +337,4 @@ organizations:
   - systeme-d-information-sur-l-eau
   - twisto
 
-Done at Mon Dec  2 07:40:22 2024
+Done at Tue Dec  3 07:40:33 2024
