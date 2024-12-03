@@ -295,7 +295,7 @@ if __name__ == "__main__":
                     print(f"Datasets for '{org}' are NOT in sync", file=sys.stderr)
                     print(f"  - topic datasets : {len(topic_datasets)}", file=sys.stderr)
                     print(f"  - universe       : {len(datasets)}", file=sys.stderr)
-                    print(f"  - search datasets: {datasets_search_count}")
+                    print(f"  - search datasets: {datasets_search_count}", file=sys.stderr)
                 else:
                     verbose(f"Datasets for '{org}' are in sync ({len(datasets)} datasets)")
             else:
