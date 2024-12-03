@@ -128,7 +128,9 @@ class ApiHelper:
         func = lambda c: {d['id'] for d in c['datasets']}
         return self.get_datasets(url, func, xfields=xfields)
 
-    def search_datasets_count(self, topic_id: str, organization_id: str = ""):
+    def search_datasets_count(self, topic_id: str | None, organization_id: str = ""):
+        if not topic_id:
+            return
         url = f"{self.base_url}/api/2/datasets/search/?topic={topic_id}"
         if organization_id:
             url += f"&organization={organization_id}"
@@ -231,7 +233,7 @@ if __name__ == "__main__":
     api = ApiHelper(url, token, fail_on_errors=args.fail_on_errors, dry_run=args.dry_run)
 
     topic = conf['topic']
-    topic_id = "xxx"
+    topic_id = None
 
     queries = conf['organizations'].get('queries', [])
     slugs = set(conf['organizations'].get('slugs', []))
