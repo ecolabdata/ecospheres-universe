@@ -293,7 +293,7 @@ if __name__ == "__main__":
                 datasets_search_count = api.search_datasets_count(topic_id, organization_id=org_ids[org])
                 if not(len(topic_datasets) == len(datasets) == datasets_search_count):
                     print(f"Datasets for '{org}' are NOT in sync", file=sys.stderr)
-                    print(f"  - topic datasets : {len(topic_datasets)}")
+                    print(f"  - topic datasets : {len(topic_datasets)}", file=sys.stderr)
                     print(f"  - universe       : {len(datasets)}", file=sys.stderr)
                     print(f"  - search datasets: {datasets_search_count}")
                 else:
