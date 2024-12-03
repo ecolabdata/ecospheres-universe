@@ -8,8 +8,7 @@ import time
 import requests
 import yaml
 
-# TODO:
-# - (optionally) update site config.yaml with new org list
+GRIST_URL = "https://grist.numerique.gouv.fr/o/ecospheres/api/docs/k3YQHL3Bmrhmpk8frjznZL/tables/Universe/records"
 
 session = requests.Session()
 
@@ -45,6 +44,12 @@ def batched(iterable, n=1):
     l = len(iterable)
     for ndx in range(0, l, n):
         yield iterable[ndx:min(ndx + n, l)]
+
+
+def get_slugs(grist_url: str, env: str) -> list[str]:
+    r = requests.get(grist_url, params={'filter': json.dumps({'env': [env]}), 'limit': 1000})
+    r.raise_for_status()
+    return [o['fields']['slug'] for o in r.json()['records']]
 
 
 class IndentedDumper(yaml.Dumper):
@@ -201,6 +206,10 @@ if __name__ == "__main__":
                         help='enable slow reset mode')
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
                         help='enable verbose mode')
+    parser.add_argument('-t', '--topic-name', action='store_true', default='univers-ecospheres',
+                        help='universe topic name')
+    parser.add_argument('-g', '--grist-url', action='store_true', default=GRIST_URL,
+                        help='url of grist api')
     args = parser.parse_args()
 
     conf = {}
@@ -211,11 +220,8 @@ if __name__ == "__main__":
     token = os.getenv("DATAGOUV_API_KEY", conf['api']['token'])
     api = ApiHelper(url, token, fail_on_errors=args.fail_on_errors, dry_run=args.dry_run)
 
-    topic = conf['topic']
-
-    queries = conf['organizations'].get('queries', [])
-    slugs = set(conf['organizations'].get('slugs', []))
-    skip = set(conf['organizations'].get('skip', []))
+    topic = args.topic_name
+    slugs = get_slugs(args.grist_url, conf['env'])
 
     if args.verbose:
         verbose = print
@@ -237,11 +243,6 @@ if __name__ == "__main__":
             except Exception:
                 print(f"Unknown organization '{org}'")
 
-        for q in queries:
-            verbose(f"Fetching organizations for query '{q}'")
-            orgs |= set(api.get_organizations(q))
-
-        orgs -= skip
         print(f"Processing {len(orgs)} organizations...")
 
         if args.reset:
