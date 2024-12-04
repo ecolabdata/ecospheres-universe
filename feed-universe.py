@@ -48,7 +48,7 @@ def batched(iterable, n=1):
 
 
 def get_slugs(grist_url: str, env: str) -> list[str]:
-    r = requests.get(grist_url, params={'filter': json.dumps({'env': [env]}), 'limit': 1000})
+    r = requests.get(grist_url, params={'filter': json.dumps({'env': [env]}), 'limit': 0})
     r.raise_for_status()
     return [o['fields']['slug'] for o in r.json()['records']]
 
