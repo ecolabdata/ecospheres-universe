@@ -9,8 +9,6 @@ import time
 import requests
 import yaml
 
-GRIST_URL = "https://grist.numerique.gouv.fr/o/ecospheres/api/docs/k3YQHL3Bmrhmpk8frjznZL/tables/Universe/records"
-
 session = requests.Session()
 
 # noop unless args.verbose is set
@@ -225,8 +223,6 @@ if __name__ == "__main__":
                         help='enable slow reset mode')
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
                         help='enable verbose mode')
-    parser.add_argument('-g', '--grist-url', action='store_true', default=GRIST_URL,
-                        help='url of grist api')
     parser.add_argument('-c', '--check', action='store_true', default=False,
                         help='only check synchronization status')
     args = parser.parse_args()
@@ -242,7 +238,7 @@ if __name__ == "__main__":
     topic = conf['topic']
     topic_id = None
 
-    slugs = get_slugs(args.grist_url, conf['env'])
+    slugs = get_slugs(conf['grist_url'], conf['env'])
 
     if args.verbose:
         verbose = print
