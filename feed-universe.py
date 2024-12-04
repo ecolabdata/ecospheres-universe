@@ -225,8 +225,6 @@ if __name__ == "__main__":
                         help='enable slow reset mode')
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
                         help='enable verbose mode')
-    parser.add_argument('-t', '--topic-name', action='store_true', default='univers-ecospheres',
-                        help='universe topic name')
     parser.add_argument('-g', '--grist-url', action='store_true', default=GRIST_URL,
                         help='url of grist api')
     parser.add_argument('-c', '--check', action='store_true', default=False,
@@ -241,7 +239,7 @@ if __name__ == "__main__":
     token = os.getenv("DATAGOUV_API_KEY", conf['api']['token'])
     api = ApiHelper(url, token, fail_on_errors=args.fail_on_errors, dry_run=args.dry_run)
 
-    topic = args.topic_name
+    topic = conf['topic']
     topic_id = None
 
     slugs = get_slugs(args.grist_url, conf['env'])

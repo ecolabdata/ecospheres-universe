@@ -2,7 +2,7 @@
 
 ## Mise en place
 
-Utiliser un ficher d'environnement (`env.yaml` dans les exemples ci-dessous) pour stocker la configuration :
+Utiliser un ficher d'environnement (`env.yaml` dans les exemples ci-dessous) pour stocker la configuration spécifique à `env` en étendant `config.yaml` :
 
 ```yaml
 env: demo
@@ -14,7 +14,7 @@ api:
 ## Créer ou mettre à jour un univers
 
 ```shell
-python feed-universe.py [--dry-run] [options] env.yaml
+python feed-universe.py [--dry-run] [options] config.yaml env.yaml
 ```
 
 Options :

@@ -1,0 +1,6 @@
+# overload with your own config file
+env: fixme
+topic: univers-ecospheres
+api:
+  url: https://demo.data.gouv.fr
+  token: fixme
