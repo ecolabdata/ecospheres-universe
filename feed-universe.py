@@ -6,6 +6,8 @@ import os
 import sys
 import time
 
+from typing import NamedTuple
+
 import requests
 import yaml
 
@@ -13,6 +15,12 @@ session = requests.Session()
 
 # noop unless args.verbose is set
 verbose = lambda *a, **k: None
+
+
+class Organization(NamedTuple):
+    id: str
+    name: str
+    slug: str
 
 
 def elapsed_and_count(func):
@@ -254,14 +262,14 @@ if __name__ == "__main__":
     t_all = time.time()
     try:
         orgs = set()
-        org_ids = {}
+        orgs_data: dict[str, Organization] = {}
 
         for org in sorted(slugs):
             verbose(f"Checking organization '{org}'")
             try:
                 api_org = api.get_organization(org)
                 orgs.add(org)
-                org_ids[org] = api_org['id']
+                orgs_data[org] = Organization(id=api_org['id'], name=api_org['name'], slug=org)
             except Exception:
                 print(f"Unknown organization '{org}'")
 
@@ -287,8 +295,8 @@ if __name__ == "__main__":
             active_orgs.append(org)
 
             if args.check:
-                topic_datasets = api.get_topic_datasets(topic, organization_id=org_ids[org])
-                datasets_search_count = api.search_datasets_count(topic_id, organization_id=org_ids[org])
+                topic_datasets = api.get_topic_datasets(topic, organization_id=orgs_data[org].id)
+                datasets_search_count = api.search_datasets_count(topic_id, organization_id=orgs_data[org].id)
                 if not(len(topic_datasets) == len(datasets) == datasets_search_count):
                     print(f"Datasets for '{org}' are NOT in sync", file=sys.stderr)
                     print(f"  - topic datasets : {len(topic_datasets)}", file=sys.stderr)
@@ -305,7 +313,14 @@ if __name__ == "__main__":
         print(f"Total count: {t_count}, elapsed: {time.time() - t_all:.2f} s")
 
     if not args.check:
-        print("List of organizations for ecospheres/config.yaml:")
-        print(yaml.dump({'organizations': active_orgs}, Dumper=IndentedDumper))
+        filename = f"organizations-{conf['env']}.json"
+        print(f"Generating output file {filename}...")
+        active_orgs_data = [
+            org_data._asdict()
+            for org_data in orgs_data.values()
+            if org_data.slug in active_orgs
+        ]
+        with open(f"dist/{filename}", "w") as f:
+            json.dump(active_orgs_data, f, indent=2 if args.verbose else None)
 
     print(f"Done at {datetime.datetime.now():%c}")
