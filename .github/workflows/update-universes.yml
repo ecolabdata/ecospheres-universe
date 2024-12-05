@@ -5,6 +5,10 @@ on:
     # this should run right after most of harvesting is finished on data.gouv.fr
     - cron: '4 5 * * *'
   workflow_dispatch:
+  # FIXME: remove before merge
+  push:
+    branches:
+      - feat/org-api
 
 jobs:
 
@@ -28,15 +32,18 @@ jobs:
       env:
         DATAGOUV_URL: https://demo.data.gouv.fr
         DATAGOUV_API_KEY: ${{ secrets.DATAGOUV_API_KEY_DEMO }}
+      # FIXME: remove dry run
       run: |
-        python -u feed-universe.py config-demo.yaml 2>&1 | tee logs/run_log_demo.txt
+        python -u feed-universe.py --dry-run config-demo.yaml 2>&1 | tee logs/run_log_demo.txt
 
-    - name: Commit Run Logs
+    - name: Commit artifacts
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add logs/run_log_demo.txt
         git commit -m "Update daily run log for demo"
+        git add dist/organizations-demo.json
+        git commit -m "Update organizations JSON for demo"
 
     - name: Push changes
       run: |
@@ -66,15 +73,18 @@ jobs:
       env:
         DATAGOUV_URL: https://www.data.gouv.fr
         DATAGOUV_API_KEY: ${{ secrets.DATAGOUV_API_KEY_PROD }}
+      # FIXME: remove dry run
       run: |
-        python -u feed-universe.py config-prod.yaml 2>&1 | tee logs/run_log_prod.txt
+        python -u feed-universe.py --dry-run config-prod.yaml 2>&1 | tee logs/run_log_prod.txt
 
-    - name: Commit Run Logs
+    - name: Commit artifacts
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add logs/run_log_prod.txt
         git commit -m "Update daily run log for prod"
+        git add dist/organizations-prod.json
+        git commit -m "Update organizations JSON for prod"
 
     - name: Push changes
       run: |
