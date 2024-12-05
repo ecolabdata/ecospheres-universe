@@ -23,6 +23,11 @@ class Organization(NamedTuple):
     slug: str
 
 
+class GristOrganization(NamedTuple):
+    slug: str
+    type: str
+
+
 def elapsed_and_count(func):
     @functools.wraps(func)
     def wrapper_decorator(*args, **kwargs):
@@ -53,10 +58,13 @@ def batched(iterable, n=1):
         yield iterable[ndx:min(ndx + n, l)]
 
 
-def get_slugs(grist_url: str, env: str) -> list[str]:
+def get_grist_orgs(grist_url: str, env: str) -> list[GristOrganization]:
     r = requests.get(grist_url, params={'filter': json.dumps({'env': [env]}), 'limit': 0})
     r.raise_for_status()
-    return [o['fields']['slug'] for o in r.json()['records']]
+    return [
+        GristOrganization(slug=o['fields']['slug'], type=o['fields']['type'])
+        for o in r.json()['records']
+    ]
 
 
 class IndentedDumper(yaml.Dumper):
@@ -246,7 +254,7 @@ if __name__ == "__main__":
     topic = conf['topic']
     topic_id = None
 
-    slugs = get_slugs(conf['grist_url'], conf['env'])
+    grist_orgs = get_grist_orgs(conf['grist_url'], conf['env'])
 
     if args.verbose:
         verbose = print
@@ -264,7 +272,7 @@ if __name__ == "__main__":
         orgs = set()
         orgs_data: dict[str, Organization] = {}
 
-        for org in sorted(slugs):
+        for org in sorted([o.slug for o in grist_orgs]):
             verbose(f"Checking organization '{org}'")
             try:
                 api_org = api.get_organization(org)
@@ -316,7 +324,10 @@ if __name__ == "__main__":
         filename = f"organizations-{conf['env']}.json"
         print(f"Generating output file {filename}...")
         active_orgs_data = [
-            org_data._asdict()
+            {
+                **org_data._asdict(),
+                "type": next(o for o in grist_orgs if o.slug == org_data.slug).type,
+            }
             for org_data in orgs_data.values()
             if org_data.slug in active_orgs
         ]
