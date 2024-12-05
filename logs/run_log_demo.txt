@@ -1,4 +1,4 @@
-Starting at Wed Dec  4 07:33:58 2024
+Starting at Thu Dec  5 07:34:21 2024
 Unknown organization 'agence-de-leau-seine-normandie-1'
 Unknown organization 'agence-nationale-de-lhabitat'
 Unknown organization 'engie-mobilites-electriques'
@@ -142,15 +142,184 @@ Feeding 23 datasets from 'ministere-de-l-egalite-des-territoires-et-du-logement'
 Feeding 325 datasets from 'ministere-de-la-transition-ecologique'...
 Feeding 11 datasets from 'morbihan-energies'...
 Feeding 10 datasets from 'museum-national-dhistoire-naturelle'...
-Total count: 22309, elapsed: 320.86 s
-Traceback (most recent call last):
-  File "/home/runner/work/ecospheres-universe/ecospheres-universe/feed-universe.py", line 306, in <module>
-    api.put_topic_datasets(topic, batch)
-  File "/home/runner/work/ecospheres-universe/ecospheres-universe/feed-universe.py", line 27, in wrapper_decorator
-    val = func(*args, **kwargs)
-          ^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/ecospheres-universe/ecospheres-universe/feed-universe.py", line 147, in put_topic_datasets
-    session.post(url, data=data, headers=headers).raise_for_status()
-  File "/opt/hostedtoolcache/Python/3.12.7/x64/lib/python3.12/site-packages/requests/models.py", line 1024, in raise_for_status
-    raise HTTPError(http_error_msg, response=self)
-requests.exceptions.HTTPError: 502 Server Error: Bad Gateway for url: https://demo.data.gouv.fr/api/2/topics/univers-ecospheres/datasets/
+Feeding 119 datasets from 'observatoire-de-recherche-montpellierain-de-lenvironnement'...
+Feeding 1 datasets from 'office-national-des-forets'...
+Feeding 1 datasets from 'oise-mobilite-syndicat-mixte-des-transports-collectifs-de-loise'...
+Feeding 201 datasets from 'open-data-reseaux-energies-1'...
+Feeding 1 datasets from 'parc-national-de-forets'...
+Feeding 5 datasets from 'parc-national-des-cevennes'...
+Feeding 4 datasets from 'parc-national-des-ecrins'...
+Feeding 7 datasets from 'parc-naturel-regional-de-la-montagne-de-reims'...
+Feeding 1 datasets from 'parc-naturel-regional-de-la-montagne-de-reims-1'...
+Feeding 1 datasets from 'parc-naturel-regional-des-vosges-du-nord'...
+Feeding 34 datasets from 'parc-naturel-regional-du-morvan'...
+Feeding 2 datasets from 'parc-naturel-regional-du-vercors'...
+Feeding 31 datasets from 'regie-autonome-des-transports-parisiens-ratp'...
+Feeding 27 datasets from 'reseau-de-transport-delectricite'...
+Feeding 12 datasets from 'section-cadastre-topographie-de-la-polynesie-francaise'...
+Feeding 132 datasets from 'shom'...
+Feeding 211 datasets from 'sncf'...
+Feeding 12 datasets from 'societe-du-grand-paris'...
+Feeding 44 datasets from 'star'...
+Feeding 36 datasets from 'syndicat-mixte-des-mobilites-de-laire-grenobloise'...
+Feeding 646 datasets from 'systeme-d-information-sur-l-eau'...
+Feeding 47 datasets from 'twisto'...
+Total count: 23884, elapsed: 296.27 s
+List of organizations for ecospheres/config.yaml:
+organizations:
+  - ademe
+  - agence-de-l-eau-rhone-mediterranee-et-corse
+  - agence-nationale-de-la-cohesion-des-territoires
+  - agence-nationale-pour-la-renovation-urbaine
+  - agence-ore-3
+  - airparif-1
+  - atmo-bourgogne-franche-comte
+  - atmo-grand-est
+  - atmosud
+  - bureau-de-recherches-geologiques-et-minieres
+  - centre-scientifique-et-technique-du-batiment
+  - cerema
+  - commission-de-regulation-de-lenergie
+  - datagrandest
+  - ddt-aisne
+  - ddt-ardennes
+  - ddt-aveyron
+  - ddt-cote-dor
+  - ddt-creuse
+  - ddt-de-la-loire
+  - ddt-de-la-moselle
+  - ddt-de-lain
+  - ddt-de-lardeche
+  - ddt-de-meurthe-et-moselle
+  - ddt-deux-sevres
+  - ddt-dordogne
+  - ddt-drome
+  - ddt-haute-garonne
+  - ddt-haute-marne
+  - ddt-haute-vienne
+  - ddt-hautes-pyrenees
+  - ddt-indre
+  - ddt-jura
+  - ddt-lot
+  - ddt-maine-et-loire
+  - ddt-mayenne
+  - ddt-nievre
+  - ddt-savoie
+  - ddt-tarn
+  - ddt-tarn-et-garonne
+  - ddt-territoire-de-belfort
+  - ddt-vaucluse
+  - ddt-vienne
+  - ddt-yonne
+  - ddt-yvelines
+  - ddtm-alpes-maritimes
+  - ddtm-aude
+  - ddtm-corse-du-sud
+  - ddtm-cotes-darmor
+  - ddtm-finistere
+  - ddtm-gard
+  - ddtm-gironde
+  - ddtm-haute-corse
+  - ddtm-manche
+  - ddtm-morbihan
+  - ddtm-nord
+  - ddtm-pas-de-calais
+  - ddtm-pyrenees-orientales
+  - ddtm-seine-maritime
+  - ddtm-vendee
+  - deal-guadeloupe
+  - direction-departementale-des-territoire-du-puy-de-dome
+  - direction-departementale-des-territoires-de-charente
+  - direction-departementale-des-territoires-de-haute-saone
+  - direction-departementale-des-territoires-de-haute-savoie
+  - direction-departementale-des-territoires-de-la-correze
+  - direction-departementale-des-territoires-de-la-haute-loire
+  - direction-departementale-des-territoires-de-la-lozere
+  - direction-departementale-des-territoires-de-la-marne
+  - direction-departementale-des-territoires-de-la-meuse
+  - direction-departementale-des-territoires-de-la-sarthe
+  - direction-departementale-des-territoires-de-lallier
+  - direction-departementale-des-territoires-de-lariege
+  - direction-departementale-des-territoires-de-laube
+  - direction-departementale-des-territoires-de-lessonne
+  - direction-departementale-des-territoires-de-lisere
+  - direction-departementale-des-territoires-de-loir-et-cher
+  - direction-departementale-des-territoires-de-lorne
+  - direction-departementale-des-territoires-de-lot-et-garonne
+  - direction-departementale-des-territoires-de-saone-et-loire
+  - direction-departementale-des-territoires-de-seine-et-marne
+  - direction-departementale-des-territoires-des-alpes-de-haute-provence
+  - direction-departementale-des-territoires-des-hautes-alpes
+  - direction-departementale-des-territoires-des-vosges
+  - direction-departementale-des-territoires-deure-et-loir
+  - direction-departementale-des-territoires-dindre-et-loire
+  - direction-departementale-des-territoires-du-bas-rhin-67
+  - direction-departementale-des-territoires-du-cher
+  - direction-departementale-des-territoires-du-doubs
+  - direction-departementale-des-territoires-du-gers
+  - direction-departementale-des-territoires-du-haut-rhin-68
+  - direction-departementale-des-territoires-du-loiret
+  - direction-departementale-des-territoires-du-rhone-1
+  - direction-departementale-des-territoires-du-val-doise
+  - direction-departementale-des-territoires-et-de-la-mer-de-charente-maritime
+  - direction-departementale-des-territoires-et-de-la-mer-de-la-somme
+  - direction-departementale-des-territoires-et-de-la-mer-de-leure
+  - direction-departementale-des-territoires-et-de-la-mer-de-lherault
+  - direction-departementale-des-territoires-et-de-la-mer-de-loire-atlantique
+  - direction-departementale-des-territoires-et-de-la-mer-des-bouches-du-rhone
+  - direction-departementale-des-territoires-et-de-la-mer-des-landes
+  - direction-departementale-des-territoires-et-de-la-mer-des-pyrenees-atlantiques
+  - direction-departementale-des-territoires-et-de-la-mer-dille-et-vilaine
+  - direction-departementale-des-territoires-et-de-la-mer-du-calvados
+  - direction-departementale-des-territoires-et-de-la-mer-du-var
+  - direction-departementale-et-des-territoires-du-cantal
+  - direction-regionale-de-lenvironnement-de-lamenagement-et-du-logement-de-normandie
+  - direction-regionale-de-lenvironnement-de-lamenagement-et-du-logement-du-centre-val-de-loire
+  - direction-regionale-de-lenvironnement-et-du-logement-bourgogne-franche-comte
+  - do-terr-geo-centre
+  - dreal-grand-est
+  - dreal-hauts-de-france
+  - dreal-nouvelle-aquitaine
+  - dreal-provence-alpes-cote-dazur
+  - edf-systemes-energetiques-insulaires
+  - electricite-de-france
+  - electricite-reseau-distribution-france
+  - equipe-transport-data-gouv-fr
+  - federation-des-parcs-naturels-regionaux-de-france
+  - fluo-grand-est
+  - gip-bretagne-environnement
+  - grdf
+  - institut-francais-de-recherche-pour-lexploitation-de-la-mer
+  - institut-national-de-l-information-geographique-et-forestiere
+  - irstea
+  - jvmalin
+  - ligair
+  - meteo-france
+  - ministere-de-l-egalite-des-territoires-et-du-logement
+  - ministere-de-la-transition-ecologique
+  - morbihan-energies
+  - museum-national-dhistoire-naturelle
+  - observatoire-de-recherche-montpellierain-de-lenvironnement
+  - office-national-des-forets
+  - oise-mobilite-syndicat-mixte-des-transports-collectifs-de-loise
+  - open-data-reseaux-energies-1
+  - parc-national-de-forets
+  - parc-national-des-cevennes
+  - parc-national-des-ecrins
+  - parc-naturel-regional-de-la-montagne-de-reims
+  - parc-naturel-regional-de-la-montagne-de-reims-1
+  - parc-naturel-regional-des-vosges-du-nord
+  - parc-naturel-regional-du-morvan
+  - parc-naturel-regional-du-vercors
+  - regie-autonome-des-transports-parisiens-ratp
+  - reseau-de-transport-delectricite
+  - section-cadastre-topographie-de-la-polynesie-francaise
+  - shom
+  - sncf
+  - societe-du-grand-paris
+  - star
+  - syndicat-mixte-des-mobilites-de-laire-grenobloise
+  - systeme-d-information-sur-l-eau
+  - twisto
+
+Done at Thu Dec  5 07:39:17 2024
