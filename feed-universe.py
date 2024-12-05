@@ -231,7 +231,7 @@ if __name__ == "__main__":
     for u in args.universe:
         conf.update(yaml.safe_load(u))
 
-    url = os.getenv("DATAGOUV_URL", conf['api']['url'])
+    url = conf['api']['url']
     token = os.getenv("DATAGOUV_API_KEY", conf['api']['token'])
     api = ApiHelper(url, token, fail_on_errors=args.fail_on_errors, dry_run=args.dry_run)
 

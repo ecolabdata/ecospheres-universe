@@ -2,10 +2,11 @@
 
 ## Mise en place
 
-Utiliser un ficher d'environnement (`env.yaml` dans les exemples ci-dessous) pour stocker la configuration spécifique à `env` en étendant `config.yaml` :
+La configuration est stockée dans un fichier `config-{env}.yaml` en fonction du `env` sur lequel on travaille (`demo` ou `prod`).
+
+Pour renseigner le token d'API, utiliser la variable d'environnement `DATAGOUV_API_KEY` ou un autre fichier d'environnement (`env.yaml` dans les exemples ci-dessous) :
 
 ```yaml
-env: demo
 api:
   url: https://demo.data.gouv.fr
   token: ...
@@ -14,7 +15,7 @@ api:
 ## Créer ou mettre à jour un univers
 
 ```shell
-python feed-universe.py [--dry-run] [options] config.yaml env.yaml
+python feed-universe.py [--dry-run] [options] config-{env}.yaml env.yaml
 ```
 
 Options :
