@@ -6,7 +6,6 @@ on:
     - cron: '4 5 * * *'
   workflow_dispatch:
 
-
 jobs:
 
   run-demo-update:
