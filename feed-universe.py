@@ -298,7 +298,7 @@ if __name__ == "__main__":
                     )
                 )
             except requests.exceptions.HTTPError:
-                print(f"Unknown organization '{org.slug}'")
+                print(f"Unknown organization '{org.slug}'", file=sys.stderr)
 
         print(f"Processing {len(orgs)} organizations...")
 
