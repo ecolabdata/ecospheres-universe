@@ -2,9 +2,9 @@
 
 ## Mise en place
 
-Éditer `universe-{env}.yaml` pour y configurer l'environnement, ou utiliser un ficher d'environnement séparé.
+La configuration est stockée dans un fichier `config-{env}.yaml` en fonction du `env` sur lequel on travaille (`demo` ou `prod`).
 
-Dans le cas d'un fichier d'environnement séparé (`env.yaml` dans les exemples ci-dessous), le fichier doit uniquement contenir la section `api` de la config :
+Pour renseigner le token d'API, utiliser la variable d'environnement `DATAGOUV_API_KEY` ou un autre fichier d'environnement (`env.yaml` dans les exemples ci-dessous) :
 
 ```yaml
 api:
@@ -15,7 +15,7 @@ api:
 ## Créer ou mettre à jour un univers
 
 ```shell
-python feed-universe.py [--dry-run] [options] universe-{env}.yaml [env.yaml]
+python feed-universe.py [--dry-run] [options] config-{env}.yaml env.yaml
 ```
 
 Options :

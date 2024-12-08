@@ -2,7 +2,8 @@ name: Update universes
 
 on:
   schedule:
-    - cron: '27 7 * * *'
+    # this should run right after most of harvesting is finished on data.gouv.fr
+    - cron: '4 5 * * *'
   workflow_dispatch:
 
 jobs:
@@ -28,7 +29,7 @@ jobs:
         DATAGOUV_URL: https://demo.data.gouv.fr
         DATAGOUV_API_KEY: ${{ secrets.DATAGOUV_API_KEY_DEMO }}
       run: |
-        python -u feed-universe.py universe-demo.yaml 2>&1 | tee logs/run_log_demo.txt
+        python -u feed-universe.py config-demo.yaml 2>&1 | tee logs/run_log_demo.txt
 
     - name: Commit Run Logs
       run: |
@@ -66,7 +67,7 @@ jobs:
         DATAGOUV_URL: https://www.data.gouv.fr
         DATAGOUV_API_KEY: ${{ secrets.DATAGOUV_API_KEY_PROD }}
       run: |
-        python -u feed-universe.py universe-prod.yaml 2>&1 | tee logs/run_log_prod.txt
+        python -u feed-universe.py config-prod.yaml 2>&1 | tee logs/run_log_prod.txt
 
     - name: Commit Run Logs
       run: |

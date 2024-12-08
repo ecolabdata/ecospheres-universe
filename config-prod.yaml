@@ -1,0 +1,7 @@
+# overload with your own config file
+env: prod
+topic: univers-ecospheres
+grist_url: "https://grist.numerique.gouv.fr/o/ecospheres/api/docs/k3YQHL3Bmrhmpk8frjznZL/tables/Universe/records"
+api:
+  url: https://www.data.gouv.fr
+  token: CONFIGURE_ME
