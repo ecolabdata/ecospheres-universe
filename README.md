@@ -25,12 +25,6 @@ Options :
 - `--slow` : À combiner avec `--reset` si l'univers contient beaucoup de jeux de données (milliers+) pour éviter les timeouts de l'API data.gouv.
 
 
-## Mettre à jour le déploiement correspondant
+## Utilisation du référentiel
 
-Une fois le script terminé, il faut mettre à jour la section `organizations` du fichier de config [`udata-front-kit`](https://github.com/opendatateam/udata-front-kit/blob/main/configs/ecospheres/config.yaml) correspondant à l'environnement data.gouv mis à jour.
-
-Pour ecologie.data.gouv :
-- demo.data.gouv.fr : Mettre à jour la config de la branche `main`, puis merger dans la branche `ecospheres-demo`.
-- www.data.gouv.fr : Mettre à jour la config de la branche `ecospheres-prod`.
-
-Puis, dans le cas où la config a changé, faire une release et déploiement de l'environnement mis à jour.
+Le script génère un fichier `dist/organizations-{env}.json` avec les informations extraites de data.gouv.fr des organisations valides et possédant des jeux de données. Ce fichier peut être utilisé comme API.
