@@ -336,6 +336,6 @@ if __name__ == "__main__":
         filename = f"organizations-{conf['env']}.json"
         print(f"Generating output file {filename}...")
         with open(f"dist/{filename}", "w") as f:
-            json.dump([o._asdict() for o in active_orgs], f, indent=2 if args.verbose else None)
+            json.dump([o._asdict() for o in active_orgs], f, indent=2)
 
     print(f"Done at {datetime.datetime.now():%c}")
