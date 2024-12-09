@@ -62,11 +62,11 @@ def batched(iterable, n=1):
 def get_grist_orgs(grist_url: str, env: str) -> list[GristOrganization]:
     r = requests.get(grist_url, params={'filter': json.dumps({'env': [env]}), 'limit': 0})
     r.raise_for_status()
-    return [
-        GristOrganization(slug=o['fields']['slug'], type=o['fields']['type'])
+    # deduplicated list
+    return list({
+        o['fields']['slug']: GristOrganization(slug=o['fields']['slug'], type=o['fields']['type'])
         for o in r.json()['records']
-    ]
-
+    }.values())
 
 class IndentedDumper(yaml.Dumper):
     def increase_indent(self, flow=False, indentless=False):
