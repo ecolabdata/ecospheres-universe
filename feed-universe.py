@@ -9,9 +9,6 @@ import time
 import requests
 import yaml
 
-# TODO:
-# - (optionally) update site config.yaml with new org list
-
 session = requests.Session()
 
 # noop unless args.verbose is set
@@ -46,6 +43,12 @@ def batched(iterable, n=1):
     l = len(iterable)
     for ndx in range(0, l, n):
         yield iterable[ndx:min(ndx + n, l)]
+
+
+def get_slugs(grist_url: str, env: str) -> list[str]:
+    r = requests.get(grist_url, params={'filter': json.dumps({'env': [env]}), 'limit': 0})
+    r.raise_for_status()
+    return [o['fields']['slug'] for o in r.json()['records']]
 
 
 class IndentedDumper(yaml.Dumper):
@@ -228,16 +231,14 @@ if __name__ == "__main__":
     for u in args.universe:
         conf.update(yaml.safe_load(u))
 
-    url = os.getenv("DATAGOUV_URL", conf['api']['url'])
+    url = conf['api']['url']
     token = os.getenv("DATAGOUV_API_KEY", conf['api']['token'])
     api = ApiHelper(url, token, fail_on_errors=args.fail_on_errors, dry_run=args.dry_run)
 
     topic = conf['topic']
     topic_id = None
 
-    queries = conf['organizations'].get('queries', [])
-    slugs = set(conf['organizations'].get('slugs', []))
-    skip = set(conf['organizations'].get('skip', []))
+    slugs = get_slugs(conf['grist_url'], conf['env'])
 
     if args.verbose:
         verbose = print
@@ -264,11 +265,6 @@ if __name__ == "__main__":
             except Exception:
                 print(f"Unknown organization '{org}'")
 
-        for q in queries:
-            verbose(f"Fetching organizations for query '{q}'")
-            orgs |= set(api.get_organizations(q))
-
-        orgs -= skip
         print(f"Processing {len(orgs)} organizations...")
 
         if args.reset:
