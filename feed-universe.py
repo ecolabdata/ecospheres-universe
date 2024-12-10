@@ -6,6 +6,8 @@ import os
 import sys
 import time
 
+from typing import NamedTuple
+
 import requests
 import yaml
 
@@ -13,6 +15,18 @@ session = requests.Session()
 
 # noop unless args.verbose is set
 verbose = lambda *a, **k: None
+
+
+class Organization(NamedTuple):
+    id: str
+    name: str
+    slug: str
+    type: str
+
+
+class GristOrganization(NamedTuple):
+    slug: str
+    type: str
 
 
 def elapsed_and_count(func):
@@ -45,11 +59,14 @@ def batched(iterable, n=1):
         yield iterable[ndx:min(ndx + n, l)]
 
 
-def get_slugs(grist_url: str, env: str) -> list[str]:
+def get_grist_orgs(grist_url: str, env: str) -> list[GristOrganization]:
     r = requests.get(grist_url, params={'filter': json.dumps({'env': [env]}), 'limit': 0})
     r.raise_for_status()
-    return [o['fields']['slug'] for o in r.json()['records']]
-
+    # deduplicated list
+    return list({
+        o['fields']['slug']: GristOrganization(slug=o['fields']['slug'], type=o['fields']['type'])
+        for o in r.json()['records']
+    }.values())
 
 class IndentedDumper(yaml.Dumper):
     def increase_indent(self, flow=False, indentless=False):
@@ -83,7 +100,7 @@ class ApiHelper:
             verbose(e)
         return list(datasets)
 
-    def get_organization(self, org):
+    def get_organization(self, org: str):
         url = f"{self.base_url}/api/1/organizations/{org}/"
         r = session.get(url)
         r.raise_for_status()
@@ -110,7 +127,7 @@ class ApiHelper:
                 break
         return list(orgs)
 
-    def get_organization_datasets(self, org):
+    def get_organization_datasets(self, org: str):
         url = f"{self.base_url}/api/1/organizations/{org}/datasets/?page_size=1000"
         xfields = 'data{id,archived,deleted,private,extras{geop:dataset_id}}'
         func = lambda c: {d['id'] for d in c['data']
@@ -207,6 +224,18 @@ class ApiHelper:
         self.delete_topic_datasets(topic, datasets)
 
 
+def check_sync(org: Organization, datasets: list):
+    topic_datasets = api.get_topic_datasets(topic, organization_id=org.id)
+    datasets_search_count = api.search_datasets_count(topic_id, organization_id=org.id)
+    if not(len(topic_datasets) == len(datasets) == datasets_search_count):
+        print(f"Datasets for '{org.slug}' are NOT in sync", file=sys.stderr)
+        print(f"  - topic datasets : {len(topic_datasets)}", file=sys.stderr)
+        print(f"  - universe       : {len(datasets)}", file=sys.stderr)
+        print(f"  - search datasets: {datasets_search_count}", file=sys.stderr)
+    else:
+        verbose(f"Datasets for '{org.slug}' are in sync ({len(datasets)} datasets)")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('universe', nargs='+', type=argparse.FileType('r'), metavar='config',
@@ -238,7 +267,8 @@ if __name__ == "__main__":
     topic = conf['topic']
     topic_id = None
 
-    slugs = get_slugs(conf['grist_url'], conf['env'])
+    grist_orgs = get_grist_orgs(conf['grist_url'], conf['env'])
+    grist_orgs = sorted(grist_orgs, key=lambda o: o.slug)
 
     if args.verbose:
         verbose = print
@@ -253,17 +283,22 @@ if __name__ == "__main__":
     t_count = 0
     t_all = time.time()
     try:
-        orgs = set()
-        org_ids = {}
+        orgs: list[Organization] = []
 
-        for org in sorted(slugs):
-            verbose(f"Checking organization '{org}'")
+        for org in grist_orgs:
+            verbose(f"Checking organization '{org.slug}'")
             try:
-                api_org = api.get_organization(org)
-                orgs.add(org)
-                org_ids[org] = api_org['id']
-            except Exception:
-                print(f"Unknown organization '{org}'")
+                api_org = api.get_organization(org.slug)
+                orgs.append(
+                    Organization(
+                        id=api_org["id"],
+                        name=api_org["name"],
+                        slug=org.slug,
+                        type=org.type,
+                    )
+                )
+            except requests.exceptions.HTTPError:
+                print(f"Unknown organization '{org.slug}'", file=sys.stderr)
 
         print(f"Processing {len(orgs)} organizations...")
 
@@ -274,38 +309,33 @@ if __name__ == "__main__":
             else:
                 api.delete_all_topic_datasets(topic)
 
-        print(f"Updating topic '{topic}'")
-        active_orgs = []
-        for org in sorted(orgs):
-            verbose(f"Fetching datasets for organization '{org}'...")
-            datasets = api.get_organization_datasets(org)
+        print(f"Processing topic '{topic}'")
+        active_orgs: list[Organization] = []
+        for org in orgs:
+            verbose(f"Fetching datasets for organization '{org.slug}'...")
+            datasets = api.get_organization_datasets(org.slug)
             if not datasets and not args.keep_empty:
-                verbose(f"Skipping empty organization '{org}'")
+                verbose(f"Skipping empty organization '{org.slug}'")
                 continue
 
             t_count += len(datasets)
             active_orgs.append(org)
 
             if args.check:
-                topic_datasets = api.get_topic_datasets(topic, organization_id=org_ids[org])
-                datasets_search_count = api.search_datasets_count(topic_id, organization_id=org_ids[org])
-                if not(len(topic_datasets) == len(datasets) == datasets_search_count):
-                    print(f"Datasets for '{org}' are NOT in sync", file=sys.stderr)
-                    print(f"  - topic datasets : {len(topic_datasets)}", file=sys.stderr)
-                    print(f"  - universe       : {len(datasets)}", file=sys.stderr)
-                    print(f"  - search datasets: {datasets_search_count}", file=sys.stderr)
-                else:
-                    verbose(f"Datasets for '{org}' are in sync ({len(datasets)} datasets)")
-            else:
-                print(f"Feeding {len(datasets)} datasets from '{org}'...")
-                for batch in batched(datasets, 1000):
-                    api.put_topic_datasets(topic, batch)
+                check_sync(org, datasets)
+                continue
+
+            print(f"Feeding {len(datasets)} datasets from '{org.slug}'...")
+            for batch in batched(datasets, 1000):
+                api.put_topic_datasets(topic, batch)
 
     finally:
         print(f"Total count: {t_count}, elapsed: {time.time() - t_all:.2f} s")
 
     if not args.check:
-        print("List of organizations for ecospheres/config.yaml:")
-        print(yaml.dump({'organizations': active_orgs}, Dumper=IndentedDumper))
+        filename = f"organizations-{conf['env']}.json"
+        print(f"Generating output file {filename}...")
+        with open(f"dist/{filename}", "w") as f:
+            json.dump([o._asdict() for o in active_orgs], f, indent=2, ensure_ascii=False)
 
     print(f"Done at {datetime.datetime.now():%c}")
