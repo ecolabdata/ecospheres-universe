@@ -174,6 +174,12 @@
     "type": ""
   },
   {
+    "id": "58aef76b88ee3830af08f4d9",
+    "name": "DDT Haute-Vienne",
+    "slug": "ddt-haute-vienne",
+    "type": ""
+  },
+  {
     "id": "58aeee1688ee382134fb5212",
     "name": "DDT Hautes-Pyrénées",
     "slug": "ddt-hautes-pyrenees",
@@ -738,6 +744,12 @@
     "type": ""
   },
   {
+    "id": "56e02813c751df1c1a1ffccd",
+    "name": "Institut National de l'Environnement Industriel et des Risques",
+    "slug": "institut-national-de-lenvironnement-industriel-et-des-risques",
+    "type": ""
+  },
+  {
     "id": "55acbc5f88ee3854e7d98334",
     "name": "Irstea",
     "slug": "irstea",
@@ -867,6 +879,12 @@
     "id": "55f03e1088ee384bc1a46ec1",
     "name": "Réseau de Transport d'Electricité",
     "slug": "reseau-de-transport-delectricite",
+    "type": ""
+  },
+  {
+    "id": "65df5d4a04b5dff5a965e2fd",
+    "name": "RNB",
+    "slug": "rnb",
     "type": ""
   },
   {
