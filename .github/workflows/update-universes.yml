@@ -78,7 +78,7 @@ jobs:
         git add logs/run_log_prod.txt
         git commit -m "Update daily run log for prod"
         git add dist/organizations-prod.json
-        git commit -m "Update organizations JSON for prod" || true
+        git diff-index --cached --quiet HEAD || git commit -m "Update organizations JSON for prod"
 
     - name: Push changes
       run: |
