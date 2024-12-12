@@ -38,7 +38,7 @@ jobs:
         git add logs/run_log_demo.txt
         git commit -m "Update daily run log for demo"
         git add dist/organizations-demo.json
-        git commit -m "Update organizations JSON for demo" || true
+        git diff-index --cached --quiet HEAD || git commit -m "Update organizations JSON for demo"
 
     - name: Push changes
       run: |
