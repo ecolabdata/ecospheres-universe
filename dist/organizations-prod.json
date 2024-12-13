@@ -3,7 +3,7 @@
     "id": "534fff4ca3a7292c64a77c95",
     "name": "ADEME",
     "slug": "ademe",
-    "type": ""
+    "type": "OP"
   },
   {
     "id": "534fff4ea3a7292c64a77cad",
@@ -27,7 +27,7 @@
     "id": "62da6837cde1491f3727cdb2",
     "name": "Agence Nationale de l'Habitat",
     "slug": "agence-nationale-de-lhabitat",
-    "type": ""
+    "type": "OP"
   },
   {
     "id": "534fff51a3a7292c64a77cca",
@@ -81,19 +81,19 @@
     "id": "66601e784637c6bfa87b06ca",
     "name": "Bureau de Recherches Géologiques et Minières",
     "slug": "bureau-de-recherches-geologiques-et-minieres",
-    "type": ""
+    "type": "OP"
   },
   {
     "id": "61dc6a1398b3376b6fa0d0d9",
     "name": "Centre Scientifique et Technique du Batiment",
     "slug": "centre-scientifique-et-technique-du-batiment",
-    "type": ""
+    "type": "OP"
   },
   {
     "id": "5c812a16634f416583ed1876",
     "name": "Cerema",
     "slug": "cerema",
-    "type": ""
+    "type": "OP"
   },
   {
     "id": "5b85546b634f41167d62ce37",
@@ -717,7 +717,7 @@
     "id": "605074cb59c1d13e775073d4",
     "name": "Electricité de France",
     "slug": "electricite-de-france",
-    "type": "OP"
+    "type": ""
   },
   {
     "id": "560d929ac751df40ef756894",
@@ -777,19 +777,19 @@
     "id": "54f461f8c751df0f88882844",
     "name": "Institut français de recherche pour l'exploitation de la mer (IFREMER)",
     "slug": "institut-francais-de-recherche-pour-lexploitation-de-la-mer",
-    "type": ""
+    "type": "OP"
   },
   {
     "id": "534fff80a3a7292c64a77e41",
     "name": "Institut national de l'information géographique et forestière",
     "slug": "institut-national-de-l-information-geographique-et-forestiere",
-    "type": ""
+    "type": "OP"
   },
   {
     "id": "56e02813c751df1c1a1ffccd",
     "name": "Institut National de l'Environnement Industriel et des Risques",
     "slug": "institut-national-de-lenvironnement-industriel-et-des-risques",
-    "type": ""
+    "type": "OP"
   },
   {
     "id": "55acbc5f88ee3854e7d98334",
@@ -837,7 +837,7 @@
     "id": "55842c2bc751df66bba453b9",
     "name": "Muséum National d'Histoire Naturelle",
     "slug": "museum-national-dhistoire-naturelle",
-    "type": ""
+    "type": "OP"
   },
   {
     "id": "5feb30f52fd6b61032e301c9",
@@ -849,7 +849,7 @@
     "id": "534fff9ca3a7292c64a7803e",
     "name": "Office National des Forêts",
     "slug": "office-national-des-forets",
-    "type": ""
+    "type": "OP"
   },
   {
     "id": "65b916b3d12193d250fedb69",
@@ -963,7 +963,7 @@
     "id": "534fffafa3a7292c64a78103",
     "name": "Shom",
     "slug": "shom",
-    "type": ""
+    "type": "OP"
   },
   {
     "id": "534fffb0a3a7292c64a78115",
@@ -1005,7 +1005,7 @@
     "id": "534fffb2a3a7292c64a78123",
     "name": "Système d'Information sur l'Eau",
     "slug": "systeme-d-information-sur-l-eau",
-    "type": ""
+    "type": "OP"
   },
   {
     "id": "653130edb6223421ef195862",
