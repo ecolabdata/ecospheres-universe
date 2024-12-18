@@ -11,6 +11,8 @@ from typing import NamedTuple
 import requests
 import yaml
 
+REMOVALS_THRESHOLD = 1800
+
 session = requests.Session()
 
 # noop unless args.verbose is set
@@ -106,7 +108,7 @@ class ApiHelper:
         r.raise_for_status()
         return r.json()
 
-    def get_topic_id(self, topic_slug: str):
+    def get_topic_id(self, topic_slug: str) -> str:
         url = f"{self.base_url}/api/2/topics/{topic_slug}/"
         r = session.get(url)
         r.raise_for_status()
@@ -224,8 +226,9 @@ class ApiHelper:
         self.delete_topic_datasets(topic, datasets)
 
 
-def check_sync(org: Organization, datasets: list):
-    topic_datasets = api.get_topic_datasets(topic, organization_id=org.id)
+def check_sync(topic_slug: str, org: Organization, datasets: list):
+    topic_id = api.get_topic_id(topic_slug)
+    topic_datasets = api.get_topic_datasets(topic_slug, organization_id=org.id)
     datasets_search_count = api.search_datasets_count(topic_id, organization_id=org.id)
     if not(len(topic_datasets) == len(datasets) == datasets_search_count):
         print(f"Datasets for '{org.slug}' are NOT in sync", file=sys.stderr)
@@ -264,8 +267,7 @@ if __name__ == "__main__":
     token = os.getenv("DATAGOUV_API_KEY", conf['api']['token'])
     api = ApiHelper(url, token, fail_on_errors=args.fail_on_errors, dry_run=args.dry_run)
 
-    topic = conf['topic']
-    topic_id = None
+    topic_slug = conf['topic']
 
     grist_orgs = get_grist_orgs(conf['grist_url'], conf['env'])
     grist_orgs = sorted(grist_orgs, key=lambda o: o.slug)
@@ -278,11 +280,13 @@ if __name__ == "__main__":
         print("*** DRY RUN ***")
     elif args.check:
         print("*** CHECKING ***")
-        topic_id = api.get_topic_id(topic)
 
     t_count = 0
     t_all = time.time()
     try:
+        verbose(f"Getting existing datasets for topic '{topic_slug}'")
+        existing_datasets = api.get_topic_datasets(topic_slug)
+
         orgs: list[Organization] = []
 
         for org in grist_orgs:
@@ -303,14 +307,15 @@ if __name__ == "__main__":
         print(f"Processing {len(orgs)} organizations...")
 
         if args.reset:
-            print(f"Removing ALL datasets from topic '{topic}'")
+            print(f"Removing ALL datasets from topic '{topic_slug}'")
             if args.slow:
-                api.slow_delete_all_topic_datasets(topic)
+                api.slow_delete_all_topic_datasets(topic_slug)
             else:
-                api.delete_all_topic_datasets(topic)
+                api.delete_all_topic_datasets(topic_slug)
 
-        print(f"Processing topic '{topic}'")
+        print(f"Processing topic '{topic_slug}'")
         active_orgs: list[Organization] = []
+        new_datasets = []
         for org in orgs:
             verbose(f"Fetching datasets for organization '{org.slug}'...")
             datasets = api.get_organization_datasets(org.slug)
@@ -322,12 +327,20 @@ if __name__ == "__main__":
             active_orgs.append(org)
 
             if args.check:
-                check_sync(org, datasets)
-                continue
+                check_sync(topic_slug, org, datasets)
+            else:
+                new_datasets += datasets
 
-            print(f"Feeding {len(datasets)} datasets from '{org.slug}'...")
-            for batch in batched(datasets, 1000):
-                api.put_topic_datasets(topic, batch)
+        if not args.check:
+            additions = list(set(new_datasets) - set(existing_datasets))
+            removals = list(set(existing_datasets) - set(new_datasets))
+            if len(removals) > REMOVALS_THRESHOLD:
+                raise Exception(f"Too many removals ({len(removals)}), aborting")
+            print(f"Feeding {len(additions)} datasets...")
+            for batch in batched(additions, 1000):
+                api.put_topic_datasets(topic_slug, batch)
+            print(f"Removing {len(removals)} datasets...")
+            api.delete_topic_datasets(topic_slug, removals)
 
     finally:
         print(f"Total count: {t_count}, elapsed: {time.time() - t_all:.2f} s")
