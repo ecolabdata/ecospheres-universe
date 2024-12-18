@@ -284,8 +284,10 @@ if __name__ == "__main__":
     t_count = 0
     t_all = time.time()
     try:
-        verbose(f"Getting existing datasets for topic '{topic_slug}'")
-        existing_datasets = api.get_topic_datasets(topic_slug)
+        existing_datasets = []
+        if not args.check:
+            verbose(f"Getting existing datasets for topic '{topic_slug}'")
+            existing_datasets = api.get_topic_datasets(topic_slug)
 
         orgs: list[Organization] = []
 
