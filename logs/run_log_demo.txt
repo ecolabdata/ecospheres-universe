@@ -1,4 +1,4 @@
-Starting at Mon Feb 17 05:25:50 2025
+Starting at Tue Feb 18 05:25:30 2025
 Unknown organization 'agence-de-leau-seine-normandie-1'
 Unknown organization 'agence-nationale-de-lhabitat'
 Unknown organization 'engie-mobilites-electriques'
@@ -10,8 +10,8 @@ Unknown organization 'parcs-naturels-regionaux-de-provence-alpes-cote-dazur'
 Unknown organization 'systeme-dinformation-sur-la-biodiversite'
 Processing 172 organizations...
 Processing topic 'univers-ecospheres'
-Feeding 1 datasets...
+Feeding 13 datasets...
 Removing 0 datasets...
-Total count: 23788, elapsed: 259.14 s
+Total count: 23775, elapsed: 251.74 s
 Generating output file organizations-demo.json...
-Done at Mon Feb 17 05:30:09 2025
+Done at Tue Feb 18 05:29:41 2025
