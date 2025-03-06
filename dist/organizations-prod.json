@@ -258,6 +258,12 @@
     "type": "DREAL"
   },
   {
+    "id": "5891a8fc88ee384a7c9b81a4",
+    "name": "DREAL Corse",
+    "slug": "dreal-corse",
+    "type": "DREAL"
+  },
+  {
     "id": "5891a2f188ee3840059b81a4",
     "name": "DREAL Hauts-de-France",
     "slug": "dreal-hauts-de-france",
