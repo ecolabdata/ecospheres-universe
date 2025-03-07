@@ -84,10 +84,12 @@ class ApiHelper:
         self.dry_run = dry_run
 
     @elapsed_and_count
-    def get_datasets(self, url, func, xfields='data{id}'):
+    def get_datasets(self, url, func, xfields='data{id}', authenticated: bool = False):
         datasets = set()
         try:
-            headers={'X-Fields': f"{xfields},next_page"}
+            headers = {'X-Fields': f"{xfields},next_page"}
+            if authenticated:
+                headers['X-API-KEY'] = self.token
             while True:
                 r = session.get(url, headers=headers)
                 r.raise_for_status()
@@ -149,6 +151,13 @@ class ApiHelper:
         xfields = 'datasets{id}'
         func = lambda c: {d['id'] for d in c['datasets']}
         return self.get_datasets(url, func, xfields=xfields)
+
+    def get_topic_all_datasets(self, topic_id: str):
+        url = f"{self.base_url}/api/1/datasets/?topic={topic_id}"
+        xfields = 'data{id}'
+        def parse(d):
+            return {d['id'] for d in d['data']}
+        return self.get_datasets(url, parse, xfields=xfields, authenticated=True)
 
     def search_datasets_count(self, topic_id: str | None, organization_id: str = ""):
         if not topic_id:
@@ -226,8 +235,7 @@ class ApiHelper:
         self.delete_topic_datasets(topic, datasets)
 
 
-def check_sync(topic_slug: str, org: Organization, datasets: list):
-    topic_id = api.get_topic_id(topic_slug)
+def check_sync(topic_id: str, org: Organization, datasets: list):
     topic_datasets = api.get_topic_datasets(topic_slug, organization_id=org.id)
     datasets_search_count = api.search_datasets_count(topic_id, organization_id=org.id)
     if not(len(topic_datasets) == len(datasets) == datasets_search_count):
@@ -268,6 +276,7 @@ if __name__ == "__main__":
     api = ApiHelper(url, token, fail_on_errors=args.fail_on_errors, dry_run=args.dry_run)
 
     topic_slug = conf['topic']
+    topic_id = api.get_topic_id(topic_slug)
 
     grist_orgs = get_grist_orgs(conf['grist_url'], conf['env'])
     grist_orgs = sorted(grist_orgs, key=lambda o: o.slug)
@@ -287,7 +296,8 @@ if __name__ == "__main__":
         existing_datasets = []
         if not args.check:
             verbose(f"Getting existing datasets for topic '{topic_slug}'")
-            existing_datasets = api.get_topic_datasets(topic_slug)
+            # also get archived / private datasets
+            existing_datasets = api.get_topic_all_datasets(topic_id)
 
         orgs: list[Organization] = []
 
@@ -329,7 +339,7 @@ if __name__ == "__main__":
             active_orgs.append(org)
 
             if args.check:
-                check_sync(topic_slug, org, datasets)
+                check_sync(topic_id, org, datasets)
             else:
                 new_datasets += datasets
 
