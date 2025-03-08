@@ -3,103 +3,103 @@
     "id": "534fff4ca3a7292c64a77c95",
     "name": "ADEME",
     "slug": "ademe",
-    "type": "Agences et opérateurs"
+    "type": "EPIC"
   },
   {
     "id": "534fff4ea3a7292c64a77cad",
     "name": "Agence de l'eau Rhône-Méditerranée et Corse",
     "slug": "agence-de-l-eau-rhone-mediterranee-et-corse",
-    "type": "Agences et opérateurs"
+    "type": "EPA"
   },
   {
     "id": "634916955ef1b4d57ca08835",
     "name": "Agence de l'eau Seine-Normandie",
     "slug": "agence-de-leau-seine-normandie-1",
-    "type": "Agences et opérateurs"
+    "type": "EPA"
   },
   {
     "id": "5901f4dfc751df412e7bb92d",
     "name": "Agence nationale de la cohésion des territoires",
     "slug": "agence-nationale-de-la-cohesion-des-territoires",
-    "type": "Agences et opérateurs"
+    "type": "EPA"
   },
   {
     "id": "62da6837cde1491f3727cdb2",
     "name": "Agence Nationale de l'Habitat",
     "slug": "agence-nationale-de-lhabitat",
-    "type": "Agences et opérateurs"
+    "type": "EPA"
   },
   {
     "id": "534fff51a3a7292c64a77cca",
     "name": "Agence nationale pour la rénovation urbaine",
     "slug": "agence-nationale-pour-la-renovation-urbaine",
-    "type": "Agences et opérateurs"
+    "type": "EPA"
   },
   {
     "id": "5b1138d9c751df2618dc4662",
     "name": "Agence ORE",
     "slug": "agence-ore-3",
-    "type": "Associations"
+    "type": "Association"
   },
   {
     "id": "5a4381adc751df74bae4627d",
     "name": "Airparif",
     "slug": "airparif-1",
-    "type": "Associations"
+    "type": "Association"
   },
   {
     "id": "59a538b688ee386b121578b9",
     "name": "Atmo Auvergne-Rhône-Alpes",
     "slug": "atmo-auvergne-rhone-alpes",
-    "type": "Associations"
+    "type": "Association"
   },
   {
     "id": "5ddbf5ff6f444103e11e9d3d",
     "name": "Atmo Bourgogne-Franche-Comté",
     "slug": "atmo-bourgogne-franche-comte",
-    "type": "Associations"
+    "type": "Association"
   },
   {
     "id": "5889ea7a88ee385a5e9b81a4",
     "name": "ATMO Grand Est",
     "slug": "atmo-grand-est",
-    "type": "Associations"
+    "type": "Association"
   },
   {
     "id": "66e2f4170ec983188ba0302d",
     "name": "Atmo Occitanie",
     "slug": "atmo-occitanie",
-    "type": "Associations"
+    "type": "Association"
   },
   {
     "id": "5b9fb3678b4c416ff2277bb5",
     "name": "AtmoSud",
     "slug": "atmosud",
-    "type": "Associations"
+    "type": "Association"
   },
   {
     "id": "66601e784637c6bfa87b06ca",
     "name": "Bureau de Recherches Géologiques et Minières",
     "slug": "bureau-de-recherches-geologiques-et-minieres",
-    "type": "Agences et opérateurs"
+    "type": "EPIC"
   },
   {
     "id": "61dc6a1398b3376b6fa0d0d9",
     "name": "Centre Scientifique et Technique du Batiment",
     "slug": "centre-scientifique-et-technique-du-batiment",
-    "type": "Agences et opérateurs"
+    "type": "EPIC"
   },
   {
     "id": "5c812a16634f416583ed1876",
     "name": "Cerema",
     "slug": "cerema",
-    "type": "Agences et opérateurs"
+    "type": "EPA"
   },
   {
     "id": "5b85546b634f41167d62ce37",
     "name": "Commission de régulation de l'énergie (CRE)",
     "slug": "commission-de-regulation-de-lenergie",
-    "type": "Agences et opérateurs"
+    "type": "API ou AAI"
   },
   {
     "id": "5bf7f6a3634f413588391745",
@@ -705,43 +705,43 @@
     "id": "60240cd536ca1c415a3053a2",
     "name": "EDF Systèmes Energétiques Insulaires",
     "slug": "edf-systemes-energetiques-insulaires",
-    "type": "Autres"
+    "type": "SA"
   },
   {
     "id": "605074cb59c1d13e775073d4",
     "name": "Electricité de France",
     "slug": "electricite-de-france",
-    "type": "Autres"
+    "type": "SA"
   },
   {
     "id": "560d929ac751df40ef756894",
     "name": "Enedis",
     "slug": "electricite-reseau-distribution-france",
-    "type": "Autres"
+    "type": "SA"
   },
   {
     "id": "63ea4747c2e5458da3b97b35",
     "name": "Engie Mobilités Electriques",
     "slug": "engie-mobilites-electriques",
-    "type": "Autres"
+    "type": "SA"
   },
   {
     "id": "5abca8d588ee386ee6ece479",
     "name": "Point d'Accès National transport.data.gouv.fr",
     "slug": "equipe-transport-data-gouv-fr",
-    "type": "Administrations Centrales"
+    "type": "Administration centrale"
   },
   {
     "id": "5eb035fd32d114765d6e8389",
     "name": "Fédération des Parcs Naturels Régionaux de France",
     "slug": "federation-des-parcs-naturels-regionaux-de-france",
-    "type": "Associations"
+    "type": "Association"
   },
   {
     "id": "5d823fd98b4c411e38e820b4",
     "name": "Fluo Grand Est",
     "slug": "fluo-grand-est",
-    "type": "Autres"
+    "type": "Autre"
   },
   {
     "id": "5ddc086f634f41190d4c1006",
@@ -753,264 +753,264 @@
     "id": "56c44eb7c751df689e6c6de0",
     "name": "Observatoire de l'environnement en Bretagne",
     "slug": "gip-bretagne-environnement",
-    "type": "Autres"
+    "type": "GIP"
   },
   {
     "id": "571e4595c751df54b2fcca0d",
     "name": "GRDF",
     "slug": "grdf",
-    "type": "Autres"
+    "type": "SA"
   },
   {
     "id": "568e5e9488ee38033aaf0bf4",
     "name": "Île-de-France Mobilités",
     "slug": "ile-de-france-mobilites",
-    "type": "Autres"
+    "type": "EPA"
   },
   {
     "id": "54f461f8c751df0f88882844",
     "name": "Institut français de recherche pour l'exploitation de la mer (IFREMER)",
     "slug": "institut-francais-de-recherche-pour-lexploitation-de-la-mer",
-    "type": "Agences et opérateurs"
+    "type": "EPIC"
   },
   {
     "id": "534fff80a3a7292c64a77e41",
     "name": "Institut national de l'information géographique et forestière",
     "slug": "institut-national-de-l-information-geographique-et-forestiere",
-    "type": "Agences et opérateurs"
+    "type": "EPA"
   },
   {
     "id": "56e02813c751df1c1a1ffccd",
     "name": "Institut National de l'Environnement Industriel et des Risques",
     "slug": "institut-national-de-lenvironnement-industriel-et-des-risques",
-    "type": "Agences et opérateurs"
+    "type": "EPIC"
   },
   {
     "id": "55acbc5f88ee3854e7d98334",
     "name": "Irstea",
     "slug": "irstea",
-    "type": "Autres"
+    "type": "EPA"
   },
   {
     "id": "5e26b9ab634f41621612b93c",
     "name": "JVMALIN",
     "slug": "jvmalin",
-    "type": "Autres"
+    "type": "Autre"
   },
   {
     "id": "5be949a9634f415deb46af0e",
     "name": "Lig'Air",
     "slug": "ligair",
-    "type": "Associations"
+    "type": "Association"
   },
   {
     "id": "534fff8ba3a7292c64a77ed4",
     "name": "Météo-France",
     "slug": "meteo-france",
-    "type": "Agences et opérateurs"
+    "type": "EPIC"
   },
   {
     "id": "534fff8fa3a7292c64a77f3d",
     "name": "Ministère de la Cohésion des territoires",
     "slug": "ministere-de-l-egalite-des-territoires-et-du-logement",
-    "type": "Administrations Centrales"
+    "type": "Administration centrale"
   },
   {
     "id": "534fff8da3a7292c64a77eee",
     "name": "Ministère de la Transition écologique",
     "slug": "ministere-de-la-transition-ecologique",
-    "type": "Administrations Centrales"
+    "type": "Administration centrale"
   },
   {
     "id": "551d4b6cc751df4f1a0cd89f",
     "name": "Morbihan énergies",
     "slug": "morbihan-energies",
-    "type": "Autres"
+    "type": "Autre"
   },
   {
     "id": "55842c2bc751df66bba453b9",
     "name": "Muséum National d'Histoire Naturelle",
     "slug": "museum-national-dhistoire-naturelle",
-    "type": "Agences et opérateurs"
+    "type": "EPA"
   },
   {
     "id": "5feb30f52fd6b61032e301c9",
     "name": "Observatoire de Recherche Montpelliérain de l'Environnement",
     "slug": "observatoire-de-recherche-montpellierain-de-lenvironnement",
-    "type": "Autres"
+    "type": "EPSP"
   },
   {
     "id": "534fff9ca3a7292c64a7803e",
     "name": "Office National des Forêts",
     "slug": "office-national-des-forets",
-    "type": "Agences et opérateurs"
+    "type": "EPIC"
   },
   {
     "id": "65b916b3d12193d250fedb69",
     "name": "OFFICE PUBLIC DE L'HABITAT DES LANDES",
     "slug": "office-public-de-lhabitat-des-landes",
-    "type": "Autres"
+    "type": "EPIC"
   },
   {
     "id": "5e874ace3af8a02435889f1b",
     "name": "Oise Mobilité - Syndicat mixte des transports collectifs de l'Oise",
     "slug": "oise-mobilite-syndicat-mixte-des-transports-collectifs-de-loise",
-    "type": "Autres"
+    "type": "Syndicat mixte ouvert"
   },
   {
     "id": "5a0f0384c751df5f68d855b9",
     "name": "Open Data Réseaux Énergies",
     "slug": "open-data-reseaux-energies-1",
-    "type": "Autres"
+    "type": "SA"
   },
   {
     "id": "5bcee3028b4c4135155f881c",
     "name": "Parc & Géoparc Normandie-Maine",
     "slug": "parc-geoparc-normandie-maine",
-    "type": "Autres"
+    "type": "Syndicat mixte ouvert"
   },
   {
     "id": "5f898bdf254e86297006ef0c",
     "name": "Parc national de forêts",
     "slug": "parc-national-de-forets",
-    "type": "Autres"
+    "type": "EPA"
   },
   {
     "id": "5be05903634f4138316458c7",
     "name": "Parc national des Cévennes",
     "slug": "parc-national-des-cevennes",
-    "type": "Autres"
+    "type": "EPA"
   },
   {
     "id": "5bf88b3a8b4c4151badafa03",
     "name": "Parc national des Écrins",
     "slug": "parc-national-des-ecrins",
-    "type": "Autres"
+    "type": "EPA"
   },
   {
     "id": "57a0a78788ee383e74d73ff5",
     "name": "Parc naturel régional de la Montagne de Reims",
     "slug": "parc-naturel-regional-de-la-montagne-de-reims",
-    "type": "Autres"
+    "type": "Syndicat mixte ouvert"
   },
   {
     "id": "5dc53b1b6f4441145da42202",
     "name": "Parc Naturel régional de la Montagne de Reims",
     "slug": "parc-naturel-regional-de-la-montagne-de-reims-1",
-    "type": "Autres"
+    "type": "Syndicat mixte ouvert"
   },
   {
     "id": "563a2ec3c751df39a8dcc3f0",
     "name": "Parc naturel régional des Vosges du Nord",
     "slug": "parc-naturel-regional-des-vosges-du-nord",
-    "type": "Autres"
+    "type": "Syndicat mixte ouvert"
   },
   {
     "id": "5f91506e6d1d6f595ceb0ea8",
     "name": "Parc naturel régional du Morvan ",
     "slug": "parc-naturel-regional-du-morvan",
-    "type": "Autres"
+    "type": "Syndicat mixte ouvert"
   },
   {
     "id": "546e60c7c751df7135068e8d",
     "name": "Parc Naturel Régional du Vercors",
     "slug": "parc-naturel-regional-du-vercors",
-    "type": "Autres"
+    "type": "Syndicat mixte ouvert"
   },
   {
     "id": "655e13af657b1d085c6a9e90",
     "name": "Parcs nationaux de France",
     "slug": "parcs-nationaux-de-france",
-    "type": "Autres"
+    "type": "EPA"
   },
   {
     "id": "63d2af46663cff0dff096cf3",
     "name": "Parcs naturels régionaux de Provence-Alpes-Côte d'Azur",
     "slug": "parcs-naturels-regionaux-de-provence-alpes-cote-dazur",
-    "type": "Autres"
+    "type": "Syndicat mixte ouvert"
   },
   {
     "id": "65a5533ed45dd6c0abf38d0e",
     "name": "Référentiel National des Bâtiments",
     "slug": "referentiel-national-des-batiments",
-    "type": "Agences et opérateurs"
+    "type": "Administration centrale"
   },
   {
     "id": "534fffa6a3a7292c64a780b7",
     "name": "Régie autonome des transports parisiens (RATP)",
     "slug": "regie-autonome-des-transports-parisiens-ratp",
-    "type": "Autres"
+    "type": "EPIC"
   },
   {
     "id": "55f03e1088ee384bc1a46ec1",
     "name": "Réseau de Transport d'Electricité",
     "slug": "reseau-de-transport-delectricite",
-    "type": "Autres"
+    "type": "SA"
   },
   {
     "id": "5b0863e088ee382b48ed72ea",
     "name": "Section Cadastre-Topographie de la Polynésie française",
     "slug": "section-cadastre-topographie-de-la-polynesie-francaise",
-    "type": "Autres"
+    "type": "Autre"
   },
   {
     "id": "534fffafa3a7292c64a78103",
     "name": "Shom",
     "slug": "shom",
-    "type": "Agences et opérateurs"
+    "type": "EPA"
   },
   {
     "id": "534fffb0a3a7292c64a78115",
     "name": "SNCF",
     "slug": "sncf",
-    "type": "Autres"
+    "type": "SA"
   },
   {
     "id": "534fffb1a3a7292c64a7811f",
     "name": "Société du Grand Paris",
     "slug": "societe-du-grand-paris",
-    "type": "Autres"
+    "type": "EPIC"
   },
   {
     "id": "5631e535c751df24cedcc3f1",
     "name": "STAR",
     "slug": "star",
-    "type": "Autres"
+    "type": "Autre"
   },
   {
     "id": "6380a35b9f35ddce103462cc",
     "name": "Syndicat Mixte des Milieux Aquatiques et des Rivières de l'Aude",
     "slug": "syndicat-mixte-des-milieux-aquatiques-et-des-rivieres-de-laude",
-    "type": "Autres"
+    "type": "Syndicat mixte ouvert"
   },
   {
     "id": "575fc7f0c751df0e1dac31a0",
     "name": "Syndicat Mixte des Mobilités de l'Aire Grenobloise",
     "slug": "syndicat-mixte-des-mobilites-de-laire-grenobloise",
-    "type": "Autres"
+    "type": "Syndicat mixte ouvert"
   },
   {
     "id": "5c10d7b38b4c413b777a3fa6",
     "name": "Syndicat mixte EPTB Meurthe Madon",
     "slug": "syndicat-mixte-eptb-meurthe-madon",
-    "type": "Autres"
+    "type": "Syndicat mixte ouvert"
   },
   {
     "id": "534fffb2a3a7292c64a78123",
     "name": "Système d'Information sur l'Eau",
     "slug": "systeme-d-information-sur-l-eau",
-    "type": "Agences et opérateurs"
+    "type": "EPA"
   },
   {
     "id": "653130edb6223421ef195862",
     "name": "Système d'information sur la biodiversité",
     "slug": "systeme-dinformation-sur-la-biodiversite",
-    "type": "Agences et opérateurs"
+    "type": "EPA"
   },
   {
     "id": "5c09189f8b4c414a8d02298e",
     "name": "Twisto",
     "slug": "twisto",
-    "type": "Autres"
+    "type": "Autre"
   }
 ]
