@@ -144,6 +144,12 @@
     "type": ""
   },
   {
+    "id": "58aef40688ee382b0211f854",
+    "name": "DDT Deux-Sèvres",
+    "slug": "ddt-deux-sevres",
+    "type": ""
+  },
+  {
     "id": "58aec3c288ee385bdf5d8a01",
     "name": "DDT Dordogne",
     "slug": "ddt-dordogne",
@@ -219,6 +225,48 @@
     "id": "58aef31c88ee3821f6d0496a",
     "name": "DDT Savoie",
     "slug": "ddt-savoie",
+    "type": ""
+  },
+  {
+    "id": "58aef48d88ee382cb41ab9c0",
+    "name": "DDT Tarn",
+    "slug": "ddt-tarn",
+    "type": ""
+  },
+  {
+    "id": "58aef50788ee382d101eb438",
+    "name": "DDT Tarn-et-Garonne",
+    "slug": "ddt-tarn-et-garonne",
+    "type": ""
+  },
+  {
+    "id": "58aef7cd88ee3830ed5fc99a",
+    "name": "DDT Territoire-de-Belfort",
+    "slug": "ddt-territoire-de-belfort",
+    "type": ""
+  },
+  {
+    "id": "58aef6d188ee382d1749c425",
+    "name": "DDT Vaucluse",
+    "slug": "ddt-vaucluse",
+    "type": ""
+  },
+  {
+    "id": "58aef73d88ee3830af08f4d8",
+    "name": "DDT Vienne",
+    "slug": "ddt-vienne",
+    "type": ""
+  },
+  {
+    "id": "58aef7a188ee3830ed5fc999",
+    "name": "DDT Yonne",
+    "slug": "ddt-yonne",
+    "type": ""
+  },
+  {
+    "id": "58aef3cc88ee382ad7933d6d",
+    "name": "DDT Yvelines",
+    "slug": "ddt-yvelines",
     "type": ""
   },
   {
@@ -300,6 +348,18 @@
     "type": ""
   },
   {
+    "id": "58aef70888ee3830a05fffe6",
+    "name": "DDTM Vendée",
+    "slug": "ddtm-vendee",
+    "type": ""
+  },
+  {
+    "id": "5891f69f88ee385ad59b81a4",
+    "name": "DEAL Guadeloupe",
+    "slug": "deal-guadeloupe",
+    "type": ""
+  },
+  {
     "id": "565f741788ee380296e72046",
     "name": "Direction Départementale des Territoire du Puy-de-Dôme",
     "slug": "direction-departementale-des-territoire-du-puy-de-dome",
@@ -378,6 +438,12 @@
     "type": ""
   },
   {
+    "id": "558adba9c751df04a0a453c1",
+    "name": "Direction Départementale des Territoires de l'Essonne",
+    "slug": "direction-departementale-des-territoires-de-lessonne",
+    "type": ""
+  },
+  {
     "id": "55ae6ba688ee386c843ca28b",
     "name": "DDT de l'Isère",
     "slug": "direction-departementale-des-territoires-de-lisere",
@@ -423,6 +489,12 @@
     "id": "5ac5cb0388ee38796b3a476b",
     "name": "Direction Départementale des Territoires des Hautes-Alpes",
     "slug": "direction-departementale-des-territoires-des-hautes-alpes",
+    "type": ""
+  },
+  {
+    "id": "55886e4dc751df3f7aa453b9",
+    "name": "Direction Départementale des Territoires des Vosges",
+    "slug": "direction-departementale-des-territoires-des-vosges",
     "type": ""
   },
   {
@@ -480,9 +552,21 @@
     "type": ""
   },
   {
+    "id": "558a7f99c751df760ba453bf",
+    "name": "Direction Départementale des Territoires du Val d'Oise",
+    "slug": "direction-departementale-des-territoires-du-val-doise",
+    "type": ""
+  },
+  {
     "id": "558bd745c751df3fffa453bd",
     "name": "Direction Départementale des Territoires et de la Mer de Charente-Maritime",
     "slug": "direction-departementale-des-territoires-et-de-la-mer-de-charente-maritime",
+    "type": ""
+  },
+  {
+    "id": "558a83dac751df039da453b9",
+    "name": "Direction Départementale des Territoires et de la Mer de la Somme",
+    "slug": "direction-departementale-des-territoires-et-de-la-mer-de-la-somme",
     "type": ""
   },
   {
@@ -534,6 +618,12 @@
     "type": ""
   },
   {
+    "id": "558ad3e3c751df7c4fa453b9",
+    "name": "Direction Départementale des Territoires et de la Mer du Var",
+    "slug": "direction-departementale-des-territoires-et-de-la-mer-du-var",
+    "type": ""
+  },
+  {
     "id": "558ad939c751df7c4fa453bc",
     "name": "Direction Départementale et des Territoires du Cantal",
     "slug": "direction-departementale-et-des-territoires-du-cantal",
@@ -543,6 +633,12 @@
     "id": "57275bd288ee387fd5a19f12",
     "name": "Direction régionale de l'Environnement, de l'Aménagement et du Logement de Normandie",
     "slug": "direction-regionale-de-lenvironnement-de-lamenagement-et-du-logement-de-normandie",
+    "type": ""
+  },
+  {
+    "id": "55b23b0e88ee3839da3ca288",
+    "name": "DREAL Centre-Val de Loire",
+    "slug": "direction-regionale-de-lenvironnement-de-lamenagement-et-du-logement-du-centre-val-de-loire",
     "type": ""
   },
   {
@@ -561,6 +657,12 @@
     "id": "5882a05d88ee3835c59b81a4",
     "name": "DREAL Auvergne-Rhône-Alpes",
     "slug": "dreal-auvergne-rhone-alpes-1",
+    "type": ""
+  },
+  {
+    "id": "5883d10488ee3810d19b81e3",
+    "name": "DREAL Grand Est",
+    "slug": "dreal-grand-est",
     "type": ""
   },
   {
