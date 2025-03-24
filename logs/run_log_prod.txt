@@ -1,9 +1,9 @@
-Starting at Sun Mar 23 05:24:13 2025
+Starting at Mon Mar 24 05:26:16 2025
 Unknown organization 'do-terr-geo-centre'
-Processing 174 organizations...
+Processing 175 organizations...
 Processing topic 'univers-ecospheres'
-Feeding 6 datasets...
-Total count: 24421, elapsed: 202.96 s
+Feeding 10 datasets...
+Total count: 24378, elapsed: 212.40 s
 Traceback (most recent call last):
   File "/home/runner/work/ecospheres-universe/ecospheres-universe/feed-universe.py", line 343, in <module>
     api.put_topic_datasets(topic_slug, batch)
