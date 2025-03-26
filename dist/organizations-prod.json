@@ -6,6 +6,12 @@
     "type": "EPIC"
   },
   {
+    "id": "534fff4da3a7292c64a77c9f",
+    "name": "Agence Bio",
+    "slug": "agence-bio",
+    "type": "GIP"
+  },
+  {
     "id": "534fff4ea3a7292c64a77cad",
     "name": "Agence de l'eau Rhône-Méditerranée et Corse",
     "slug": "agence-de-l-eau-rhone-mediterranee-et-corse",
@@ -744,10 +750,10 @@
     "type": "Association"
   },
   {
-    "id": "5d823fd98b4c411e38e820b4",
-    "name": "Fluo Grand Est",
-    "slug": "fluo-grand-est",
-    "type": "Autre"
+    "id": "6314f7a2844b191886637a24",
+    "name": "France Chaleur Urbaine",
+    "slug": "france-chaleur-urbaine",
+    "type": "Administration centrale"
   },
   {
     "id": "5ddc086f634f41190d4c1006",
@@ -814,12 +820,6 @@
     "name": "Ministère de la Transition écologique",
     "slug": "ministere-de-la-transition-ecologique",
     "type": "Administration centrale"
-  },
-  {
-    "id": "551d4b6cc751df4f1a0cd89f",
-    "name": "Morbihan énergies",
-    "slug": "morbihan-energies",
-    "type": "Autre"
   },
   {
     "id": "55842c2bc751df66bba453b9",
@@ -936,15 +936,21 @@
     "type": "EPIC"
   },
   {
+    "id": "61937d50e54eade2bbf8e8df",
+    "name": "Registre de Preuve de Covoiturage",
+    "slug": "registre-de-preuve-de-covoiturage",
+    "type": "Administration centrale"
+  },
+  {
     "id": "55f03e1088ee384bc1a46ec1",
     "name": "Réseau de Transport d'Electricité",
     "slug": "reseau-de-transport-delectricite",
     "type": "SA"
   },
   {
-    "id": "5b0863e088ee382b48ed72ea",
-    "name": "Section Cadastre-Topographie de la Polynésie française",
-    "slug": "section-cadastre-topographie-de-la-polynesie-francaise",
+    "id": "55eeb55fc751df24d31f92b3",
+    "name": "Service central d’hydrométéorologie et d’appui à la prévision des inondations",
+    "slug": "service-central-dhydrometeorologie-et-dappui-a-la-prevision-des-inondations",
     "type": "Autre"
   },
   {
@@ -964,12 +970,6 @@
     "name": "Société des grands projets",
     "slug": "societe-du-grand-paris",
     "type": "EPIC"
-  },
-  {
-    "id": "5631e535c751df24cedcc3f1",
-    "name": "STAR",
-    "slug": "star",
-    "type": "Autre"
   },
   {
     "id": "6380a35b9f35ddce103462cc",
@@ -1000,17 +1000,5 @@
     "name": "Système d'information sur la biodiversité",
     "slug": "systeme-dinformation-sur-la-biodiversite",
     "type": "EPA"
-  },
-  {
-    "id": "55263369c751df702faec475",
-    "name": "Occitanie Pyrénées en Intelligence Géomatique",
-    "slug": "systemes-dinformations-geographiques-en-languedoc-roussillon",
-    "type": "Association"
-  },
-  {
-    "id": "5c09189f8b4c414a8d02298e",
-    "name": "Twisto",
-    "slug": "twisto",
-    "type": "Autre"
   }
 ]
