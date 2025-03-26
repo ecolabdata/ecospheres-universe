@@ -1,18 +1,9 @@
-Starting at Wed Mar 26 05:25:37 2025
+Starting at Wed Mar 26 06:38:15 2025
 Unknown organization 'do-terr-geo-centre'
 Processing 176 organizations...
 Processing topic 'univers-ecospheres'
 Feeding 30 datasets...
-Total count: 24418, elapsed: 179.15 s
-Traceback (most recent call last):
-  File "/home/runner/work/ecospheres-universe/ecospheres-universe/feed-universe.py", line 343, in <module>
-    api.put_topic_datasets(topic_slug, batch)
-    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/ecospheres-universe/ecospheres-universe/feed-universe.py", line 40, in wrapper_decorator
-    val = func(*args, **kwargs)
-  File "/home/runner/work/ecospheres-universe/ecospheres-universe/feed-universe.py", line 169, in put_topic_datasets
-    session.post(url, data=data, headers=headers).raise_for_status()
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
-  File "/opt/hostedtoolcache/Python/3.13.2/x64/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
-    raise HTTPError(http_error_msg, response=self)
-requests.exceptions.HTTPError: 401 Client Error: UNAUTHORIZED for url: https://www.data.gouv.fr/api/2/topics/univers-ecospheres/datasets/
+Removing 468 datasets...
+Total count: 24418, elapsed: 821.36 s
+Generating output file organizations-prod.json...
+Done at Wed Mar 26 06:51:57 2025
