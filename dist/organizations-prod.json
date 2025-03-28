@@ -18,6 +18,12 @@
     "type": "EPA"
   },
   {
+    "id": "55195b45c751df66ab057c91",
+    "name": "Agence de l'eau Loire-Bretagne",
+    "slug": "agence-de-leau-loire-bretagne",
+    "type": "EPA"
+  },
+  {
     "id": "634916955ef1b4d57ca08835",
     "name": "Agence de l'eau Seine-Normandie",
     "slug": "agence-de-leau-seine-normandie-1",
@@ -34,6 +40,18 @@
     "name": "Agence Nationale de l'Habitat",
     "slug": "agence-nationale-de-lhabitat",
     "type": "EPA"
+  },
+  {
+    "id": "534fff50a3a7292c64a77cc0",
+    "name": "Agence nationale de sécurité sanitaire, de l'alimentation, de l'environnement et du travail (Anses)",
+    "slug": "agence-nationale-de-securite-sanitaire-de-l-alimentation-de-l-environnement-et-du-travail-anses",
+    "type": "EPA"
+  },
+  {
+    "id": "56bca517c751df265b9f9deb",
+    "name": "Agence nationale pour la gestion des déchets radioactifs",
+    "slug": "agence-nationale-pour-la-gestion-des-dechets-radioactifs",
+    "type": "EPIC"
   },
   {
     "id": "534fff51a3a7292c64a77cca",
@@ -84,9 +102,21 @@
     "type": "Association"
   },
   {
+    "id": "539ef743a3a72946de9ebe28",
+    "name": "Autorité de sûreté nucléaire et de radioprotection",
+    "slug": "autorite-de-surete-nucleaire-et-de-radioprotection",
+    "type": "API ou AAI"
+  },
+  {
     "id": "66601e784637c6bfa87b06ca",
     "name": "Bureau de Recherches Géologiques et Minières",
     "slug": "bureau-de-recherches-geologiques-et-minieres",
+    "type": "EPIC"
+  },
+  {
+    "id": "563a2cdf88ee385a94531575",
+    "name": "Centre National d'Etudes Spatiales",
+    "slug": "centre-national-detudes-spatiales",
     "type": "EPIC"
   },
   {
@@ -672,6 +702,12 @@
     "type": "DDT"
   },
   {
+    "id": "5f80888fed80726c5bacfa29",
+    "name": "Direction Générale de l'Aviation Civile",
+    "slug": "direction-generale-de-laviation-civile",
+    "type": "Administration centrale"
+  },
+  {
     "id": "57275bd288ee387fd5a19f12",
     "name": "Direction régionale de l'Environnement, de l'Aménagement et du Logement de Normandie",
     "slug": "direction-regionale-de-lenvironnement-de-lamenagement-et-du-logement-de-normandie",
@@ -792,10 +828,22 @@
     "type": "EPA"
   },
   {
+    "id": "534fff80a3a7292c64a77e54",
+    "name": "Institut national de l'origine et de la qualité (INAO)",
+    "slug": "institut-national-de-l-origine-et-de-la-qualite-inao",
+    "type": "EPA"
+  },
+  {
     "id": "56e02813c751df1c1a1ffccd",
     "name": "Institut National de l'Environnement Industriel et des Risques",
     "slug": "institut-national-de-lenvironnement-industriel-et-des-risques",
     "type": "EPIC"
+  },
+  {
+    "id": "56e11c31c751df6b481ffccd",
+    "name": "Laboratoire Central de Surveillance de la Qualité de l'Air",
+    "slug": "laboratoire-central-de-surveillance-de-la-qualite-de-lair",
+    "type": "Autre"
   },
   {
     "id": "5be949a9634f415deb46af0e",
@@ -1000,5 +1048,11 @@
     "name": "Système d'information sur la biodiversité",
     "slug": "systeme-dinformation-sur-la-biodiversite",
     "type": "EPA"
+  },
+  {
+    "id": "6200dfeba70a9f33f0854650",
+    "name": "Trackdéchets",
+    "slug": "trackdechets",
+    "type": "Administration centrale"
   }
 ]
