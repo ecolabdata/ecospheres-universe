@@ -996,6 +996,12 @@
     "type": "SA"
   },
   {
+    "id": "66c35108b375912c281edb22",
+    "name": "Réseau des Agences Régionales de l'Énergie et de l'Environnement",
+    "slug": "reseau-des-agences-regionales-de-lenergie-et-de-lenvironnement",
+    "type": "Association"
+  },
+  {
     "id": "55eeb55fc751df24d31f92b3",
     "name": "Service central d’hydrométéorologie et d’appui à la prévision des inondations",
     "slug": "service-central-dhydrometeorologie-et-dappui-a-la-prevision-des-inondations",
