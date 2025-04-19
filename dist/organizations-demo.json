@@ -726,12 +726,6 @@
     "type": ""
   },
   {
-    "id": "5d823fd98b4c411e38e820b4",
-    "name": "Fluo Grand Est",
-    "slug": "fluo-grand-est",
-    "type": ""
-  },
-  {
     "id": "56c44eb7c751df689e6c6de0",
     "name": "Observatoire de l'environnement en Bretagne",
     "slug": "gip-bretagne-environnement",
@@ -759,18 +753,6 @@
     "id": "56e02813c751df1c1a1ffccd",
     "name": "Institut National de l'Environnement Industriel et des Risques",
     "slug": "institut-national-de-lenvironnement-industriel-et-des-risques",
-    "type": ""
-  },
-  {
-    "id": "55acbc5f88ee3854e7d98334",
-    "name": "Irstea",
-    "slug": "irstea",
-    "type": ""
-  },
-  {
-    "id": "5e26b9ab634f41621612b93c",
-    "name": "JVMALIN",
-    "slug": "jvmalin",
     "type": ""
   },
   {
@@ -924,12 +906,6 @@
     "type": ""
   },
   {
-    "id": "5631e535c751df24cedcc3f1",
-    "name": "STAR",
-    "slug": "star",
-    "type": ""
-  },
-  {
     "id": "575fc7f0c751df0e1dac31a0",
     "name": "Syndicat Mixte des Mobilités de l'Aire Grenobloise",
     "slug": "syndicat-mixte-des-mobilites-de-laire-grenobloise",
@@ -939,12 +915,6 @@
     "id": "534fffb2a3a7292c64a78123",
     "name": "Système d'Information sur l'Eau",
     "slug": "systeme-d-information-sur-l-eau",
-    "type": ""
-  },
-  {
-    "id": "5c09189f8b4c414a8d02298e",
-    "name": "Twisto",
-    "slug": "twisto",
     "type": ""
   }
 ]
