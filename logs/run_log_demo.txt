@@ -1,4 +1,4 @@
-Starting at Sat May  3 05:26:57 2025
+Starting at Sun May  4 05:26:07 2025
 Unknown organization 'agence-de-leau-seine-normandie-1'
 Unknown organization 'agence-nationale-de-lhabitat'
 Unknown organization 'engie-mobilites-electriques'
@@ -12,6 +12,6 @@ Processing 167 organizations...
 Processing topic 'univers-ecospheres'
 Feeding 0 datasets...
 Removing 0 datasets...
-Total count: 23843, elapsed: 297.11 s
+Total count: 23843, elapsed: 355.08 s
 Generating output file organizations-demo.json...
-Done at Sat May  3 05:31:55 2025
+Done at Sun May  4 05:32:02 2025
