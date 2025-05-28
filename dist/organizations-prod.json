@@ -141,7 +141,7 @@
     "id": "5bf7f6a3634f413588391745",
     "name": "DataGrandEst",
     "slug": "datagrandest",
-    "type": "DREAL"
+    "type": "DREAL/DRIEAT"
   },
   {
     "id": "58ad720388ee381d53318fb0",
@@ -705,43 +705,49 @@
     "id": "57275bd288ee387fd5a19f12",
     "name": "Direction régionale de l'Environnement, de l'Aménagement et du Logement de Normandie",
     "slug": "direction-regionale-de-lenvironnement-de-lamenagement-et-du-logement-de-normandie",
-    "type": "DREAL"
+    "type": "DREAL/DRIEAT"
   },
   {
     "id": "55b23b0e88ee3839da3ca288",
     "name": "DREAL Centre-Val de Loire",
     "slug": "direction-regionale-de-lenvironnement-de-lamenagement-et-du-logement-du-centre-val-de-loire",
-    "type": "DREAL"
+    "type": "DREAL/DRIEAT"
   },
   {
     "id": "5835d0a088ee3842afc65bb3",
     "name": "DREAL Bourgogne-Franche-Comté",
     "slug": "direction-regionale-de-lenvironnement-et-du-logement-bourgogne-franche-comte",
-    "type": "DREAL"
+    "type": "DREAL/DRIEAT"
+  },
+  {
+    "id": "6511605c27356de83427f4cb",
+    "name": "Direction régionale et interdépartementale de l’environnement, de l’aménagement et des transports d'Île-de-France",
+    "slug": "direction-regionale-et-interdepartementale-de-lenvironnement-de-lamenagement-et-des-transports-1",
+    "type": "DREAL/DRIEAT"
   },
   {
     "id": "5891a8fc88ee384a7c9b81a4",
     "name": "DREAL Corse",
     "slug": "dreal-corse",
-    "type": "DREAL"
+    "type": "DREAL/DRIEAT"
   },
   {
     "id": "5883d10488ee3810d19b81e3",
     "name": "DREAL Grand Est",
     "slug": "dreal-grand-est",
-    "type": "DREAL"
+    "type": "DREAL/DRIEAT"
   },
   {
     "id": "5891a2f188ee3840059b81a4",
     "name": "DREAL Hauts-de-France",
     "slug": "dreal-hauts-de-france",
-    "type": "DREAL"
+    "type": "DREAL/DRIEAT"
   },
   {
     "id": "5891ab1688ee384eb89b81a4",
     "name": "DREAL Provence-Alpes-Côte d'Azur",
     "slug": "dreal-provence-alpes-cote-dazur",
-    "type": "DREAL"
+    "type": "DREAL/DRIEAT"
   },
   {
     "id": "60240cd536ca1c415a3053a2",
@@ -789,7 +795,7 @@
     "id": "5ddc086f634f41190d4c1006",
     "name": "Géo2France",
     "slug": "geo2france",
-    "type": "DREAL"
+    "type": "DREAL/DRIEAT"
   },
   {
     "id": "56c44eb7c751df689e6c6de0",
