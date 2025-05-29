@@ -20,8 +20,7 @@ def check_sync(*universe: Path, fail_on_errors: bool = False):
         conf.update(yaml.safe_load(u.read_text()))
 
     url = conf['api']['url']
-    token = os.getenv("DATAGOUV_API_KEY", conf['api']['token'])
-    api = ApiHelper(url, token, fail_on_errors=fail_on_errors, dry_run=True)
+    api = ApiHelper(url, "no-token-needed", fail_on_errors=fail_on_errors, dry_run=True)
 
     grist_orgs = get_grist_orgs(conf['grist_url'], conf['env'])
     grist_orgs = sorted(grist_orgs, key=lambda o: o.slug)
@@ -45,7 +44,7 @@ def check_sync(*universe: Path, fail_on_errors: bool = False):
             print(f"✅ ({datasets_w_es}) — {org_name}")
         else:
             has_errors += 1
-            print(f"❌ ({datasets_wo_es} / {datasets_w_es}) — {org_name}", file=sys.stderr)
+            print(f"❌ ({datasets_w_es} / {datasets_wo_es}) — {org_name}", file=sys.stderr)
 
     if has_errors:
         print(f"\n{has_errors} organizations are NOT in sync.", file=sys.stderr)
