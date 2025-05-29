@@ -108,6 +108,12 @@ class ApiHelper:
         r.raise_for_status()
         return r.json()
 
+    def get_topic_id(self, topic_slug: str) -> str:
+        url = f"{self.base_url}/api/2/topics/{topic_slug}/"
+        r = session.get(url)
+        r.raise_for_status()
+        return r.json()['id']
+
     def get_organization_datasets(self, org: str):
         url = f"{self.base_url}/api/1/organizations/{org}/datasets/?page_size=1000"
         xfields = 'data{id,archived,deleted,private,extras{geop:dataset_id}}'
@@ -115,6 +121,12 @@ class ApiHelper:
                           if not bool(d.get('archived') or d.get('deleted')
                                       or d.get('private') or d.get('extras'))}
         return self.get_datasets(url, func, xfields=xfields)
+
+    def get_topic_datasets_count(self, topic_id: str, org_id: str, use_es: bool = False):
+        url = f"{self.base_url}/api/2/datasets{'/search' if use_es else ''}/?topic={topic_id}&organization={org_id}&page_size=1"
+        r = session.get(url)
+        r.raise_for_status()
+        return r.json()["total"]
 
     def get_topic_datasets_elements(self, topic: str) -> list[tuple[str, str]]:
         elements = []
