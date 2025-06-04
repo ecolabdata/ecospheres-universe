@@ -12,9 +12,21 @@
     "type": ""
   },
   {
+    "id": "634916955ef1b4d57ca08835",
+    "name": "Agence de l'eau Seine-Normandie",
+    "slug": "agence-de-leau-seine-normandie-1",
+    "type": ""
+  },
+  {
     "id": "5901f4dfc751df412e7bb92d",
     "name": "Agence nationale de la cohésion des territoires",
     "slug": "agence-nationale-de-la-cohesion-des-territoires",
+    "type": ""
+  },
+  {
+    "id": "62da6837cde1491f3727cdb2",
+    "name": "Agence Nationale de l'Habitat",
+    "slug": "agence-nationale-de-lhabitat",
     "type": ""
   },
   {
@@ -36,6 +48,12 @@
     "type": ""
   },
   {
+    "id": "59a538b688ee386b121578b9",
+    "name": "Atmo Auvergne-Rhône-Alpes",
+    "slug": "atmo-auvergne-rhone-alpes",
+    "type": ""
+  },
+  {
     "id": "5ddbf5ff6f444103e11e9d3d",
     "name": "Atmo Bourgogne-Franche-Comté",
     "slug": "atmo-bourgogne-franche-comte",
@@ -54,7 +72,7 @@
     "type": ""
   },
   {
-    "id": "6324292281b8284650abaa1b",
+    "id": "66601e784637c6bfa87b06ca",
     "name": "Bureau de Recherches Géologiques et Minières",
     "slug": "bureau-de-recherches-geologiques-et-minieres",
     "type": ""
@@ -205,7 +223,7 @@
   },
   {
     "id": "58aeea3188ee3819199f6798",
-    "name": "DDT Maine-et-Loire",
+    "name": "DDT de Maine-et-Loire",
     "slug": "ddt-maine-et-loire",
     "type": ""
   },
@@ -219,6 +237,12 @@
     "id": "58aeed0f88ee381f26e6e756",
     "name": "DDT Nièvre",
     "slug": "ddt-nievre",
+    "type": ""
+  },
+  {
+    "id": "58aeed8088ee3820e86bd1f3",
+    "name": "DDT Oise",
+    "slug": "ddt-oise",
     "type": ""
   },
   {
@@ -313,7 +337,7 @@
   },
   {
     "id": "58aec08788ee38561ae40f54",
-    "name": "DDTM Haute-Corse",
+    "name": "DDT Haute-Corse",
     "slug": "ddtm-haute-corse",
     "type": ""
   },
@@ -403,7 +427,7 @@
   },
   {
     "id": "558e9c3ec751df75fea453c7",
-    "name": "Direction Départementale des Territoires de la Marne",
+    "name": "Direction Départementale des Territoires de la Marne (DDT51)",
     "slug": "direction-departementale-des-territoires-de-la-marne",
     "type": ""
   },
@@ -481,7 +505,7 @@
   },
   {
     "id": "558dc1c0c751df341aa453b9",
-    "name": "Direction Départementale des Territoires des Alpes de Haute-Provence",
+    "name": "Direction Départementale des Territoires des Alpes-de-Haute-Provence",
     "slug": "direction-departementale-des-territoires-des-alpes-de-haute-provence",
     "type": ""
   },
@@ -553,7 +577,7 @@
   },
   {
     "id": "558a7f99c751df760ba453bf",
-    "name": "Direction Départementale des Territoires du Val d'Oise",
+    "name": "Direction Départementale des Territoires du Val-d'Oise",
     "slug": "direction-departementale-des-territoires-du-val-doise",
     "type": ""
   },
@@ -660,6 +684,12 @@
     "type": ""
   },
   {
+    "id": "5891a8fc88ee384a7c9b81a4",
+    "name": "DREAL Corse",
+    "slug": "dreal-corse",
+    "type": ""
+  },
+  {
     "id": "5883d10488ee3810d19b81e3",
     "name": "DREAL Grand Est",
     "slug": "dreal-grand-est",
@@ -708,6 +738,12 @@
     "type": ""
   },
   {
+    "id": "63ea4747c2e5458da3b97b35",
+    "name": "Engie Mobilités Electriques",
+    "slug": "engie-mobilites-electriques",
+    "type": ""
+  },
+  {
     "id": "5abca8d588ee386ee6ece479",
     "name": "Point d'Accès National transport.data.gouv.fr",
     "slug": "equipe-transport-data-gouv-fr",
@@ -717,6 +753,12 @@
     "id": "5eb035fd32d114765d6e8389",
     "name": "Fédération des Parcs Naturels Régionaux de France",
     "slug": "federation-des-parcs-naturels-regionaux-de-france",
+    "type": ""
+  },
+  {
+    "id": "5ddc086f634f41190d4c1006",
+    "name": "Géo2France",
+    "slug": "geo2france",
     "type": ""
   },
   {
@@ -732,6 +774,12 @@
     "type": ""
   },
   {
+    "id": "568e5e9488ee38033aaf0bf4",
+    "name": "Île-de-France Mobilités",
+    "slug": "ile-de-france-mobilites",
+    "type": ""
+  },
+  {
     "id": "54f461f8c751df0f88882844",
     "name": "Institut français de recherche pour l'exploitation de la mer (IFREMER)",
     "slug": "institut-francais-de-recherche-pour-lexploitation-de-la-mer",
@@ -739,7 +787,7 @@
   },
   {
     "id": "534fff80a3a7292c64a77e41",
-    "name": "Institut National de l'Information Géographique et Forestière",
+    "name": "Institut national de l'information géographique et forestière",
     "slug": "institut-national-de-l-information-geographique-et-forestiere",
     "type": ""
   },
@@ -798,6 +846,12 @@
     "type": ""
   },
   {
+    "id": "65b916b3d12193d250fedb69",
+    "name": "OFFICE PUBLIC DE L'HABITAT DES LANDES",
+    "slug": "office-public-de-lhabitat-des-landes",
+    "type": ""
+  },
+  {
     "id": "5e874ace3af8a02435889f1b",
     "name": "Oise Mobilité - Syndicat mixte des transports collectifs de l'Oise",
     "slug": "oise-mobilite-syndicat-mixte-des-transports-collectifs-de-loise",
@@ -807,6 +861,12 @@
     "id": "5a0f0384c751df5f68d855b9",
     "name": "Open Data Réseaux Énergies",
     "slug": "open-data-reseaux-energies-1",
+    "type": ""
+  },
+  {
+    "id": "5bcee3028b4c4135155f881c",
+    "name": "Parc & Géoparc Normandie-Maine",
+    "slug": "parc-geoparc-normandie-maine",
     "type": ""
   },
   {
@@ -858,6 +918,18 @@
     "type": ""
   },
   {
+    "id": "655e13af657b1d085c6a9e90",
+    "name": "Parcs nationaux de France",
+    "slug": "parcs-nationaux-de-france",
+    "type": ""
+  },
+  {
+    "id": "63d2af46663cff0dff096cf3",
+    "name": "Parcs naturels régionaux de Provence-Alpes-Côte d'Azur",
+    "slug": "parcs-naturels-regionaux-de-provence-alpes-cote-dazur",
+    "type": ""
+  },
+  {
     "id": "534fffa6a3a7292c64a780b7",
     "name": "Régie autonome des transports parisiens (RATP)",
     "slug": "regie-autonome-des-transports-parisiens-ratp",
@@ -867,12 +939,6 @@
     "id": "55f03e1088ee384bc1a46ec1",
     "name": "Réseau de Transport d'Electricité",
     "slug": "reseau-de-transport-delectricite",
-    "type": ""
-  },
-  {
-    "id": "65df5d4a04b5dff5a965e2fd",
-    "name": "RNB",
-    "slug": "rnb",
     "type": ""
   },
   {
@@ -895,8 +961,14 @@
   },
   {
     "id": "534fffb1a3a7292c64a7811f",
-    "name": "Société du Grand Paris",
+    "name": "Société des grands projets",
     "slug": "societe-du-grand-paris",
+    "type": ""
+  },
+  {
+    "id": "6380a35b9f35ddce103462cc",
+    "name": "Syndicat Mixte des Milieux Aquatiques et des Rivières de l'Aude",
+    "slug": "syndicat-mixte-des-milieux-aquatiques-et-des-rivieres-de-laude",
     "type": ""
   },
   {
@@ -906,9 +978,21 @@
     "type": ""
   },
   {
+    "id": "5c10d7b38b4c413b777a3fa6",
+    "name": "Syndicat mixte EPTB Meurthe Madon",
+    "slug": "syndicat-mixte-eptb-meurthe-madon",
+    "type": ""
+  },
+  {
     "id": "534fffb2a3a7292c64a78123",
     "name": "Système d'Information sur l'Eau",
     "slug": "systeme-d-information-sur-l-eau",
+    "type": ""
+  },
+  {
+    "id": "653130edb6223421ef195862",
+    "name": "Système d'information sur la biodiversité",
+    "slug": "systeme-dinformation-sur-la-biodiversite",
     "type": ""
   }
 ]
