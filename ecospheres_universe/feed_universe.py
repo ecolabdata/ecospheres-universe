@@ -165,11 +165,10 @@ class ApiHelper:
 
     @elapsed
     def delete_all_topic_elements(self, topic):
-        url = f"{self.base_url}/api/2/topics/{topic}/"
+        url = f"{self.base_url}/api/2/topics/{topic}/elements/"
         if not self.dry_run:
             headers = {'Content-Type': 'application/json', 'X-API-KEY': self.token}
-            # FIXME: test this
-            session.put(url, data={"elements": []}, headers=headers).raise_for_status()
+            session.delete(url, headers=headers).raise_for_status()
 
 
 if __name__ == "__main__":
@@ -212,8 +211,6 @@ if __name__ == "__main__":
     t_all = time.time()
     try:
         verbose(f"Getting existing datasets for topic '{topic_slug}'")
-        existing_elements = api.get_topic_datasets_elements(topic_slug)
-
         orgs: list[Organization] = []
 
         for org in grist_orgs:
@@ -252,6 +249,7 @@ if __name__ == "__main__":
 
             new_datasets += datasets
 
+        existing_elements = api.get_topic_datasets_elements(topic_slug)
         additions = list(set(new_datasets) - set(e[1] for e in existing_elements))
         removals = list(set(e[1] for e in existing_elements) - set(new_datasets))
         if len(removals) > REMOVALS_THRESHOLD:
