@@ -23,8 +23,8 @@ def verbose(*args, **kwargs):
 
 
 class ElementClass(Enum):
-    DATASET = "Dataset"
-    API = "Dataservice"
+    Dataset = "datasets"
+    Dataservice = "dataservices"
 
 
 class Organization(NamedTuple):
@@ -128,7 +128,7 @@ class ApiHelper:
         return r.json()['id']
 
     def get_organization_objects(self, org_id: str, element_class: ElementClass) -> list[str]:
-        url = f"{self.base_url}/api/2/{element_class.value.lower()}s/search/?organization={org_id}&page_size=1000"
+        url = f"{self.base_url}/api/2/{element_class.value}/search/?organization={org_id}&page_size=1000"
         xfields = 'data{id,archived,deleted,private,extras{geop:dataset_id}}'
         def filter_objects(c):
             return {
@@ -151,7 +151,7 @@ class ApiHelper:
 
     def get_topic_elements(self, topic: str, element_class: ElementClass) -> list[ElementJoin]:
         elements = []
-        url = f"{self.base_url}/api/2/topics/{topic}/elements/?class={element_class.value}&page_size=1000"
+        url = f"{self.base_url}/api/2/topics/{topic}/elements/?class={element_class.name}&page_size=1000"
         while True:
             r = session.get(url)
             r.raise_for_status()
@@ -166,7 +166,7 @@ class ApiHelper:
     def put_topic_elements(self, topic, element_class: ElementClass, datasets):
         url = f"{self.base_url}/api/2/topics/{topic}/elements/"
         headers = {"Content-Type": "application/json", "X-API-KEY": self.token}
-        data = [{"element": {"class": element_class.value, "id": d}} for d in datasets]
+        data = [{"element": {"class": element_class.name, "id": d}} for d in datasets]
         if not self.dry_run:
             session.post(url, json=data, headers=headers).raise_for_status()
         return datasets
@@ -261,7 +261,7 @@ if __name__ == "__main__":
         for element_class in ElementClass:
             new_objects = []
             for org in orgs:
-                verbose(f"Fetching {element_class.value}s for organization '{org.slug}'...")
+                verbose(f"Fetching {element_class.name} for organization '{org.slug}'...")
                 objects = api.get_organization_objects(org.id, element_class)
                 if not objects and not args.keep_empty:
                     verbose(f"Skipping empty organization '{org.slug}'")
@@ -275,20 +275,20 @@ if __name__ == "__main__":
             removals = list(set(e.object_id for e in existing_elements) - set(new_objects))
             if len(removals) > REMOVALS_THRESHOLD:
                 raise Exception(f"Too many removals ({len(removals)}), aborting")
-            print(f"Feeding {len(additions)} {element_class.value}s...")
+            print(f"Feeding {len(additions)} {element_class.value}...")
             for batch in batched(additions, 1000):
                 api.put_topic_elements(topic_slug, element_class, batch)
-            print(f"Removing {len(removals)} {element_class.value}s...")
+            print(f"Removing {len(removals)} {element_class.value}...")
             elements_removals = [e.element_id for e in existing_elements if e.object_id in removals]
             api.delete_topic_elements(topic_slug, elements_removals)
 
     finally:
         print(f"Elapsed: {time.time() - t_all:.2f} s")
         for element_class in ElementClass:
-            print(f"Total count {element_class.value}s: {t_count[element_class]}")
+            print(f"Total count {element_class.value}: {t_count[element_class]}")
 
     for element_class in ElementClass:
-        filename = f"organizations-{element_class.value.lower()}s-{conf['env']}.json"
+        filename = f"organizations-{element_class.value}-{conf['env']}.json"
         print(f"Generating output file {filename}...")
         with open(f"dist/{filename}", "w") as f:
             json.dump([o._asdict() for o in active_orgs[element_class]], f, indent=2, ensure_ascii=False)
