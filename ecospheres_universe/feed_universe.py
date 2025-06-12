@@ -31,6 +31,11 @@ class GristOrganization(NamedTuple):
     type: str
 
 
+class DatasetElementJoin(NamedTuple):
+    element_id: str
+    dataset_id: str
+
+
 def elapsed_and_count(func):
     @functools.wraps(func)
     def wrapper_decorator(*args, **kwargs):
@@ -122,20 +127,20 @@ class ApiHelper:
                                       or d.get('private') or d.get('extras'))}
         return self.get_datasets(url, func, xfields=xfields)
 
-    def get_topic_datasets_count(self, topic_id: str, org_id: str, use_es: bool = False):
-        url = f"{self.base_url}/api/2/datasets{'/search' if use_es else ''}/?topic={topic_id}&organization={org_id}&page_size=1"
+    def get_topic_datasets_count(self, topic_id: str, org_id: str, use_search: bool = False):
+        url = f"{self.base_url}/api/2/datasets{'/search' if use_search else ''}/?topic={topic_id}&organization={org_id}&page_size=1"
         r = session.get(url)
         r.raise_for_status()
         return r.json()["total"]
 
-    def get_topic_datasets_elements(self, topic: str) -> list[tuple[str, str]]:
+    def get_topic_datasets_elements(self, topic: str) -> list[DatasetElementJoin]:
         elements = []
         url = f"{self.base_url}/api/2/topics/{topic}/elements/?class=Dataset&page_size=1000"
         while True:
             r = session.get(url)
             r.raise_for_status()
             c = r.json()
-            elements.extend([(elt['id'], elt['element']['id']) for elt in c['data']])
+            elements.extend([DatasetElementJoin(element_id=elt['id'], dataset_id=elt['element']['id']) for elt in c['data']])
             url = c.get('next_page')
             if not url:
                 break
@@ -250,15 +255,15 @@ if __name__ == "__main__":
             new_datasets += datasets
 
         existing_elements = api.get_topic_datasets_elements(topic_slug)
-        additions = list(set(new_datasets) - set(e[1] for e in existing_elements))
-        removals = list(set(e[1] for e in existing_elements) - set(new_datasets))
+        additions = list(set(new_datasets) - set(e.dataset_id for e in existing_elements))
+        removals = list(set(e.dataset_id for e in existing_elements) - set(new_datasets))
         if len(removals) > REMOVALS_THRESHOLD:
             raise Exception(f"Too many removals ({len(removals)}), aborting")
         print(f"Feeding {len(additions)} datasets...")
         for batch in batched(additions, 1000):
             api.put_topic_datasets(topic_slug, batch)
         print(f"Removing {len(removals)} datasets...")
-        elements_removals = [e[0] for e in existing_elements if e[1] in removals]
+        elements_removals = [e.element_id for e in existing_elements if e.dataset_id in removals]
         api.delete_topic_elements(topic_slug, elements_removals)
 
     finally:

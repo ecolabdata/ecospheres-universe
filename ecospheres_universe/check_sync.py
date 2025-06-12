@@ -2,6 +2,7 @@ import sys
 import yaml
 
 from pathlib import Path
+from typing import NamedTuple
 
 import requests
 
@@ -10,8 +11,13 @@ from minicli import cli, run
 from ecospheres_universe.feed_universe import ApiHelper, get_grist_orgs
 
 
+class Organization(NamedTuple):
+    id: str
+    name: str
+
+
 @cli
-def check_sync(*universe: Path, fail_on_errors: bool = False):
+def check_sync(*universe: Path):
     print("Running check of universe sync...")
 
     conf = {}
@@ -19,7 +25,7 @@ def check_sync(*universe: Path, fail_on_errors: bool = False):
         conf.update(yaml.safe_load(u.read_text()))
 
     url = conf['api']['url']
-    api = ApiHelper(url, "no-token-needed", fail_on_errors=fail_on_errors, dry_run=True)
+    api = ApiHelper(url, "no-token-needed", fail_on_errors=False, dry_run=True)
 
     grist_orgs = get_grist_orgs(conf['grist_url'], conf['env'])
     grist_orgs = sorted(grist_orgs, key=lambda o: o.slug)
@@ -27,26 +33,26 @@ def check_sync(*universe: Path, fail_on_errors: bool = False):
     topic_slug = conf['topic']
     topic_id = api.get_topic_id(topic_slug)
 
-    orgs = set()
+    orgs: set[Organization] = set()
     for org in grist_orgs:
         try:
             api_org = api.get_organization(org.slug)
-            orgs.add((api_org["id"], api_org["name"]))
+            orgs.add(Organization(id=api_org["id"], name=api_org["name"]))
         except requests.exceptions.HTTPError:
             print(f"Unknown organization '{org.slug}'", file=sys.stderr)
 
-    has_errors = 0
-    for org_id, org_name in orgs:
-        datasets_wo_es = api.get_topic_datasets_count(topic_id, org_id, use_es=False)
-        datasets_w_es = api.get_topic_datasets_count(topic_id, org_id, use_es=True)
+    nb_errors = 0
+    for org in orgs:
+        datasets_wo_es = api.get_topic_datasets_count(topic_id, org.id, use_search=False)
+        datasets_w_es = api.get_topic_datasets_count(topic_id, org.id, use_search=True)
         if datasets_w_es == datasets_wo_es:
-            print(f"✅ ({datasets_w_es}) — {org_name}")
+            print(f"✅ ({datasets_w_es}) — {org.name}")
         else:
-            has_errors += 1
-            print(f"❌ ({datasets_w_es} / {datasets_wo_es}) — {org_name}", file=sys.stderr)
+            nb_errors += 1
+            print(f"❌ ({datasets_w_es} / {datasets_wo_es}) — {org.name}", file=sys.stderr)
 
-    if has_errors:
-        print(f"\n{has_errors} organizations are NOT in sync.", file=sys.stderr)
+    if nb_errors:
+        print(f"\n{nb_errors} organizations are NOT in sync.", file=sys.stderr)
         sys.exit(1)
 
 
