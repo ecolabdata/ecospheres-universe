@@ -165,9 +165,9 @@ class ApiHelper:
     def put_topic_elements(self, topic, element_class: ElementClass, datasets):
         url = f"{self.base_url}/api/2/topics/{topic}/elements/"
         headers = {"Content-Type": "application/json", "X-API-KEY": self.token}
-        data = json.dumps([{"element": {"class": element_class.value, "id": d}} for d in datasets])
+        data = [{"element": {"class": element_class.value, "id": d}} for d in datasets]
         if not self.dry_run:
-            session.post(url, data=data, headers=headers).raise_for_status()
+            session.post(url, json=data, headers=headers).raise_for_status()
         return datasets
 
     @elapsed
