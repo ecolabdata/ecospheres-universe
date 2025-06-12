@@ -7,6 +7,7 @@ import sys
 import time
 
 from enum import Enum
+from shutil import copyfile
 from typing import NamedTuple
 
 import requests
@@ -227,7 +228,7 @@ if __name__ == "__main__":
     if args.dry_run:
         print("*** DRY RUN ***")
 
-    t_count = {element_class.name: 0 for element_class in ElementClass}
+    t_count = {element_class: 0 for element_class in ElementClass}
     t_all = time.time()
     try:
         verbose(f"Getting existing datasets for topic '{topic_slug}'")
@@ -254,7 +255,7 @@ if __name__ == "__main__":
             print(f"Removing ALL elements from topic '{topic_slug}'")
             api.delete_all_topic_elements(topic_slug)
 
-        active_orgs: set[Organization] = set()
+        active_orgs: dict[ElementClass, set[Organization]] = {element_class: set() for element_class in ElementClass}
 
         print(f"Processing topic '{topic_slug}'")
         for element_class in ElementClass:
@@ -265,8 +266,8 @@ if __name__ == "__main__":
                 if not objects and not args.keep_empty:
                     verbose(f"Skipping empty organization '{org.slug}'")
                     continue
-                t_count[element_class.name] += len(objects)
-                active_orgs.add(org)
+                t_count[element_class] += len(objects)
+                active_orgs[element_class].add(org)
                 new_objects += objects
 
             existing_elements = api.get_topic_elements(topic_slug, element_class)
@@ -284,12 +285,15 @@ if __name__ == "__main__":
     finally:
         print(f"Elapsed: {time.time() - t_all:.2f} s")
         for element_class in ElementClass:
-            print(f"Total count {element_class.value}s: {t_count[element_class.name]}")
+            print(f"Total count {element_class.value}s: {t_count[element_class]}")
 
-    filename = f"organizations-{conf['env']}.json"
-    print(f"Generating output file {filename}...")
-    # TODO: we might need a file foreach ElementClass
-    with open(f"dist/{filename}", "w") as f:
-        json.dump([o._asdict() for o in active_orgs], f, indent=2, ensure_ascii=False)
+    for element_class in ElementClass:
+        filename = f"organizations-{element_class.value.lower()}s-{conf['env']}.json"
+        print(f"Generating output file {filename}...")
+        with open(f"dist/{filename}", "w") as f:
+            json.dump([o._asdict() for o in active_orgs[element_class]], f, indent=2, ensure_ascii=False)
+
+    # retrocompatibility
+    copyfile(f"dist/organizations-datasets-{conf['env']}.json", f"dist/organizations-{conf['env']}.json")
 
     print(f"Done at {datetime.datetime.now():%c}")
