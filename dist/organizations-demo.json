@@ -156,6 +156,12 @@
     "type": ""
   },
   {
+    "id": "58aeea3188ee3819199f6798",
+    "name": "DDT de Maine-et-Loire",
+    "slug": "ddt-de-maine-et-loire",
+    "type": ""
+  },
+  {
     "id": "55883748c751df7971a453bc",
     "name": "Direction Départementale des Territoires de Meurthe-et-Moselle",
     "slug": "ddt-de-meurthe-et-moselle",
@@ -177,6 +183,12 @@
     "id": "58aed7b188ee38779b2b7560",
     "name": "DDT Drôme",
     "slug": "ddt-drome",
+    "type": ""
+  },
+  {
+    "id": "58aec08788ee38561ae40f54",
+    "name": "DDT Haute-Corse",
+    "slug": "ddt-haute-corse",
     "type": ""
   },
   {
@@ -219,12 +231,6 @@
     "id": "58aee8f488ee38152cb276f1",
     "name": "DDT Lot",
     "slug": "ddt-lot",
-    "type": ""
-  },
-  {
-    "id": "58aeea3188ee3819199f6798",
-    "name": "DDT de Maine-et-Loire",
-    "slug": "ddt-maine-et-loire",
     "type": ""
   },
   {
@@ -330,12 +336,6 @@
     "type": ""
   },
   {
-    "id": "58aec08788ee38561ae40f54",
-    "name": "DDT Haute-Corse",
-    "slug": "ddtm-haute-corse",
-    "type": ""
-  },
-  {
     "id": "58aeeaef88ee381b3633b25b",
     "name": "DDTM Manche",
     "slug": "ddtm-manche",
@@ -410,7 +410,7 @@
   {
     "id": "558e9c3ec751df75fea453c7",
     "name": "Direction Départementale des Territoires de la Marne (DDT51)",
-    "slug": "direction-departementale-des-territoires-de-la-marne",
+    "slug": "direction-departementale-des-territoires-de-la-marne-ddt51",
     "type": ""
   },
   {
@@ -636,6 +636,12 @@
     "type": ""
   },
   {
+    "id": "6511605c27356de83427f4cb",
+    "name": "Direction régionale et interdépartementale de l’environnement, de l’aménagement et des transports d'Île-de-France",
+    "slug": "direction-regionale-et-interdepartementale-de-lenvironnement-de-lamenagement-et-des-transports-dile-de-france",
+    "type": ""
+  },
+  {
     "id": "5a83f81fc751df6f8573eb8a",
     "name": "Do.TeRR . Géo-Centre",
     "slug": "do-terr-geo-centre",
@@ -750,15 +756,15 @@
     "type": ""
   },
   {
-    "id": "534fff80a3a7292c64a77e41",
-    "name": "Institut national de l'information géographique et forestière",
-    "slug": "institut-national-de-l-information-geographique-et-forestiere",
-    "type": ""
-  },
-  {
     "id": "56e02813c751df1c1a1ffccd",
     "name": "Institut National de l'Environnement Industriel et des Risques",
     "slug": "institut-national-de-lenvironnement-industriel-et-des-risques",
+    "type": ""
+  },
+  {
+    "id": "534fff80a3a7292c64a77e41",
+    "name": "Institut national de l'information géographique et forestière",
+    "slug": "institut-national-de-linformation-geographique-et-forestiere",
     "type": ""
   },
   {
@@ -926,7 +932,7 @@
   {
     "id": "534fffb1a3a7292c64a7811f",
     "name": "Société des grands projets",
-    "slug": "societe-du-grand-paris",
+    "slug": "societe-des-grands-projets-1",
     "type": ""
   },
   {
