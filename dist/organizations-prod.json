@@ -204,6 +204,12 @@
     "type": "DDT"
   },
   {
+    "id": "58aeea3188ee3819199f6798",
+    "name": "DDT de Maine-et-Loire",
+    "slug": "ddt-de-maine-et-loire",
+    "type": "DDT"
+  },
+  {
     "id": "55883748c751df7971a453bc",
     "name": "Direction Départementale des Territoires de Meurthe-et-Moselle",
     "slug": "ddt-de-meurthe-et-moselle",
@@ -228,6 +234,12 @@
     "type": "DDT"
   },
   {
+    "id": "58aec08788ee38561ae40f54",
+    "name": "DDT Haute-Corse",
+    "slug": "ddt-haute-corse",
+    "type": "DDTM"
+  },
+  {
     "id": "58aedcab88ee3803c23a38c8",
     "name": "DDT Haute-Garonne",
     "slug": "ddt-haute-garonne",
@@ -243,12 +255,6 @@
     "id": "58aef76b88ee3830af08f4d9",
     "name": "DDT Haute-Vienne",
     "slug": "ddt-haute-vienne",
-    "type": "DDT"
-  },
-  {
-    "id": "58adb1c088ee38170d451e0d",
-    "name": "Direction Départementale des Territoires des Hautes-Alpes",
-    "slug": "ddt-hautes-alpes",
     "type": "DDT"
   },
   {
@@ -273,12 +279,6 @@
     "id": "58aee8f488ee38152cb276f1",
     "name": "DDT Lot",
     "slug": "ddt-lot",
-    "type": "DDT"
-  },
-  {
-    "id": "58aeea3188ee3819199f6798",
-    "name": "DDT de Maine-et-Loire",
-    "slug": "ddt-maine-et-loire",
     "type": "DDT"
   },
   {
@@ -390,18 +390,6 @@
     "type": "DDTM"
   },
   {
-    "id": "58aec08788ee38561ae40f54",
-    "name": "DDT Haute-Corse",
-    "slug": "ddtm-haute-corse",
-    "type": "DDTM"
-  },
-  {
-    "id": "58aede6188ee3805dde1ae88",
-    "name": "Direction Départementale des Territoires et de la Mer de l'Hérault",
-    "slug": "ddtm-herault",
-    "type": "DDTM"
-  },
-  {
     "id": "58aeeaef88ee381b3633b25b",
     "name": "DDTM Manche",
     "slug": "ddtm-manche",
@@ -488,7 +476,7 @@
   {
     "id": "558e9c3ec751df75fea453c7",
     "name": "Direction Départementale des Territoires de la Marne (DDT51)",
-    "slug": "direction-departementale-des-territoires-de-la-marne",
+    "slug": "direction-departementale-des-territoires-de-la-marne-ddt51",
     "type": "DDT"
   },
   {
@@ -561,6 +549,12 @@
     "id": "558dc1c0c751df341aa453b9",
     "name": "Direction Départementale des Territoires des Alpes-de-Haute-Provence",
     "slug": "direction-departementale-des-territoires-des-alpes-de-haute-provence",
+    "type": "DDT"
+  },
+  {
+    "id": "58adb1c088ee38170d451e0d",
+    "name": "Direction Départementale des Territoires des Hautes-Alpes",
+    "slug": "direction-departementale-des-territoires-des-hautes-alpes-1",
     "type": "DDT"
   },
   {
@@ -648,6 +642,12 @@
     "type": "DDT"
   },
   {
+    "id": "58aede6188ee3805dde1ae88",
+    "name": "Direction Départementale des Territoires et de la Mer de l'Hérault",
+    "slug": "direction-departementale-des-territoires-et-de-la-mer-de-lherault-1",
+    "type": "DDTM"
+  },
+  {
     "id": "5809b72788ee38380e13e4c7",
     "name": "Direction Départementale des Territoires et de la Mer de Loire-Atlantique",
     "slug": "direction-departementale-des-territoires-et-de-la-mer-de-loire-atlantique",
@@ -722,7 +722,13 @@
   {
     "id": "6511605c27356de83427f4cb",
     "name": "Direction régionale et interdépartementale de l’environnement, de l’aménagement et des transports d'Île-de-France",
-    "slug": "direction-regionale-et-interdepartementale-de-lenvironnement-de-lamenagement-et-des-transports-1",
+    "slug": "direction-regionale-et-interdepartementale-de-lenvironnement-de-lamenagement-et-des-transports-dile-de-france",
+    "type": "DREAL/DRIEAT"
+  },
+  {
+    "id": "5882a05d88ee3835c59b81a4",
+    "name": "DREAL Auvergne-Rhône-Alpes",
+    "slug": "dreal-auvergne-rhone-alpes-1",
     "type": "DREAL/DRIEAT"
   },
   {
@@ -828,12 +834,6 @@
     "type": "EPIC"
   },
   {
-    "id": "534fff80a3a7292c64a77e41",
-    "name": "Institut national de l'information géographique et forestière",
-    "slug": "institut-national-de-l-information-geographique-et-forestiere",
-    "type": "EPA"
-  },
-  {
     "id": "534fff80a3a7292c64a77e54",
     "name": "Institut national de l'origine et de la qualité (INAO)",
     "slug": "institut-national-de-l-origine-et-de-la-qualite-inao",
@@ -844,6 +844,12 @@
     "name": "Institut National de l'Environnement Industriel et des Risques",
     "slug": "institut-national-de-lenvironnement-industriel-et-des-risques",
     "type": "EPIC"
+  },
+  {
+    "id": "534fff80a3a7292c64a77e41",
+    "name": "Institut national de l'information géographique et forestière",
+    "slug": "institut-national-de-linformation-geographique-et-forestiere",
+    "type": "EPA"
   },
   {
     "id": "56e11c31c751df6b481ffccd",
@@ -1028,7 +1034,7 @@
   {
     "id": "534fffb1a3a7292c64a7811f",
     "name": "Société des grands projets",
-    "slug": "societe-du-grand-paris",
+    "slug": "societe-des-grands-projets-1",
     "type": "EPIC"
   },
   {
