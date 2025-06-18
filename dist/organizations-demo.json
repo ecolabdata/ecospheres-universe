@@ -318,6 +318,12 @@
     "type": ""
   },
   {
+    "id": "58aec2b188ee3859fed82c1c",
+    "name": "DDTM Côtes d'Armor",
+    "slug": "ddtm-cotes-darmor",
+    "type": ""
+  },
+  {
     "id": "58aedac788ee387b6dcadf8e",
     "name": "DDTM Finistère",
     "slug": "ddtm-finistere",
@@ -393,6 +399,12 @@
     "id": "56eed4d2c751df3308d6e93b",
     "name": "Direction Départementale des Territoires de Haute-Savoie",
     "slug": "direction-departementale-des-territoires-de-haute-savoie",
+    "type": ""
+  },
+  {
+    "id": "558bc11cc751df5bfda453ba",
+    "name": "Direction Départementale des Territoires de la Corrèze",
+    "slug": "direction-departementale-des-territoires-de-la-correze",
     "type": ""
   },
   {
