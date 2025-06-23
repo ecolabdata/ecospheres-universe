@@ -270,7 +270,6 @@ if __name__ == "__main__":
     topic_slug = conf['topic']
 
     grist_orgs = get_grist_orgs(conf['grist_url'], conf['env'])
-    grist_orgs = sorted(grist_orgs, key=lambda o: o.slug)
 
     if args.verbose:
         verbose = print
@@ -305,6 +304,8 @@ if __name__ == "__main__":
                 )
             except requests.exceptions.HTTPError:
                 print(f"Unknown organization '{org.slug}'", file=sys.stderr)
+
+        orgs = sorted(orgs, key=lambda o: o.name)
 
         print(f"Processing {len(orgs)} organizations...")
 
