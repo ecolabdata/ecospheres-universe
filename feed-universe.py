@@ -5,6 +5,7 @@ import json
 import os
 import sys
 import time
+import unicodedata
 
 from typing import NamedTuple
 
@@ -305,7 +306,8 @@ if __name__ == "__main__":
             except requests.exceptions.HTTPError:
                 print(f"Unknown organization '{org.slug}'", file=sys.stderr)
 
-        orgs = sorted(orgs, key=lambda o: o.name)
+        # sort by name, ignoring diacritics
+        orgs = sorted(orgs, key=lambda o: unicodedata.normalize("NFKD", o.name).encode("ascii", "ignore").decode("ascii"))
 
         print(f"Processing {len(orgs)} organizations...")
 

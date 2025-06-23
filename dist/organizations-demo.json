@@ -114,15 +114,15 @@
     "type": ""
   },
   {
-    "id": "58aec33a88ee3859f5f21deb",
-    "name": "DDT Creuse",
-    "slug": "ddt-creuse",
-    "type": ""
-  },
-  {
     "id": "58aec19a88ee385837ea9abe",
     "name": "DDT Côte-d'Or",
     "slug": "ddt-cote-dor",
+    "type": ""
+  },
+  {
+    "id": "58aec33a88ee3859f5f21deb",
+    "name": "DDT Creuse",
+    "slug": "ddt-creuse",
     "type": ""
   },
   {
@@ -450,15 +450,15 @@
     "type": ""
   },
   {
-    "id": "56eed4d2c751df3308d6e93b",
-    "name": "Direction Départementale des Territoires de Haute-Savoie",
-    "slug": "direction-departementale-des-territoires-de-haute-savoie",
-    "type": ""
-  },
-  {
     "id": "559d3913c751df33ec390bd7",
     "name": "Direction Départementale des Territoires de Haute-Saône",
     "slug": "direction-departementale-des-territoires-de-haute-saone",
+    "type": ""
+  },
+  {
+    "id": "56eed4d2c751df3308d6e93b",
+    "name": "Direction Départementale des Territoires de Haute-Savoie",
+    "slug": "direction-departementale-des-territoires-de-haute-savoie",
     "type": ""
   },
   {
@@ -696,12 +696,6 @@
     "type": ""
   },
   {
-    "id": "5a83f81fc751df6f8573eb8a",
-    "name": "Do.TeRR . Géo-Centre",
-    "slug": "do-terr-geo-centre",
-    "type": ""
-  },
-  {
     "id": "60240cd536ca1c415a3053a2",
     "name": "EDF Systèmes Energétiques Insulaires",
     "slug": "edf-systemes-energetiques-insulaires",
@@ -744,6 +738,12 @@
     "type": ""
   },
   {
+    "id": "568e5e9488ee38033aaf0bf4",
+    "name": "Île-de-France Mobilités",
+    "slug": "ile-de-france-mobilites",
+    "type": ""
+  },
+  {
     "id": "56e02813c751df1c1a1ffccd",
     "name": "Institut National de l'Environnement Industriel et des Risques",
     "slug": "institut-national-de-lenvironnement-industriel-et-des-risques",
@@ -768,6 +768,12 @@
     "type": ""
   },
   {
+    "id": "534fff8ba3a7292c64a77ed4",
+    "name": "Météo-France",
+    "slug": "meteo-france",
+    "type": ""
+  },
+  {
     "id": "534fff8fa3a7292c64a77f3d",
     "name": "Ministère de la Cohésion des territoires",
     "slug": "ministere-de-l-egalite-des-territoires-et-du-logement",
@@ -789,12 +795,6 @@
     "id": "55842c2bc751df66bba453b9",
     "name": "Muséum National d'Histoire Naturelle",
     "slug": "museum-national-dhistoire-naturelle",
-    "type": ""
-  },
-  {
-    "id": "534fff8ba3a7292c64a77ed4",
-    "name": "Météo-France",
-    "slug": "meteo-france",
     "type": ""
   },
   {
@@ -975,12 +975,6 @@
     "id": "653130edb6223421ef195862",
     "name": "Système d'information sur la biodiversité",
     "slug": "systeme-dinformation-sur-la-biodiversite",
-    "type": ""
-  },
-  {
-    "id": "568e5e9488ee38033aaf0bf4",
-    "name": "Île-de-France Mobilités",
-    "slug": "ile-de-france-mobilites",
     "type": ""
   }
 ]
