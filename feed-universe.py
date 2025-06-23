@@ -307,7 +307,7 @@ if __name__ == "__main__":
                 print(f"Unknown organization '{org.slug}'", file=sys.stderr)
 
         # sort by name, ignoring diacritics
-        orgs = sorted(orgs, key=lambda o: unicodedata.normalize("NFKD", o.name).encode("ascii", "ignore").decode("ascii"))
+        orgs = sorted(orgs, key=lambda o: unicodedata.normalize("NFKD", o.name).encode("ascii", "ignore").decode("ascii").lower())
 
         print(f"Processing {len(orgs)} organizations...")
 
