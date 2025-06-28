@@ -762,6 +762,12 @@
     "type": "DREAL/DRIEAT"
   },
   {
+    "id": "67884b4da4fca9c97bbef479",
+    "name": "Ecolab",
+    "slug": "ecolab-1",
+    "type": "Administration centrale"
+  },
+  {
     "id": "60240cd536ca1c415a3053a2",
     "name": "EDF Systèmes Energétiques Insulaires",
     "slug": "edf-systemes-energetiques-insulaires",
