@@ -744,6 +744,12 @@
     "type": "DREAL/DRIEAT"
   },
   {
+    "id": "584f145ec751df2062c0bb7e",
+    "name": "DREAL Nouvelle Aquitaine",
+    "slug": "dreal-nouvelle-aquitaine",
+    "type": "DREAL/DRIEAT"
+  },
+  {
     "id": "568e9657c751df5a92c664bc",
     "name": "DREAL Pays de la Loire",
     "slug": "dreal-pays-de-la-loire-direction-regionale-de-lenvironnement-de-lamenagement-et-du-logement-pays-de-la-loire",
