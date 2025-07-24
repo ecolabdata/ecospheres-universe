@@ -144,6 +144,12 @@
     "type": ""
   },
   {
+    "id": "55ae6ba688ee386c843ca28b",
+    "name": "DDT de l'Isère",
+    "slug": "direction-departementale-des-territoires-de-lisere",
+    "type": ""
+  },
+  {
     "id": "58837d8588ee3861b29b81af",
     "name": "DDT de la Loire",
     "slug": "ddt-de-la-loire",
@@ -531,6 +537,12 @@
     "id": "559d3813c751df392b390bd4",
     "name": "Direction Départementale des Territoires du Doubs",
     "slug": "direction-departementale-des-territoires-du-doubs",
+    "type": ""
+  },
+  {
+    "id": "55896c18c751df5864a453b9",
+    "name": "Direction Départementale des Territoires du Gers",
+    "slug": "direction-departementale-des-territoires-du-gers",
     "type": ""
   },
   {
