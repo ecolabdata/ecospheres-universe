@@ -1044,6 +1044,12 @@
     "type": "Autre"
   },
   {
+    "id": "681a1272bfa84b075f9531e1",
+    "name": "Service des données et études statistiques (SDES)",
+    "slug": "service-des-donnees-et-etudes-statistiques-sdes",
+    "type": "Administration centrale"
+  },
+  {
     "id": "534fffafa3a7292c64a78103",
     "name": "Shom",
     "slug": "shom",
