@@ -432,6 +432,12 @@
     "type": "DEAL"
   },
   {
+    "id": "648aab45548ff480a1815914",
+    "name": "DiaLog",
+    "slug": "dialog",
+    "type": "Administration centrale"
+  },
+  {
     "id": "565f741788ee380296e72046",
     "name": "Direction Départementale des Territoire du Puy-de-Dôme",
     "slug": "direction-departementale-des-territoire-du-puy-de-dome",
