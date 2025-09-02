@@ -1,17 +1,8 @@
-Starting at Wed May 28 05:28:00 2025
-Unknown organization 'agence-de-leau-seine-normandie-1'
-Unknown organization 'agence-nationale-de-lhabitat'
-Unknown organization 'engie-mobilites-electriques'
-Unknown organization 'office-public-de-lhabitat-des-landes'
-Unknown organization 'parc-geoparc-normandie-maine'
-Unknown organization 'parc-national-de-port-cros'
-Unknown organization 'parcs-nationaux-de-france'
-Unknown organization 'parcs-naturels-regionaux-de-provence-alpes-cote-dazur'
-Unknown organization 'systeme-dinformation-sur-la-biodiversite'
-Processing 167 organizations...
+Starting at Tue Sep  2 05:27:23 2025
+Processing 179 organizations...
 Processing topic 'univers-ecospheres'
-Feeding 1088 datasets...
-Removing 0 datasets...
-Total count: 25088, elapsed: 300.30 s
+Feeding 3 datasets...
+Removing 3 datasets...
+Total count: 28581, elapsed: 701.90 s
 Generating output file organizations-demo.json...
-Done at Wed May 28 05:33:01 2025
+Done at Tue Sep  2 05:39:05 2025

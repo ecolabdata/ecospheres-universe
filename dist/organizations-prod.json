@@ -12,15 +12,15 @@
     "type": "GIP"
   },
   {
-    "id": "534fff4ea3a7292c64a77cad",
-    "name": "Agence de l'eau Rhône-Méditerranée et Corse",
-    "slug": "agence-de-l-eau-rhone-mediterranee-et-corse",
-    "type": "EPA"
-  },
-  {
     "id": "55195b45c751df66ab057c91",
     "name": "Agence de l'eau Loire-Bretagne",
     "slug": "agence-de-leau-loire-bretagne",
+    "type": "EPA"
+  },
+  {
+    "id": "534fff4ea3a7292c64a77cad",
+    "name": "Agence de l'eau Rhône-Méditerranée et Corse",
+    "slug": "agence-de-l-eau-rhone-mediterranee-et-corse",
     "type": "EPA"
   },
   {
@@ -30,15 +30,15 @@
     "type": "EPA"
   },
   {
-    "id": "5901f4dfc751df412e7bb92d",
-    "name": "Agence nationale de la cohésion des territoires",
-    "slug": "agence-nationale-de-la-cohesion-des-territoires",
-    "type": "EPA"
-  },
-  {
     "id": "62da6837cde1491f3727cdb2",
     "name": "Agence Nationale de l'Habitat",
     "slug": "agence-nationale-de-lhabitat",
+    "type": "EPA"
+  },
+  {
+    "id": "5901f4dfc751df412e7bb92d",
+    "name": "Agence nationale de la cohésion des territoires",
+    "slug": "agence-nationale-de-la-cohesion-des-territoires",
     "type": "EPA"
   },
   {
@@ -174,6 +174,24 @@
     "type": "DDT"
   },
   {
+    "id": "5883648088ee38358d9b81a4",
+    "name": "DDT de l'Ain",
+    "slug": "ddt-de-lain",
+    "type": "DDT"
+  },
+  {
+    "id": "58837b3b88ee3861af9b81a7",
+    "name": "DDT de l'Ardèche",
+    "slug": "ddt-de-lardeche",
+    "type": "DDT"
+  },
+  {
+    "id": "55ae6ba688ee386c843ca28b",
+    "name": "DDT de l'Isère",
+    "slug": "direction-departementale-des-territoires-de-lisere",
+    "type": "DDT"
+  },
+  {
     "id": "58837d8588ee3861b29b81af",
     "name": "DDT de la Loire",
     "slug": "ddt-de-la-loire",
@@ -192,21 +210,9 @@
     "type": "DDT"
   },
   {
-    "id": "5883648088ee38358d9b81a4",
-    "name": "DDT de l'Ain",
-    "slug": "ddt-de-lain",
-    "type": "DDT"
-  },
-  {
-    "id": "58837b3b88ee3861af9b81a7",
-    "name": "DDT de l'Ardèche",
-    "slug": "ddt-de-lardeche",
-    "type": "DDT"
-  },
-  {
-    "id": "55883748c751df7971a453bc",
-    "name": "Direction Départementale des Territoires de Meurthe-et-Moselle",
-    "slug": "ddt-de-meurthe-et-moselle",
+    "id": "58aeea3188ee3819199f6798",
+    "name": "DDT de Maine-et-Loire",
+    "slug": "ddt-de-maine-et-loire",
     "type": "DDT"
   },
   {
@@ -228,6 +234,12 @@
     "type": "DDT"
   },
   {
+    "id": "58aec08788ee38561ae40f54",
+    "name": "DDT Haute-Corse",
+    "slug": "ddt-haute-corse",
+    "type": "DDTM"
+  },
+  {
     "id": "58aedcab88ee3803c23a38c8",
     "name": "DDT Haute-Garonne",
     "slug": "ddt-haute-garonne",
@@ -243,12 +255,6 @@
     "id": "58aef76b88ee3830af08f4d9",
     "name": "DDT Haute-Vienne",
     "slug": "ddt-haute-vienne",
-    "type": "DDT"
-  },
-  {
-    "id": "58adb1c088ee38170d451e0d",
-    "name": "Direction Départementale des Territoires des Hautes-Alpes",
-    "slug": "ddt-hautes-alpes",
     "type": "DDT"
   },
   {
@@ -273,12 +279,6 @@
     "id": "58aee8f488ee38152cb276f1",
     "name": "DDT Lot",
     "slug": "ddt-lot",
-    "type": "DDT"
-  },
-  {
-    "id": "58aeea3188ee3819199f6798",
-    "name": "DDT de Maine-et-Loire",
-    "slug": "ddt-maine-et-loire",
     "type": "DDT"
   },
   {
@@ -390,18 +390,6 @@
     "type": "DDTM"
   },
   {
-    "id": "58aec08788ee38561ae40f54",
-    "name": "DDT Haute-Corse",
-    "slug": "ddtm-haute-corse",
-    "type": "DDTM"
-  },
-  {
-    "id": "58aede6188ee3805dde1ae88",
-    "name": "Direction Départementale des Territoires et de la Mer de l'Hérault",
-    "slug": "ddtm-herault",
-    "type": "DDTM"
-  },
-  {
     "id": "58aeeaef88ee381b3633b25b",
     "name": "DDTM Manche",
     "slug": "ddtm-manche",
@@ -444,9 +432,27 @@
     "type": "DEAL"
   },
   {
+    "id": "648aab45548ff480a1815914",
+    "name": "DiaLog",
+    "slug": "dialog",
+    "type": "Administration centrale"
+  },
+  {
     "id": "565f741788ee380296e72046",
     "name": "Direction Départementale des Territoire du Puy-de-Dôme",
     "slug": "direction-departementale-des-territoire-du-puy-de-dome",
+    "type": "DDT"
+  },
+  {
+    "id": "55897427c751df54e9a453dd",
+    "name": "Direction Départementale des Territoires d'Eure-et-Loir",
+    "slug": "direction-departementale-des-territoires-deure-et-loir",
+    "type": "DDT"
+  },
+  {
+    "id": "55ae43f488ee38443d3ca288",
+    "name": "Direction Départementale des Territoires d'Indre-et-Loire",
+    "slug": "direction-departementale-des-territoires-dindre-et-loire",
     "type": "DDT"
   },
   {
@@ -465,36 +471,6 @@
     "id": "56eed4d2c751df3308d6e93b",
     "name": "Direction Départementale des Territoires de Haute-Savoie",
     "slug": "direction-departementale-des-territoires-de-haute-savoie",
-    "type": "DDT"
-  },
-  {
-    "id": "558bc11cc751df5bfda453ba",
-    "name": "Direction Départementale des Territoires de la Corrèze",
-    "slug": "direction-departementale-des-territoires-de-la-correze",
-    "type": "DDT"
-  },
-  {
-    "id": "565f746a88ee3802aee72046",
-    "name": "Direction Départementale des Territoires de la Haute-Loire",
-    "slug": "direction-departementale-des-territoires-de-la-haute-loire",
-    "type": "DDT"
-  },
-  {
-    "id": "558a7e80c751df627ca453b9",
-    "name": "Direction Départementale des Territoires de la Lozère",
-    "slug": "direction-departementale-des-territoires-de-la-lozere",
-    "type": "DDT"
-  },
-  {
-    "id": "558e9c3ec751df75fea453c7",
-    "name": "Direction Départementale des Territoires de la Marne (DDT51)",
-    "slug": "direction-departementale-des-territoires-de-la-marne",
-    "type": "DDT"
-  },
-  {
-    "id": "558e9e4ac751df2a26a453da",
-    "name": "Direction Départementale des Territoires de la Sarthe",
-    "slug": "direction-departementale-des-territoires-de-la-sarthe",
     "type": "DDT"
   },
   {
@@ -522,9 +498,39 @@
     "type": "DDT"
   },
   {
-    "id": "55ae6ba688ee386c843ca28b",
-    "name": "DDT de l'Isère",
-    "slug": "direction-departementale-des-territoires-de-lisere",
+    "id": "558e9b15c751df2a26a453b9",
+    "name": "Direction Départementale des Territoires de l'Orne",
+    "slug": "direction-departementale-des-territoires-de-lorne",
+    "type": "DDT"
+  },
+  {
+    "id": "558bc11cc751df5bfda453ba",
+    "name": "Direction Départementale des Territoires de la Corrèze",
+    "slug": "direction-departementale-des-territoires-de-la-correze",
+    "type": "DDT"
+  },
+  {
+    "id": "565f746a88ee3802aee72046",
+    "name": "Direction Départementale des Territoires de la Haute-Loire",
+    "slug": "direction-departementale-des-territoires-de-la-haute-loire",
+    "type": "DDT"
+  },
+  {
+    "id": "558a7e80c751df627ca453b9",
+    "name": "Direction Départementale des Territoires de la Lozère",
+    "slug": "direction-departementale-des-territoires-de-la-lozere",
+    "type": "DDT"
+  },
+  {
+    "id": "558e9c3ec751df75fea453c7",
+    "name": "Direction Départementale des Territoires de la Marne (DDT51)",
+    "slug": "direction-departementale-des-territoires-de-la-marne-ddt51",
+    "type": "DDT"
+  },
+  {
+    "id": "558e9e4ac751df2a26a453da",
+    "name": "Direction Départementale des Territoires de la Sarthe",
+    "slug": "direction-departementale-des-territoires-de-la-sarthe",
     "type": "DDT"
   },
   {
@@ -534,15 +540,15 @@
     "type": "DDT"
   },
   {
-    "id": "558e9b15c751df2a26a453b9",
-    "name": "Direction Départementale des Territoires de l'Orne",
-    "slug": "direction-departementale-des-territoires-de-lorne",
-    "type": "DDT"
-  },
-  {
     "id": "558adf97c751df04a0a453df",
     "name": "Direction Départementale des Territoires de Lot-et-Garonne",
     "slug": "direction-departementale-des-territoires-de-lot-et-garonne",
+    "type": "DDT"
+  },
+  {
+    "id": "55883748c751df7971a453bc",
+    "name": "Direction Départementale des Territoires de Meurthe-et-Moselle",
+    "slug": "ddt-de-meurthe-et-moselle",
     "type": "DDT"
   },
   {
@@ -564,21 +570,15 @@
     "type": "DDT"
   },
   {
+    "id": "58adb1c088ee38170d451e0d",
+    "name": "Direction Départementale des Territoires des Hautes-Alpes",
+    "slug": "direction-departementale-des-territoires-des-hautes-alpes-1",
+    "type": "DDT"
+  },
+  {
     "id": "55886e4dc751df3f7aa453b9",
     "name": "Direction Départementale des Territoires des Vosges",
     "slug": "direction-departementale-des-territoires-des-vosges",
-    "type": "DDT"
-  },
-  {
-    "id": "55897427c751df54e9a453dd",
-    "name": "Direction Départementale des Territoires d'Eure-et-Loir",
-    "slug": "direction-departementale-des-territoires-deure-et-loir",
-    "type": "DDT"
-  },
-  {
-    "id": "55ae43f488ee38443d3ca288",
-    "name": "Direction Départementale des Territoires d'Indre-et-Loire",
-    "slug": "direction-departementale-des-territoires-dindre-et-loire",
     "type": "DDT"
   },
   {
@@ -630,21 +630,33 @@
     "type": "DDT"
   },
   {
+    "id": "56ec29b7c751df5240cc7140",
+    "name": "Direction Départementale des Territoires et de la Mer d'Ille-et-Vilaine",
+    "slug": "direction-departementale-des-territoires-et-de-la-mer-dille-et-vilaine",
+    "type": "DDT"
+  },
+  {
     "id": "558bd745c751df3fffa453bd",
     "name": "Direction Départementale des Territoires et de la Mer de Charente-Maritime",
     "slug": "direction-departementale-des-territoires-et-de-la-mer-de-charente-maritime",
     "type": "DDT"
   },
   {
-    "id": "558a83dac751df039da453b9",
-    "name": "Direction Départementale des Territoires et de la Mer de la Somme",
-    "slug": "direction-departementale-des-territoires-et-de-la-mer-de-la-somme",
-    "type": "DDT"
-  },
-  {
     "id": "58778ae0c751df7f29590451",
     "name": "Direction Départementale des Territoires et de la Mer de l'Eure",
     "slug": "direction-departementale-des-territoires-et-de-la-mer-de-leure",
+    "type": "DDT"
+  },
+  {
+    "id": "58aede6188ee3805dde1ae88",
+    "name": "Direction Départementale des Territoires et de la Mer de l'Hérault",
+    "slug": "direction-departementale-des-territoires-et-de-la-mer-de-lherault-1",
+    "type": "DDTM"
+  },
+  {
+    "id": "558a83dac751df039da453b9",
+    "name": "Direction Départementale des Territoires et de la Mer de la Somme",
+    "slug": "direction-departementale-des-territoires-et-de-la-mer-de-la-somme",
     "type": "DDT"
   },
   {
@@ -669,12 +681,6 @@
     "id": "558ea37cc751df2a26a453fe",
     "name": "Direction Départementale des Territoires et de la Mer des Pyrénées-Atlantiques",
     "slug": "direction-departementale-des-territoires-et-de-la-mer-des-pyrenees-atlantiques",
-    "type": "DDT"
-  },
-  {
-    "id": "56ec29b7c751df5240cc7140",
-    "name": "Direction Départementale des Territoires et de la Mer d'Ille-et-Vilaine",
-    "slug": "direction-departementale-des-territoires-et-de-la-mer-dille-et-vilaine",
     "type": "DDT"
   },
   {
@@ -708,9 +714,15 @@
     "type": "DREAL/DRIEAT"
   },
   {
-    "id": "55b23b0e88ee3839da3ca288",
-    "name": "DREAL Centre-Val de Loire",
-    "slug": "direction-regionale-de-lenvironnement-de-lamenagement-et-du-logement-du-centre-val-de-loire",
+    "id": "6511605c27356de83427f4cb",
+    "name": "Direction régionale et interdépartementale de l’environnement, de l’aménagement et des transports d'Île-de-France",
+    "slug": "direction-regionale-et-interdepartementale-de-lenvironnement-de-lamenagement-et-des-transports-dile-de-france",
+    "type": "DREAL/DRIEAT"
+  },
+  {
+    "id": "5882a05d88ee3835c59b81a4",
+    "name": "DREAL Auvergne-Rhône-Alpes",
+    "slug": "dreal-auvergne-rhone-alpes-1",
     "type": "DREAL/DRIEAT"
   },
   {
@@ -720,9 +732,9 @@
     "type": "DREAL/DRIEAT"
   },
   {
-    "id": "6511605c27356de83427f4cb",
-    "name": "Direction régionale et interdépartementale de l’environnement, de l’aménagement et des transports d'Île-de-France",
-    "slug": "direction-regionale-et-interdepartementale-de-lenvironnement-de-lamenagement-et-des-transports-1",
+    "id": "55b23b0e88ee3839da3ca288",
+    "name": "DREAL Centre-Val de Loire",
+    "slug": "direction-regionale-de-lenvironnement-de-lamenagement-et-du-logement-du-centre-val-de-loire",
     "type": "DREAL/DRIEAT"
   },
   {
@@ -744,10 +756,28 @@
     "type": "DREAL/DRIEAT"
   },
   {
+    "id": "584f145ec751df2062c0bb7e",
+    "name": "DREAL Nouvelle Aquitaine",
+    "slug": "dreal-nouvelle-aquitaine",
+    "type": "DREAL/DRIEAT"
+  },
+  {
+    "id": "568e9657c751df5a92c664bc",
+    "name": "DREAL Pays de la Loire",
+    "slug": "dreal-pays-de-la-loire-direction-regionale-de-lenvironnement-de-lamenagement-et-du-logement-pays-de-la-loire",
+    "type": "DREAL/DRIEAT"
+  },
+  {
     "id": "5891ab1688ee384eb89b81a4",
     "name": "DREAL Provence-Alpes-Côte d'Azur",
     "slug": "dreal-provence-alpes-cote-dazur",
     "type": "DREAL/DRIEAT"
+  },
+  {
+    "id": "67884b4da4fca9c97bbef479",
+    "name": "Ecolab",
+    "slug": "ecolab-1",
+    "type": "Administration centrale"
   },
   {
     "id": "60240cd536ca1c415a3053a2",
@@ -774,12 +804,6 @@
     "type": "SA"
   },
   {
-    "id": "5abca8d588ee386ee6ece479",
-    "name": "Point d'Accès National transport.data.gouv.fr",
-    "slug": "equipe-transport-data-gouv-fr",
-    "type": "Administration centrale"
-  },
-  {
     "id": "5eb035fd32d114765d6e8389",
     "name": "Fédération des Parcs Naturels Régionaux de France",
     "slug": "federation-des-parcs-naturels-regionaux-de-france",
@@ -796,12 +820,6 @@
     "name": "Géo2France",
     "slug": "geo2france",
     "type": "DREAL/DRIEAT"
-  },
-  {
-    "id": "56c44eb7c751df689e6c6de0",
-    "name": "Observatoire de l'environnement en Bretagne",
-    "slug": "gip-bretagne-environnement",
-    "type": "GIP"
   },
   {
     "id": "571e4595c751df54b2fcca0d",
@@ -822,9 +840,15 @@
     "type": "EPIC"
   },
   {
+    "id": "56e02813c751df1c1a1ffccd",
+    "name": "Institut National de l'Environnement Industriel et des Risques",
+    "slug": "institut-national-de-lenvironnement-industriel-et-des-risques",
+    "type": "EPIC"
+  },
+  {
     "id": "534fff80a3a7292c64a77e41",
     "name": "Institut national de l'information géographique et forestière",
-    "slug": "institut-national-de-l-information-geographique-et-forestiere",
+    "slug": "institut-national-de-linformation-geographique-et-forestiere",
     "type": "EPA"
   },
   {
@@ -832,12 +856,6 @@
     "name": "Institut national de l'origine et de la qualité (INAO)",
     "slug": "institut-national-de-l-origine-et-de-la-qualite-inao",
     "type": "EPA"
-  },
-  {
-    "id": "56e02813c751df1c1a1ffccd",
-    "name": "Institut National de l'Environnement Industriel et des Risques",
-    "slug": "institut-national-de-lenvironnement-industriel-et-des-risques",
-    "type": "EPIC"
   },
   {
     "id": "56e11c31c751df6b481ffccd",
@@ -876,10 +894,28 @@
     "type": "EPA"
   },
   {
+    "id": "5c8f5e3d8b4c4110e6286460",
+    "name": "namR",
+    "slug": "namr",
+    "type": "Autre"
+  },
+  {
+    "id": "56c44eb7c751df689e6c6de0",
+    "name": "Observatoire de l'environnement en Bretagne",
+    "slug": "gip-bretagne-environnement",
+    "type": "GIP"
+  },
+  {
     "id": "5feb30f52fd6b61032e301c9",
     "name": "Observatoire de Recherche Montpelliérain de l'Environnement",
     "slug": "observatoire-de-recherche-montpellierain-de-lenvironnement",
     "type": "EPSP"
+  },
+  {
+    "id": "5d7f937b8b4c4165718fbff1",
+    "name": "Office Français de la Biodiversité",
+    "slug": "office-francais-de-la-biodiversite",
+    "type": ""
   },
   {
     "id": "534fff9ca3a7292c64a7803e",
@@ -972,6 +1008,12 @@
     "type": "Syndicat mixte ouvert"
   },
   {
+    "id": "5abca8d588ee386ee6ece479",
+    "name": "Point d'Accès National transport.data.gouv.fr",
+    "slug": "equipe-transport-data-gouv-fr",
+    "type": "Administration centrale"
+  },
+  {
     "id": "65a5533ed45dd6c0abf38d0e",
     "name": "Référentiel National des Bâtiments",
     "slug": "referentiel-national-des-batiments",
@@ -997,7 +1039,7 @@
   },
   {
     "id": "66c35108b375912c281edb22",
-    "name": "Réseau des Agences Régionales de l'Énergie et de l'Environnement",
+    "name": "Réseau des Agences Régionales de l'Énergie et de l'Environnement (RARE)",
     "slug": "reseau-des-agences-regionales-de-lenergie-et-de-lenvironnement",
     "type": "Association"
   },
@@ -1006,6 +1048,12 @@
     "name": "Service central d’hydrométéorologie et d’appui à la prévision des inondations",
     "slug": "service-central-dhydrometeorologie-et-dappui-a-la-prevision-des-inondations",
     "type": "Autre"
+  },
+  {
+    "id": "681a1272bfa84b075f9531e1",
+    "name": "Service des données et études statistiques (SDES)",
+    "slug": "service-des-donnees-et-etudes-statistiques-sdes",
+    "type": "Administration centrale"
   },
   {
     "id": "534fffafa3a7292c64a78103",
@@ -1022,7 +1070,7 @@
   {
     "id": "534fffb1a3a7292c64a7811f",
     "name": "Société des grands projets",
-    "slug": "societe-du-grand-paris",
+    "slug": "societe-des-grands-projets-1",
     "type": "EPIC"
   },
   {
