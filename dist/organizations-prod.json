@@ -84,9 +84,21 @@
     "type": "Association"
   },
   {
+    "id": "5dfa3aba8b4c4127a6038f64",
+    "name": "Atmo France",
+    "slug": "atmo-france",
+    "type": "Association"
+  },
+  {
     "id": "5889ea7a88ee385a5e9b81a4",
     "name": "ATMO Grand Est",
     "slug": "atmo-grand-est",
+    "type": "Association"
+  },
+  {
+    "id": "5e6b3dd78b4c415ebe5c72b8",
+    "name": "Atmo Nouvelle-Aquitaine",
+    "slug": "atmo-nouvelle-aquitaine-1",
     "type": "Association"
   },
   {
