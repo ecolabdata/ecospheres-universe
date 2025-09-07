@@ -900,16 +900,16 @@
     "type": "Administration centrale"
   },
   {
+    "id": "646f625d5a9f3eb11b7ae7b7",
+    "name": "Mon diagnostic artificialisation",
+    "slug": "mon-diagnostic-artificialisation",
+    "type": "Administration centrale"
+  },
+  {
     "id": "55842c2bc751df66bba453b9",
     "name": "Muséum National d'Histoire Naturelle",
     "slug": "museum-national-dhistoire-naturelle",
     "type": "EPA"
-  },
-  {
-    "id": "5c8f5e3d8b4c4110e6286460",
-    "name": "namR",
-    "slug": "namr",
-    "type": "Autre"
   },
   {
     "id": "56c44eb7c751df689e6c6de0",
