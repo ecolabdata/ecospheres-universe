@@ -88,6 +88,7 @@ class ApiHelper:
         self.token = token
         self.fail_on_errors = fail_on_errors
         self.dry_run = dry_run
+        print(f"API for {self.base_url} ready.")
 
     @elapsed_and_count
     def get_datasets(self, url, func, xfields='data{id}'):
@@ -258,8 +259,10 @@ if __name__ == "__main__":
             new_datasets += datasets
 
         existing_elements = api.get_topic_datasets_elements(topic_slug)
-        additions = list(set(new_datasets) - set(e.dataset_id for e in existing_elements))
-        removals = list(set(e.dataset_id for e in existing_elements) - set(new_datasets))
+        existing_datasets = set(e.dataset_id for e in existing_elements)
+        print(f"Found {len(existing_datasets)} existing datasts in universe topic.")
+        additions = list(set(new_datasets) - existing_datasets)
+        removals = list(existing_datasets - set(new_datasets))
         if len(removals) > REMOVALS_THRESHOLD:
             raise Exception(f"Too many removals ({len(removals)}), aborting")
         print(f"Feeding {len(additions)} datasets...")
