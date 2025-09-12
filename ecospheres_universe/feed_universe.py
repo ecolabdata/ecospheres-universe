@@ -32,6 +32,11 @@ class GristOrganization(NamedTuple):
     type: str
 
 
+class DatasetElementJoin(NamedTuple):
+    element_id: str
+    dataset_id: str
+
+
 def elapsed_and_count(func):
     @functools.wraps(func)
     def wrapper_decorator(*args, **kwargs):
@@ -83,6 +88,7 @@ class ApiHelper:
         self.token = token
         self.fail_on_errors = fail_on_errors
         self.dry_run = dry_run
+        print(f"API for {self.base_url} ready.")
 
     @elapsed_and_count
     def get_datasets(self, url, func, xfields='data{id}'):
@@ -115,21 +121,6 @@ class ApiHelper:
         r.raise_for_status()
         return r.json()['id']
 
-    @elapsed_and_count
-    def get_organizations(self, query):
-        orgs = set()
-        url = f"{self.base_url}/api/1/organizations/?q={query}&page_size=1000"
-        headers = {'X-Fields': 'data{slug},next_page'}
-        while True:
-            r = session.get(url, headers=headers)
-            r.raise_for_status()
-            c = r.json()
-            orgs |= {d['slug'] for d in c['data']}
-            url = c['next_page']
-            if not url:
-                break
-        return list(orgs)
-
     def get_organization_datasets(self, org: str):
         url = f"{self.base_url}/api/1/organizations/{org}/datasets/?page_size=1000"
         xfields = 'data{id,archived,deleted,private,extras{geop:dataset_id}}'
@@ -138,43 +129,39 @@ class ApiHelper:
                                       or d.get('private') or d.get('extras'))}
         return self.get_datasets(url, func, xfields=xfields)
 
-    def get_topic_datasets(self, topic, organization_id: str = ""):
-        url = f"{self.base_url}/api/2/topics/{topic}/datasets/?page_size=1000"
-        if organization_id:
-            url += f"&organization={organization_id}"
-        func = lambda c: {d['id'] for d in c['data']}
-        return self.get_datasets(url, func)
-
-    def get_topic_datasets_v1(self, topic):
-        url = f"{self.base_url}/api/1/topics/{topic}/"
-        xfields = 'datasets{id}'
-        func = lambda c: {d['id'] for d in c['datasets']}
-        return self.get_datasets(url, func, xfields=xfields)
-
-    def search_datasets_count(self, topic_id: str | None, organization_id: str = ""):
-        if not topic_id:
-            return
-        url = f"{self.base_url}/api/2/datasets/search/?topic={topic_id}"
-        if organization_id:
-            url += f"&organization={organization_id}"
+    def get_topic_datasets_count(self, topic_id: str, org_id: str, use_search: bool = False):
+        url = f"{self.base_url}/api/2/datasets{'/search' if use_search else ''}/?topic={topic_id}&organization={org_id}&page_size=1"
         r = session.get(url)
         r.raise_for_status()
-        return r.json()['total']
+        return r.json()["total"]
+
+    def get_topic_datasets_elements(self, topic: str) -> list[DatasetElementJoin]:
+        elements = []
+        url = f"{self.base_url}/api/2/topics/{topic}/elements/?class=Dataset&page_size=1000"
+        while True:
+            r = session.get(url)
+            r.raise_for_status()
+            c = r.json()
+            elements.extend([DatasetElementJoin(element_id=elt['id'], dataset_id=elt['element']['id']) for elt in c['data']])
+            url = c.get('next_page')
+            if not url:
+                break
+        return elements
 
     @elapsed_and_count
     def put_topic_datasets(self, topic, datasets):
-        url = f"{self.base_url}/api/2/topics/{topic}/datasets/"
+        url = f"{self.base_url}/api/2/topics/{topic}/elements/"
         headers = {'Content-Type': 'application/json', 'X-API-KEY': self.token}
-        data = json.dumps([{'id': d} for d in datasets])
+        data = json.dumps([{'element': {'class': 'Dataset', 'id': d}} for d in datasets])
         if not self.dry_run:
             session.post(url, data=data, headers=headers).raise_for_status()
         return datasets
 
     @elapsed
-    def delete_topic_datasets(self, topic, datasets):
-        for d in datasets:
+    def delete_topic_elements(self, topic, elements):
+        for elt in elements:
             try:
-                url = f"{self.base_url}/api/2/topics/{topic}/datasets/{d}/"
+                url = f"{self.base_url}/api/2/topics/{topic}/elements/{elt}/"
                 headers = {'X-API-KEY': self.token}
                 if not self.dry_run:
                     session.delete(url, headers=headers).raise_for_status()
@@ -183,61 +170,12 @@ class ApiHelper:
                     raise
                 verbose(e)
 
-    #FIXME: doesn't work on huge topics
     @elapsed
-    def delete_all_topic_datasets(self, topic):
-        # workaround for missing "delete all" endpoint
-        # 1. get needed info from topic
-        url = f"{self.base_url}/api/2/topics/{topic}/datasets/?page_size=1"
-        r = session.get(url, headers={'X-Fields': 'data{id}'})
-        r.raise_for_status()
-        c = r.json()
-        single = [d['id'] for d in c.get('data', [])] # page_size=1
-
-        url = f"{self.base_url}/api/2/topics/{topic}/"
-        r = session.get(url, headers={'X-Fields': 'tags'})
-        r.raise_for_status()
-        c = r.json()
-        tags = c.get('tags', [])
-
-        # 2. override (api v1) existing datasets with list of 1 element
-        url = f"{self.base_url}/api/1/topics/{topic}/"
-        data = json.dumps({'datasets': single, 'tags': tags})
-        headers = {'Content-Type': 'application/json', 'X-API-KEY': self.token}
+    def delete_all_topic_elements(self, topic):
+        url = f"{self.base_url}/api/2/topics/{topic}/elements/"
         if not self.dry_run:
-            session.put(url, data=data, headers=headers).raise_for_status()
-
-        # 3. delete element from step 2
-        if not self.dry_run:
-            self.delete_topic_datasets(topic, single)
-
-    #FIXME: doesn't work on huge topics
-    @elapsed
-    def slow_delete_all_topic_datasets(self, topic):
-        print("Delete v2")
-        datasets = self.get_topic_datasets(topic)
-        self.delete_topic_datasets(topic, datasets)
-        print("Delete hack")
-        try:
-            api.delete_all_topic_datasets(topic)
-        except:
-            pass
-        print("Delete v1")
-        datasets = self.get_topic_datasets_v1(topic)
-        self.delete_topic_datasets(topic, datasets)
-
-
-def check_sync(topic_slug: str, org: Organization, datasets: list):
-    topic_id = api.get_topic_id(topic_slug)
-    topic_datasets = api.get_topic_datasets(topic_slug, organization_id=org.id)
-    datasets_search_count = api.search_datasets_count(topic_id, organization_id=org.id)
-    if not(len(topic_datasets) == len(datasets) == datasets_search_count):
-        print(f"Datasets for '{org.slug}' are NOT in sync", file=sys.stderr)
-        print(f"  - topic datasets : {len(topic_datasets)}", file=sys.stderr)
-        print(f"  - universe       : {len(datasets)}", file=sys.stderr)
-        print(f"  - search datasets: {datasets_search_count}", file=sys.stderr)
-    else:
-        verbose(f"Datasets for '{org.slug}' are in sync ({len(datasets)} datasets)")
+            headers = {'Content-Type': 'application/json', 'X-API-KEY': self.token}
+            session.delete(url, headers=headers).raise_for_status()
 
 
 if __name__ == "__main__":
@@ -252,12 +190,8 @@ if __name__ == "__main__":
                         help='perform a trial run without actual feeding')
     parser.add_argument('-r', '--reset', action='store_true', default=False,
                         help='empty topic before refeeding it')
-    parser.add_argument('-s', '--slow', action='store_true', default=False,
-                        help='enable slow reset mode')
     parser.add_argument('-v', '--verbose', action='store_true', default=False,
                         help='enable verbose mode')
-    parser.add_argument('-c', '--check', action='store_true', default=False,
-                        help='only check synchronization status')
     args = parser.parse_args()
 
     conf = {}
@@ -278,17 +212,11 @@ if __name__ == "__main__":
     print(f"Starting at {datetime.datetime.now():%c}")
     if args.dry_run:
         print("*** DRY RUN ***")
-    elif args.check:
-        print("*** CHECKING ***")
 
     t_count = 0
     t_all = time.time()
     try:
-        existing_datasets = []
-        if not args.check:
-            verbose(f"Getting existing datasets for topic '{topic_slug}'")
-            existing_datasets = api.get_topic_datasets(topic_slug)
-
+        verbose(f"Getting existing datasets for topic '{topic_slug}'")
         orgs: list[Organization] = []
 
         for org in grist_orgs:
@@ -312,11 +240,8 @@ if __name__ == "__main__":
         print(f"Processing {len(orgs)} organizations...")
 
         if args.reset:
-            print(f"Removing ALL datasets from topic '{topic_slug}'")
-            if args.slow:
-                api.slow_delete_all_topic_datasets(topic_slug)
-            else:
-                api.delete_all_topic_datasets(topic_slug)
+            print(f"Removing ALL elements from topic '{topic_slug}'")
+            api.delete_all_topic_elements(topic_slug)
 
         print(f"Processing topic '{topic_slug}'")
         active_orgs: list[Organization] = []
@@ -331,29 +256,28 @@ if __name__ == "__main__":
             t_count += len(datasets)
             active_orgs.append(org)
 
-            if args.check:
-                check_sync(topic_slug, org, datasets)
-            else:
-                new_datasets += datasets
+            new_datasets += datasets
 
-        if not args.check:
-            additions = list(set(new_datasets) - set(existing_datasets))
-            removals = list(set(existing_datasets) - set(new_datasets))
-            if len(removals) > REMOVALS_THRESHOLD:
-                raise Exception(f"Too many removals ({len(removals)}), aborting")
-            print(f"Feeding {len(additions)} datasets...")
-            for batch in batched(additions, 1000):
-                api.put_topic_datasets(topic_slug, batch)
-            print(f"Removing {len(removals)} datasets...")
-            api.delete_topic_datasets(topic_slug, removals)
+        existing_elements = api.get_topic_datasets_elements(topic_slug)
+        existing_datasets = set(e.dataset_id for e in existing_elements)
+        print(f"Found {len(existing_datasets)} existing datasts in universe topic.")
+        additions = list(set(new_datasets) - existing_datasets)
+        removals = list(existing_datasets - set(new_datasets))
+        if len(removals) > REMOVALS_THRESHOLD:
+            raise Exception(f"Too many removals ({len(removals)}), aborting")
+        print(f"Feeding {len(additions)} datasets...")
+        for batch in batched(additions, 1000):
+            api.put_topic_datasets(topic_slug, batch)
+        print(f"Removing {len(removals)} datasets...")
+        elements_removals = [e.element_id for e in existing_elements if e.dataset_id in removals]
+        api.delete_topic_elements(topic_slug, elements_removals)
 
     finally:
         print(f"Total count: {t_count}, elapsed: {time.time() - t_all:.2f} s")
 
-    if not args.check:
-        filename = f"organizations-{conf['env']}.json"
-        print(f"Generating output file {filename}...")
-        with open(f"dist/{filename}", "w") as f:
-            json.dump([o._asdict() for o in active_orgs], f, indent=2, ensure_ascii=False)
+    filename = f"organizations-{conf['env']}.json"
+    print(f"Generating output file {filename}...")
+    with open(f"dist/{filename}", "w") as f:
+        json.dump([o._asdict() for o in active_orgs], f, indent=2, ensure_ascii=False)
 
     print(f"Done at {datetime.datetime.now():%c}")
