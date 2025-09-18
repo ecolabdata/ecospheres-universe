@@ -648,16 +648,22 @@
     "type": ""
   },
   {
+    "id": "67a352054456182679d0b19b",
+    "name": "Direction régionale de  l'environnement, de l'aménagement et du logement de Bretagne",
+    "slug": "direction-regionale-de-lenvironnement-de-lamenagement-et-du-logement-de-bretagne-1",
+    "type": "DREAL/DRIEAT"
+  },
+  {
     "id": "57275bd288ee387fd5a19f12",
     "name": "Direction régionale de l'Environnement, de l'Aménagement et du Logement de Normandie",
     "slug": "direction-regionale-de-lenvironnement-de-lamenagement-et-du-logement-de-normandie",
-    "type": ""
+    "type": "DREAL/DRIEAT"
   },
   {
     "id": "6511605c27356de83427f4cb",
     "name": "Direction régionale et interdépartementale de l’environnement, de l’aménagement et des transports d'Île-de-France",
     "slug": "direction-regionale-et-interdepartementale-de-lenvironnement-de-lamenagement-et-des-transports-dile-de-france",
-    "type": ""
+    "type": "DREAL/DRIEAT"
   },
   {
     "id": "5a83f81fc751df6f8573eb8a",
@@ -669,43 +675,43 @@
     "id": "5882a05d88ee3835c59b81a4",
     "name": "DREAL Auvergne-Rhône-Alpes",
     "slug": "dreal-auvergne-rhone-alpes-1",
-    "type": ""
+    "type": "DREAL/DRIEAT"
   },
   {
     "id": "5835d0a088ee3842afc65bb3",
     "name": "DREAL Bourgogne-Franche-Comté",
     "slug": "direction-regionale-de-lenvironnement-et-du-logement-bourgogne-franche-comte",
-    "type": ""
+    "type": "DREAL/DRIEAT"
   },
   {
     "id": "55b23b0e88ee3839da3ca288",
     "name": "DREAL Centre-Val de Loire",
     "slug": "direction-regionale-de-lenvironnement-de-lamenagement-et-du-logement-du-centre-val-de-loire",
-    "type": ""
+    "type": "DREAL/DRIEAT"
   },
   {
     "id": "5891a8fc88ee384a7c9b81a4",
     "name": "DREAL Corse",
     "slug": "dreal-corse",
-    "type": ""
+    "type": "DREAL/DRIEAT"
   },
   {
     "id": "5883d10488ee3810d19b81e3",
     "name": "DREAL Grand Est",
     "slug": "dreal-grand-est",
-    "type": ""
+    "type": "DREAL/DRIEAT"
   },
   {
     "id": "5891a2f188ee3840059b81a4",
     "name": "DREAL Hauts-de-France",
     "slug": "dreal-hauts-de-france",
-    "type": ""
+    "type": "DREAL/DRIEAT"
   },
   {
     "id": "584f145ec751df2062c0bb7e",
     "name": "DREAL Nouvelle Aquitaine",
     "slug": "dreal-nouvelle-aquitaine",
-    "type": ""
+    "type": "DREAL/DRIEAT"
   },
   {
     "id": "568e9657c751df5a92c664bc",
@@ -717,7 +723,7 @@
     "id": "5891ab1688ee384eb89b81a4",
     "name": "DREAL Provence-Alpes-Côte d'Azur",
     "slug": "dreal-provence-alpes-cote-dazur",
-    "type": ""
+    "type": "DREAL/DRIEAT"
   },
   {
     "id": "60240cd536ca1c415a3053a2",
