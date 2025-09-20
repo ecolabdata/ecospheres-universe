@@ -840,6 +840,12 @@
     "type": "DREAL/DRIEAT"
   },
   {
+    "id": "60759b5d1136de3965b997ae",
+    "name": "Géofoncier",
+    "slug": "geofoncier",
+    "type": "Autre"
+  },
+  {
     "id": "571e4595c751df54b2fcca0d",
     "name": "GRDF",
     "slug": "grdf",
