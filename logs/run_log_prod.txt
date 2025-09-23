@@ -1,11 +1,11 @@
 API for https://www.data.gouv.fr ready.
-Starting at Mon Sep 22 05:26:26 2025
+Starting at Tue Sep 23 05:26:13 2025
 Unknown organization 'do-terr-geo-centre'
 Processing 197 organizations...
 Processing topic 'univers-ecospheres'
 Found 28576 existing datasts in universe topic.
 Feeding 0 datasets...
 Removing 0 datasets...
-Total count: 28576, elapsed: 163.78 s
+Total count: 28576, elapsed: 171.15 s
 Generating output file organizations-prod.json...
-Done at Mon Sep 22 05:29:10 2025
+Done at Tue Sep 23 05:29:04 2025
