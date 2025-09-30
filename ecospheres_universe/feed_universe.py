@@ -11,6 +11,7 @@ from shutil import copyfile
 from typing import NamedTuple
 
 import requests
+import unicodedata
 import yaml
 
 REMOVALS_THRESHOLD = 1800
@@ -144,11 +145,6 @@ class ApiHelper:
             }
         return self.get_objects(url, filter_objects, xfields=xfields)
 
-    def get_organization_datasets(self, org: str):
-        # Kept for backward compatibility
-        api_org = self.get_organization(org)
-        return self.get_organization_objects(api_org["id"], ElementClass.Dataset)
-
     def get_topic_datasets_count(self, topic_id: str, org_id: str, use_search: bool = False):
         url = f"{self.base_url}/api/2/datasets{'/search' if use_search else ''}/?topic={topic_id}&organization={org_id}&page_size=1"
         r = session.get(url)
@@ -253,6 +249,9 @@ if __name__ == "__main__":
                 )
             except requests.exceptions.HTTPError:
                 print(f"Unknown organization '{org.slug}'", file=sys.stderr)
+
+        # sort by name, ignoring diacritics
+        orgs = sorted(orgs, key=lambda o: unicodedata.normalize("NFKD", o.name).encode("ascii", "ignore").decode("ascii").lower())
 
         print(f"Processing {len(orgs)} organizations...")
 
