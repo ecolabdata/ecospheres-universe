@@ -5,8 +5,9 @@ import json
 import os
 import sys
 import time
-import unicodedata
 
+from enum import Enum
+from shutil import copyfile
 from typing import NamedTuple
 
 import requests
@@ -17,7 +18,13 @@ REMOVALS_THRESHOLD = 1800
 session = requests.Session()
 
 # noop unless args.verbose is set
-verbose = lambda *a, **k: None
+def verbose(*args, **kwargs):
+    return None
+
+
+class ElementClass(Enum):
+    Dataset = "datasets"
+    Dataservice = "dataservices"
 
 
 class Organization(NamedTuple):
@@ -32,9 +39,9 @@ class GristOrganization(NamedTuple):
     type: str
 
 
-class DatasetElementJoin(NamedTuple):
+class ElementJoin(NamedTuple):
     element_id: str
-    dataset_id: str
+    object_id: str
 
 
 def elapsed_and_count(func):
@@ -91,15 +98,15 @@ class ApiHelper:
         print(f"API for {self.base_url} ready.")
 
     @elapsed_and_count
-    def get_datasets(self, url, func, xfields='data{id}'):
-        datasets = set()
+    def get_objects(self, url, func, xfields='data{id}'):
+        objects = set()
         try:
             headers={'X-Fields': f"{xfields},next_page"}
             while True:
                 r = session.get(url, headers=headers)
                 r.raise_for_status()
                 c = r.json()
-                datasets |= func(c)
+                objects |= func(c)
                 url = c.get('next_page')
                 if not url:
                     break
@@ -107,7 +114,7 @@ class ApiHelper:
             if self.fail_on_errors:
                 raise
             verbose(e)
-        return list(datasets)
+        return list(objects)
 
     def get_organization(self, org: str):
         url = f"{self.base_url}/api/1/organizations/{org}/"
@@ -121,13 +128,26 @@ class ApiHelper:
         r.raise_for_status()
         return r.json()['id']
 
-    def get_organization_datasets(self, org: str):
-        url = f"{self.base_url}/api/1/organizations/{org}/datasets/?page_size=1000"
+    def get_organization_objects(self, org_id: str, element_class: ElementClass) -> list[str]:
+        url = f"{self.base_url}/api/2/{element_class.value}/search/?organization={org_id}&page_size=1000"
         xfields = 'data{id,archived,deleted,private,extras{geop:dataset_id}}'
-        func = lambda c: {d['id'] for d in c['data']
-                          if not bool(d.get('archived') or d.get('deleted')
-                                      or d.get('private') or d.get('extras'))}
-        return self.get_datasets(url, func, xfields=xfields)
+        def filter_objects(c):
+            return {
+                d["id"]
+                for d in c["data"]
+                if not bool(
+                    d.get("archived")
+                    or d.get("deleted")
+                    or d.get("private")
+                    or d.get("extras")
+                )
+            }
+        return self.get_objects(url, filter_objects, xfields=xfields)
+
+    def get_organization_datasets(self, org: str):
+        # Kept for backward compatibility
+        api_org = self.get_organization(org)
+        return self.get_organization_objects(api_org["id"], ElementClass.Dataset)
 
     def get_topic_datasets_count(self, topic_id: str, org_id: str, use_search: bool = False):
         url = f"{self.base_url}/api/2/datasets{'/search' if use_search else ''}/?topic={topic_id}&organization={org_id}&page_size=1"
@@ -135,27 +155,27 @@ class ApiHelper:
         r.raise_for_status()
         return r.json()["total"]
 
-    def get_topic_datasets_elements(self, topic: str) -> list[DatasetElementJoin]:
+    def get_topic_elements(self, topic: str, element_class: ElementClass) -> list[ElementJoin]:
         elements = []
-        url = f"{self.base_url}/api/2/topics/{topic}/elements/?class=Dataset&page_size=1000"
+        url = f"{self.base_url}/api/2/topics/{topic}/elements/?class={element_class.name}&page_size=1000"
         while True:
             r = session.get(url)
             r.raise_for_status()
             c = r.json()
-            elements.extend([DatasetElementJoin(element_id=elt['id'], dataset_id=elt['element']['id']) for elt in c['data']])
+            elements.extend([ElementJoin(element_id=elt['id'], object_id=elt['element']['id']) for elt in c['data']])
             url = c.get('next_page')
             if not url:
                 break
         return elements
 
     @elapsed_and_count
-    def put_topic_datasets(self, topic, datasets):
+    def put_topic_elements(self, topic, element_class: ElementClass, objects):
         url = f"{self.base_url}/api/2/topics/{topic}/elements/"
         headers = {'Content-Type': 'application/json', 'X-API-KEY': self.token}
-        data = json.dumps([{'element': {'class': 'Dataset', 'id': d}} for d in datasets])
+        data = [{'element': {'class': element_class.name, 'id': d}} for d in objects]
         if not self.dry_run:
-            session.post(url, data=data, headers=headers).raise_for_status()
-        return datasets
+            session.post(url, json=data, headers=headers).raise_for_status()
+        return objects
 
     @elapsed
     def delete_topic_elements(self, topic, elements):
@@ -213,7 +233,7 @@ if __name__ == "__main__":
     if args.dry_run:
         print("*** DRY RUN ***")
 
-    t_count = 0
+    t_count = {element_class: 0 for element_class in ElementClass}
     t_all = time.time()
     try:
         verbose(f"Getting existing datasets for topic '{topic_slug}'")
@@ -234,50 +254,51 @@ if __name__ == "__main__":
             except requests.exceptions.HTTPError:
                 print(f"Unknown organization '{org.slug}'", file=sys.stderr)
 
-        # sort by name, ignoring diacritics
-        orgs = sorted(orgs, key=lambda o: unicodedata.normalize("NFKD", o.name).encode("ascii", "ignore").decode("ascii").lower())
-
         print(f"Processing {len(orgs)} organizations...")
 
         if args.reset:
             print(f"Removing ALL elements from topic '{topic_slug}'")
             api.delete_all_topic_elements(topic_slug)
 
+        active_orgs: dict[ElementClass, set[Organization]] = {element_class: set() for element_class in ElementClass}
+
         print(f"Processing topic '{topic_slug}'")
-        active_orgs: list[Organization] = []
-        new_datasets = []
-        for org in orgs:
-            verbose(f"Fetching datasets for organization '{org.slug}'...")
-            datasets = api.get_organization_datasets(org.slug)
-            if not datasets and not args.keep_empty:
-                verbose(f"Skipping empty organization '{org.slug}'")
-                continue
+        for element_class in ElementClass:
+            new_objects = []
+            for org in orgs:
+                verbose(f"Fetching {element_class.name} for organization '{org.slug}'...")
+                objects = api.get_organization_objects(org.id, element_class)
+                if not objects and not args.keep_empty:
+                    verbose(f"Skipping empty organization '{org.slug}'")
+                    continue
+                t_count[element_class] += len(objects)
+                active_orgs[element_class].add(org)
+                new_objects += objects
 
-            t_count += len(datasets)
-            active_orgs.append(org)
-
-            new_datasets += datasets
-
-        existing_elements = api.get_topic_datasets_elements(topic_slug)
-        existing_datasets = set(e.dataset_id for e in existing_elements)
-        print(f"Found {len(existing_datasets)} existing datasts in universe topic.")
-        additions = list(set(new_datasets) - existing_datasets)
-        removals = list(existing_datasets - set(new_datasets))
-        if len(removals) > REMOVALS_THRESHOLD:
-            raise Exception(f"Too many removals ({len(removals)}), aborting")
-        print(f"Feeding {len(additions)} datasets...")
-        for batch in batched(additions, 1000):
-            api.put_topic_datasets(topic_slug, batch)
-        print(f"Removing {len(removals)} datasets...")
-        elements_removals = [e.element_id for e in existing_elements if e.dataset_id in removals]
-        api.delete_topic_elements(topic_slug, elements_removals)
+            existing_elements = api.get_topic_elements(topic_slug, element_class)
+            additions = list(set(new_objects) - set(e.object_id for e in existing_elements))
+            removals = list(set(e.object_id for e in existing_elements) - set(new_objects))
+            if len(removals) > REMOVALS_THRESHOLD:
+                raise Exception(f"Too many removals ({len(removals)}), aborting")
+            print(f"Feeding {len(additions)} {element_class.value}...")
+            for batch in batched(additions, 1000):
+                api.put_topic_elements(topic_slug, element_class, batch)
+            print(f"Removing {len(removals)} {element_class.value}...")
+            elements_removals = [e.element_id for e in existing_elements if e.object_id in removals]
+            api.delete_topic_elements(topic_slug, elements_removals)
 
     finally:
-        print(f"Total count: {t_count}, elapsed: {time.time() - t_all:.2f} s")
+        print(f"Elapsed: {time.time() - t_all:.2f} s")
+        for element_class in ElementClass:
+            print(f"Total count {element_class.value}: {t_count[element_class]}")
 
-    filename = f"organizations-{conf['env']}.json"
-    print(f"Generating output file {filename}...")
-    with open(f"dist/{filename}", "w") as f:
-        json.dump([o._asdict() for o in active_orgs], f, indent=2, ensure_ascii=False)
+    for element_class in ElementClass:
+        filename = f"organizations-{element_class.value}-{conf['env']}.json"
+        print(f"Generating output file {filename}...")
+        with open(f"dist/{filename}", "w") as f:
+            json.dump([o._asdict() for o in active_orgs[element_class]], f, indent=2, ensure_ascii=False)
+
+    # retrocompatibility
+    copyfile(f"dist/organizations-datasets-{conf['env']}.json", f"dist/organizations-{conf['env']}.json")
 
     print(f"Done at {datetime.datetime.now():%c}")
