@@ -69,9 +69,9 @@ def elapsed(func):
 
 
 def batched(iterable, n=1):
-    l = len(iterable)
-    for ndx in range(0, l, n):
-        yield iterable[ndx:min(ndx + n, l)]
+    length = len(iterable)
+    for ndx in range(0, length, n):
+        yield iterable[ndx:min(ndx + n, length)]
 
 
 def get_grist_orgs(grist_url: str, env: str) -> list[GristOrganization]:
