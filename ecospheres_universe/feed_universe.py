@@ -6,6 +6,7 @@ import os
 import sys
 import time
 
+from collections import defaultdict
 from enum import Enum
 from shutil import copyfile
 from typing import NamedTuple
@@ -229,7 +230,7 @@ if __name__ == "__main__":
     if args.dry_run:
         print("*** DRY RUN ***")
 
-    t_count = {element_class: 0 for element_class in ElementClass}
+    t_count: dict[ElementClass, int] = defaultdict(int)
     t_all = time.time()
     try:
         verbose(f"Getting existing datasets for topic '{topic_slug}'")
@@ -259,7 +260,7 @@ if __name__ == "__main__":
             print(f"Removing ALL elements from topic '{topic_slug}'")
             api.delete_all_topic_elements(topic_slug)
 
-        active_orgs: dict[ElementClass, set[Organization]] = {element_class: set() for element_class in ElementClass}
+        active_orgs: dict[ElementClass, set[Organization]] = defaultdict(set)
 
         print(f"Processing topic '{topic_slug}'")
         for element_class in ElementClass:
@@ -275,8 +276,10 @@ if __name__ == "__main__":
                 new_objects += objects
 
             existing_elements = api.get_topic_elements(topic_slug, element_class)
-            additions = list(set(new_objects) - set(e.object_id for e in existing_elements))
-            removals = list(set(e.object_id for e in existing_elements) - set(new_objects))
+            existing_object_ids = set(e.object_id for e in existing_elements)
+            print(f"Found {len(existing_object_ids)} existing {element_class.name} in universe topic.")
+            additions = list(set(new_objects) - existing_object_ids)
+            removals = list(existing_object_ids - set(new_objects))
             if len(removals) > REMOVALS_THRESHOLD:
                 raise Exception(f"Too many removals ({len(removals)}), aborting")
             print(f"Feeding {len(additions)} {element_class.value}...")
