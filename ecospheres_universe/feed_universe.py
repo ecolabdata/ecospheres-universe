@@ -300,6 +300,7 @@ if __name__ == "__main__":
         with open(f"dist/{filename}", "w") as f:
             json.dump([o._asdict() for o in active_orgs[element_class]], f, indent=2, ensure_ascii=False)
 
+    # FIXME: remove when front uses the new file path
     # retrocompatibility
     copyfile(f"dist/organizations-datasets-{conf['env']}.json", f"dist/organizations-{conf['env']}.json")
 
