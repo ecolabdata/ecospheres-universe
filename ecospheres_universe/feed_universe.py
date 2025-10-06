@@ -260,7 +260,7 @@ if __name__ == "__main__":
             print(f"Removing ALL elements from topic '{topic_slug}'")
             api.delete_all_topic_elements(topic_slug)
 
-        active_orgs: dict[ElementClass, set[Organization]] = defaultdict(set)
+        active_orgs: dict[ElementClass, list[Organization]] = defaultdict(list)
 
         print(f"Processing topic '{topic_slug}'")
         for element_class in ElementClass:
@@ -272,7 +272,7 @@ if __name__ == "__main__":
                     verbose(f"Skipping empty organization '{org.slug}'")
                     continue
                 t_count[element_class] += len(objects)
-                active_orgs[element_class].add(org)
+                active_orgs[element_class].append(org)
                 new_objects += objects
 
             existing_elements = api.get_topic_elements(topic_slug, element_class)
