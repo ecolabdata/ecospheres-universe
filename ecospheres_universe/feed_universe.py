@@ -132,15 +132,23 @@ class ApiHelper:
 
     def get_organization_objects(self, org_id: str, element_class: ElementClass) -> list[str]:
         url = f"{self.base_url}/api/2/{element_class.value}/search/?organization={org_id}&page_size=1000"
-        xfields = 'data{id,archived,deleted,private,extras{geop:dataset_id}}'
+        xfields = 'data{id,archived,archived_at,deleted,deleted_at,private,extras{geop:dataset_id}}'
         def filter_objects(c):
             return {
                 d["id"]
                 for d in c["data"]
                 if not bool(
+                    # dataset.archived
                     d.get("archived")
+                    # dataservice.archived_at
+                    or d.get("archived_at")
+                    # dataset.deleted
                     or d.get("deleted")
+                    # dataservice.deleted_at
+                    or d.get("deleted_at")
+                    # (dataset|dataservice).private
                     or d.get("private")
+                    # dataset.extras[geop:dataset_id]
                     or d.get("extras")
                 )
             }
