@@ -30,30 +30,6 @@
     "type": ""
   },
   {
-    "id": "58aed7b188ee38779b2b7560",
-    "name": "DDT Drôme",
-    "slug": "ddt-drome",
-    "type": "DDT(M)"
-  },
-  {
-    "id": "58aeee1688ee382134fb5212",
-    "name": "DDT Hautes-Pyrénées",
-    "slug": "ddt-hautes-pyrenees",
-    "type": "DDT(M)"
-  },
-  {
-    "id": "55896df6c751df54e9a453b9",
-    "name": "Direction Départementale des Territoires de l'Aube",
-    "slug": "direction-departementale-des-territoires-de-laube",
-    "type": "DDT(M)"
-  },
-  {
-    "id": "55883748c751df7971a453bc",
-    "name": "Direction Départementale des Territoires de Meurthe-et-Moselle",
-    "slug": "ddt-de-meurthe-et-moselle",
-    "type": "DDT(M)"
-  },
-  {
     "id": "5882a05d88ee3835c59b81a4",
     "name": "DREAL Auvergne-Rhône-Alpes",
     "slug": "dreal-auvergne-rhone-alpes-1",
