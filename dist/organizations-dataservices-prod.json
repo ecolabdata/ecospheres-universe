@@ -36,24 +36,6 @@
     "type": "EPA"
   },
   {
-    "id": "58aed7b188ee38779b2b7560",
-    "name": "DDT Drôme",
-    "slug": "ddt-drome",
-    "type": "DDT(M)"
-  },
-  {
-    "id": "56eed4d2c751df3308d6e93b",
-    "name": "Direction Départementale des Territoires de Haute-Savoie",
-    "slug": "direction-departementale-des-territoires-de-haute-savoie",
-    "type": "DDT(M)"
-  },
-  {
-    "id": "55896df6c751df54e9a453b9",
-    "name": "Direction Départementale des Territoires de l'Aube",
-    "slug": "direction-departementale-des-territoires-de-laube",
-    "type": "DDT(M)"
-  },
-  {
     "id": "67884b4da4fca9c97bbef479",
     "name": "Ecolab",
     "slug": "ecolab-1",
