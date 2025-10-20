@@ -15,14 +15,15 @@ api:
 ## Créer ou mettre à jour un univers
 
 ```shell
-python feed-universe.py [--dry-run] [options] config-{env}.yaml env.yaml
+python ecospheres_universe/feed_universe.py feed-universe [options] config-{env}.yaml env.yaml
 ```
 
 Options :
-- `--fail-on-error` : Abort on error.
-- `--keep-empty` : Conserve les organisations ne contenant pas de datasets pour la génération de la section `organizations`.
-- `--reset` : Vide l'univers de tous ses datasets avant de le repeupler. Si la conservation de l'id du topic existant n'a pas d'importance, il est plus simple de supprimer/recréer le topic.
-- `--slow` : À combiner avec `--reset` si l'univers contient beaucoup de jeux de données (milliers+) pour éviter les timeouts de l'API data.gouv.
+- `--dry-run` / `-n` : Perform a trial run without actual feeding
+- `--fail-on-errors` : Fail the run on http errors
+- `--keep-empty` / `-e` : Keep empty organizations in the list
+- `--reset` / `-r` : Empty topic before refeeding it
+- `--verbose-mode` : Enable verbose mode
 
 
 ## Utilisation du référentiel

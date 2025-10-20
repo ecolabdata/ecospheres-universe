@@ -29,7 +29,7 @@ jobs:
         DATAGOUV_URL: https://demo.data.gouv.fr
         DATAGOUV_API_KEY: ${{ secrets.DATAGOUV_API_KEY_DEMO }}
       run: |
-        python -u ecospheres_universe/feed_universe.py -f config-demo.yaml 2>&1 | tee logs/run_log_demo.txt
+        python -u ecospheres_universe/feed_universe.py config-demo.yaml --fail-on-errors 2>&1 | tee logs/run_log_demo.txt
         exit ${PIPESTATUS[0]}
 
     - name: Commit artifacts
@@ -70,7 +70,7 @@ jobs:
         DATAGOUV_URL: https://www.data.gouv.fr
         DATAGOUV_API_KEY: ${{ secrets.DATAGOUV_API_KEY_PROD }}
       run: |
-        python -u ecospheres_universe/feed_universe.py -f config-prod.yaml 2>&1 | tee logs/run_log_prod.txt
+        python -u ecospheres_universe/feed_universe.py config-prod.yaml --fail-on-errors 2>&1 | tee logs/run_log_prod.txt
         exit ${PIPESTATUS[0]}
 
     - name: Commit artifacts
