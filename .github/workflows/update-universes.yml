@@ -14,22 +14,21 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v7
       with:
-        python-version: '3.x'
+        enable-cache: true
 
     - name: Install dependencies
-      run: |
-        pip install --upgrade pip
-        pip install -r requirements.txt
+      run: uv sync
 
     - name: Update demo universe
       env:
         DATAGOUV_URL: https://demo.data.gouv.fr
         DATAGOUV_API_KEY: ${{ secrets.DATAGOUV_API_KEY_DEMO }}
+        PYTHONUNBUFFERED: 1
       run: |
-        python -u -m ecospheres_universe feed-universe config-demo.yaml --fail-on-errors 2>&1 | tee logs/run_log_demo.txt
+        uv run ecospheres-universe feed-universe config-demo.yaml --fail-on-errors 2>&1 | tee logs/run_log_demo.txt
         exit ${PIPESTATUS[0]}
 
     - name: Commit artifacts
@@ -55,22 +54,21 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v7
       with:
-        python-version: '3.x'
+        enable-cache: true
 
     - name: Install dependencies
-      run: |
-        pip install --upgrade pip
-        pip install -r requirements.txt
+      run: uv sync
 
     - name: Update prod universe
       env:
         DATAGOUV_URL: https://www.data.gouv.fr
         DATAGOUV_API_KEY: ${{ secrets.DATAGOUV_API_KEY_PROD }}
+        PYTHONUNBUFFERED: 1
       run: |
-        python -u -m ecospheres_universe feed-universe config-prod.yaml --fail-on-errors 2>&1 | tee logs/run_log_prod.txt
+        uv run ecospheres-universe feed-universe config-prod.yaml --fail-on-errors 2>&1 | tee logs/run_log_prod.txt
         exit ${PIPESTATUS[0]}
 
     - name: Commit artifacts
