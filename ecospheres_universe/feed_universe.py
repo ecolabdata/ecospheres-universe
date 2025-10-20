@@ -349,7 +349,7 @@ def feed_universe(
     bouquets = api.get_bouquets(conf["topic"])
     bouquet_orgs = list(
         {
-            o["id"]: Organization(id=o["id"], name=o["name"], slug=o["slug"], type="other")
+            o["id"]: Organization(id=o["id"], name=o["name"], slug=o["slug"], type="NA")
             for b in bouquets
             if (o := b.get("organization"))
         }.values()
