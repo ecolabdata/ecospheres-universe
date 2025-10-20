@@ -15,15 +15,23 @@ api:
 ## Créer ou mettre à jour un univers
 
 ```shell
-python ecospheres_universe/feed_universe.py feed-universe [options] config-{env}.yaml env.yaml
+python -m ecospheres_universe feed-universe [options] config-{env}.yaml [env.yaml]
 ```
 
 Options :
-- `--dry-run` / `-n` : Perform a trial run without actual feeding
+- `--dry-run` : Perform a trial run without actual feeding
 - `--fail-on-errors` : Fail the run on http errors
-- `--keep-empty` / `-e` : Keep empty organizations in the list
-- `--reset` / `-r` : Empty topic before refeeding it
-- `--verbose-mode` : Enable verbose mode
+- `--keep-empty` : Keep empty organizations in the list
+- `--reset` : Empty topic before refeeding it
+- `--verbose` : Enable verbose mode
+
+## Vérifier la synchronisation
+
+Vérifie la synchronisation entre l'index Elasticsearch de data.gouv.fr et la base de données MongoDB de data.gouv.fr pour les organisations de l'univers.
+
+```shell
+python -m ecospheres_universe check-sync config-{env}.yaml [env.yaml]
+```
 
 
 ## Utilisation du référentiel

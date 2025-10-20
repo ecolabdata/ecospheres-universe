@@ -206,7 +206,8 @@ class ApiHelper:
 
 @cli
 def feed_universe(
-    *universe: Path,
+    universe: Path,
+    *extra_configs: Path,
     keep_empty: bool = False,
     fail_on_errors: bool = False,
     dry_run: bool = False,
@@ -215,7 +216,8 @@ def feed_universe(
 ):
     """Feed the universe with datasets and dataservices from organizations.
 
-    :universe: Universe yaml config file(s)
+    :universe: Universe yaml config file
+    :extra_configs: Additional config files (optional)
     :keep_empty: Keep empty organizations in the list
     :fail_on_errors: Fail the run on http errors
     :dry_run: Perform a trial run without actual feeding
@@ -227,7 +229,7 @@ def feed_universe(
         verbose_print = print
 
     conf = {}
-    for u in universe:
+    for u in (universe,) + extra_configs:
         conf.update(yaml.safe_load(u.read_text()))
 
     url = conf['api']['url']

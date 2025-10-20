@@ -17,11 +17,16 @@ class Organization(NamedTuple):
 
 
 @cli
-def check_sync(*universe: Path):
+def check_sync(universe: Path, *extra_configs: Path):
+    """Check universe sync.
+
+    :universe: Universe yaml config file
+    :extra_configs: Additional config files (optional)
+    """
     print("Running check of universe sync...")
 
     conf = {}
-    for u in universe:
+    for u in (universe,) + extra_configs:
         conf.update(yaml.safe_load(u.read_text()))
 
     url = conf['api']['url']
