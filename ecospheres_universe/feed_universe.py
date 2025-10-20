@@ -9,7 +9,7 @@ from collections import defaultdict
 from enum import Enum
 from pathlib import Path
 from shutil import copyfile
-from typing import NamedTuple
+from typing import NamedTuple, Optional
 
 import requests
 import unicodedata
@@ -34,7 +34,7 @@ class Organization(NamedTuple):
     id: str
     name: str
     slug: str
-    type: str
+    type: Optional[str]
 
 
 class GristOrganization(NamedTuple):
@@ -349,7 +349,7 @@ def feed_universe(
     bouquets = api.get_bouquets(conf["topic"])
     bouquet_orgs = list(
         {
-            o["id"]: Organization(id=o["id"], name=o["name"], slug=o["slug"], type="NA")
+            o["id"]: Organization(id=o["id"], name=o["name"], slug=o["slug"], type=None)
             for b in bouquets
             if (o := b.get("organization"))
         }.values()
