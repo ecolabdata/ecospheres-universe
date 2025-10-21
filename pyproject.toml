@@ -1,0 +1,20 @@
+[project]
+name = "ecospheres-universe"
+version = "0.1.0"
+description = "Manage ecospheres universe topics on data.gouv.fr"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "minicli>=0.5.3",
+    "pyyaml>=6.0.3",
+    "requests>=2.32.5",
+]
+
+[project.scripts]
+ecospheres-universe = "ecospheres_universe.__main__:main"
+
+[tool.uv]
+package = true
+
+[tool.ruff]
+line-length = 100

@@ -1,4 +1,3 @@
-import argparse
 import datetime
 import functools
 import json
@@ -8,19 +7,21 @@ import time
 
 from collections import defaultdict
 from enum import Enum
+from pathlib import Path
 from shutil import copyfile
 from typing import NamedTuple
 
 import requests
 import unicodedata
 import yaml
+from minicli import cli, run
 
 REMOVALS_THRESHOLD = 1800
 
 session = requests.Session()
 
 # noop unless args.verbose is set
-def verbose(*args, **kwargs):
+def verbose_print(*args, **kwargs):
     return None
 
 
@@ -54,7 +55,7 @@ def elapsed_and_count(func):
         try:
             val = func(*args, **kwargs)
         finally:
-            verbose(f"<{func.__name__}: count={len(val or [])}, elapsed={time.time() - t:.2f}s>")
+            verbose_print(f"<{func.__name__}: count={len(val or [])}, elapsed={time.time() - t:.2f}s>")
         return val
     return wrapper_decorator
 
@@ -65,7 +66,7 @@ def elapsed(func):
         try:
             val = func(*args, **kwargs)
         finally:
-            verbose(f"<{func.__name__}: elapsed={time.time() - t:.2f}s>")
+            verbose_print(f"<{func.__name__}: elapsed={time.time() - t:.2f}s>")
         return val
     return wrapper_decorator
 
@@ -115,7 +116,7 @@ class ApiHelper:
         except requests.exceptions.HTTPError as e:
             if self.fail_on_errors:
                 raise
-            verbose(e)
+            verbose_print(e)
         return list(objects)
 
     def get_organization(self, org: str):
@@ -193,7 +194,7 @@ class ApiHelper:
             except requests.exceptions.HTTPError as e:
                 if self.fail_on_errors:
                     raise
-                verbose(e)
+                verbose_print(e)
 
     @elapsed
     def delete_all_topic_elements(self, topic):
@@ -203,49 +204,54 @@ class ApiHelper:
             session.delete(url, headers=headers).raise_for_status()
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('universe', nargs='+', type=argparse.FileType('r'), metavar='config',
-                        help='universe yaml config file')
-    parser.add_argument('-e', '--keep-empty', action='store_true', default=False,
-                        help='keep empty organizations in the list')
-    parser.add_argument('-f', '--fail-on-errors', action='store_true', default=False,
-                        help='fail the run on http errors')
-    parser.add_argument('-n', '--dry-run', action='store_true', default=False,
-                        help='perform a trial run without actual feeding')
-    parser.add_argument('-r', '--reset', action='store_true', default=False,
-                        help='empty topic before refeeding it')
-    parser.add_argument('-v', '--verbose', action='store_true', default=False,
-                        help='enable verbose mode')
-    args = parser.parse_args()
+@cli
+def feed_universe(
+    universe: Path,
+    *extra_configs: Path,
+    keep_empty: bool = False,
+    fail_on_errors: bool = False,
+    dry_run: bool = False,
+    reset: bool = False,
+    verbose: bool = False,
+):
+    """Feed the universe with datasets and dataservices from organizations.
+
+    :universe: Universe yaml config file
+    :extra_configs: Additional config files (optional)
+    :keep_empty: Keep empty organizations in the list
+    :fail_on_errors: Fail the run on http errors
+    :dry_run: Perform a trial run without actual feeding
+    :reset: Empty topic before refeeding it
+    :verbose: Enable verbose mode
+    """
+    global verbose_print
+    if verbose:
+        verbose_print = print
 
     conf = {}
-    for u in args.universe:
-        conf.update(yaml.safe_load(u))
+    for u in (universe,) + extra_configs:
+        conf.update(yaml.safe_load(u.read_text()))
 
     url = conf['api']['url']
     token = os.getenv("DATAGOUV_API_KEY", conf['api']['token'])
-    api = ApiHelper(url, token, fail_on_errors=args.fail_on_errors, dry_run=args.dry_run)
+    api = ApiHelper(url, token, fail_on_errors=fail_on_errors, dry_run=dry_run)
 
     topic_slug = conf['topic']
 
     grist_orgs = get_grist_orgs(conf['grist_url'], conf['env'])
 
-    if args.verbose:
-        verbose = print
-
     print(f"Starting at {datetime.datetime.now():%c}")
-    if args.dry_run:
+    if dry_run:
         print("*** DRY RUN ***")
 
     t_count: dict[ElementClass, int] = defaultdict(int)
     t_all = time.time()
     try:
-        verbose(f"Getting existing datasets for topic '{topic_slug}'")
+        verbose_print(f"Getting existing datasets for topic '{topic_slug}'")
         orgs: list[Organization] = []
 
         for org in grist_orgs:
-            verbose(f"Checking organization '{org.slug}'")
+            verbose_print(f"Checking organization '{org.slug}'")
             try:
                 api_org = api.get_organization(org.slug)
                 orgs.append(
@@ -264,7 +270,7 @@ if __name__ == "__main__":
 
         print(f"Processing {len(orgs)} organizations...")
 
-        if args.reset:
+        if reset:
             print(f"Removing ALL elements from topic '{topic_slug}'")
             api.delete_all_topic_elements(topic_slug)
 
@@ -274,10 +280,10 @@ if __name__ == "__main__":
         for element_class in ElementClass:
             new_objects = []
             for org in orgs:
-                verbose(f"Fetching {element_class.name} for organization '{org.slug}'...")
+                verbose_print(f"Fetching {element_class.name} for organization '{org.slug}'...")
                 objects = api.get_organization_objects(org.id, element_class)
-                if not objects and not args.keep_empty:
-                    verbose(f"Skipping empty organization '{org.slug}'")
+                if not objects and not keep_empty:
+                    verbose_print(f"Skipping empty organization '{org.slug}'")
                     continue
                 t_count[element_class] += len(objects)
                 active_orgs[element_class].append(org)
@@ -313,3 +319,7 @@ if __name__ == "__main__":
     copyfile(f"dist/organizations-datasets-{conf['env']}.json", f"dist/organizations-{conf['env']}.json")
 
     print(f"Done at {datetime.datetime.now():%c}")
+
+
+if __name__ == "__main__":
+    run(feed_universe)

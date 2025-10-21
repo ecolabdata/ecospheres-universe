@@ -2,6 +2,12 @@
 
 ## Mise en place
 
+Installer les dépendances avec [uv](https://docs.astral.sh/uv/):
+
+```shell
+uv sync
+```
+
 La configuration est stockée dans un fichier `config-{env}.yaml` en fonction du `env` sur lequel on travaille (`demo` ou `prod`).
 
 Pour renseigner le token d'API, utiliser la variable d'environnement `DATAGOUV_API_KEY` ou un autre fichier d'environnement (`env.yaml` dans les exemples ci-dessous) :
@@ -15,14 +21,23 @@ api:
 ## Créer ou mettre à jour un univers
 
 ```shell
-python feed-universe.py [--dry-run] [options] config-{env}.yaml env.yaml
+uv run ecospheres-universe feed-universe [options] config-{env}.yaml [env.yaml]
 ```
 
 Options :
-- `--fail-on-error` : Abort on error.
-- `--keep-empty` : Conserve les organisations ne contenant pas de datasets pour la génération de la section `organizations`.
-- `--reset` : Vide l'univers de tous ses datasets avant de le repeupler. Si la conservation de l'id du topic existant n'a pas d'importance, il est plus simple de supprimer/recréer le topic.
-- `--slow` : À combiner avec `--reset` si l'univers contient beaucoup de jeux de données (milliers+) pour éviter les timeouts de l'API data.gouv.
+- `--dry-run` : Perform a trial run without actual feeding
+- `--fail-on-errors` : Fail the run on http errors
+- `--keep-empty` : Keep empty organizations in the list
+- `--reset` : Empty topic before refeeding it
+- `--verbose` : Enable verbose mode
+
+## Vérifier la synchronisation
+
+Vérifie la synchronisation entre l'index Elasticsearch de data.gouv.fr et la base de données MongoDB de data.gouv.fr pour les organisations de l'univers.
+
+```shell
+uv run ecospheres-universe check-sync config-{env}.yaml [env.yaml]
+```
 
 
 ## Utilisation du référentiel
