@@ -9,7 +9,7 @@ from collections import defaultdict
 from enum import Enum
 from pathlib import Path
 from shutil import copyfile
-from typing import NamedTuple, Optional
+from typing import NamedTuple
 
 import requests
 import unicodedata
@@ -34,7 +34,7 @@ class Organization(NamedTuple):
     id: str
     name: str
     slug: str
-    type: Optional[str]
+    type: str | None
 
 
 class GristOrganization(NamedTuple):
