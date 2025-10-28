@@ -34,7 +34,7 @@ class Organization(NamedTuple):
     id: str
     name: str
     slug: str
-    type: str
+    type: str | None
 
 
 class GristOrganization(NamedTuple):
@@ -75,6 +75,18 @@ def batched(iterable, n=1):
     length = len(iterable)
     for ndx in range(0, length, n):
         yield iterable[ndx:min(ndx + n, length)]
+
+
+def sort_orgs_by_name(orgs: list[Organization]) -> list[Organization]:
+    """Sort organizations by name, ignoring diacritics"""
+    return sorted(orgs, key=lambda o: unicodedata.normalize("NFKD", o.name).encode("ascii", "ignore").decode("ascii").lower())
+
+
+def write_organizations_file(filename: str, orgs: list[Organization]):
+    """Write organizations list to a JSON file in dist/"""
+    print(f"Generating output file {filename}...")
+    with open(f"dist/{filename}", "w") as f:
+        json.dump([o._asdict() for o in orgs], f, indent=2, ensure_ascii=False)
 
 
 def get_grist_orgs(grist_url: str, env: str) -> list[GristOrganization]:
@@ -130,6 +142,23 @@ class ApiHelper:
         r = session.get(url)
         r.raise_for_status()
         return r.json()['id']
+
+    @elapsed_and_count
+    def get_bouquets(self, universe_tag: str, include_private: bool = True) -> list[dict]:
+        """Fetch all bouquets (topics) tagged with the universe tag"""
+        bouquets = []
+        headers = {}
+        url = f"{self.base_url}/api/2/topics/?tag={universe_tag}"
+        if include_private:
+            url = f"{url}&include_private=yes"
+            headers["X-API-KEY"] = self.token
+        while url:
+            r = session.get(url, headers=headers)
+            r.raise_for_status()
+            data = r.json()
+            bouquets.extend(data["data"])
+            url = data.get("next_page")
+        return bouquets
 
     def get_organization_objects(self, org_id: str, element_class: ElementClass) -> list[str]:
         url = f"{self.base_url}/api/2/{element_class.value}/search/?organization={org_id}&page_size=1000"
@@ -265,8 +294,7 @@ def feed_universe(
             except requests.exceptions.HTTPError:
                 print(f"Unknown organization '{org.slug}'", file=sys.stderr)
 
-        # sort by name, ignoring diacritics
-        orgs = sorted(orgs, key=lambda o: unicodedata.normalize("NFKD", o.name).encode("ascii", "ignore").decode("ascii").lower())
+        orgs = sort_orgs_by_name(orgs)
 
         print(f"Processing {len(orgs)} organizations...")
 
@@ -310,13 +338,24 @@ def feed_universe(
 
     for element_class in ElementClass:
         filename = f"organizations-{element_class.value}-{conf['env']}.json"
-        print(f"Generating output file {filename}...")
-        with open(f"dist/{filename}", "w") as f:
-            json.dump([o._asdict() for o in active_orgs[element_class]], f, indent=2, ensure_ascii=False)
+        write_organizations_file(filename, active_orgs[element_class])
 
     # FIXME: remove when front uses the new file path
     # retrocompatibility
     copyfile(f"dist/organizations-datasets-{conf['env']}.json", f"dist/organizations-{conf['env']}.json")
+
+    # Build a list of organizations from the list of bouquets
+    print("Fetching organizations from bouquets...")
+    bouquets = api.get_bouquets(conf["topic"])
+    bouquet_orgs = list(
+        {
+            o["id"]: Organization(id=o["id"], name=o["name"], slug=o["slug"], type=None)
+            for b in bouquets
+            if (o := b.get("organization"))
+        }.values()
+    )
+    bouquet_orgs = sort_orgs_by_name(bouquet_orgs)
+    write_organizations_file(f"organizations-bouquets-{conf['env']}.json", bouquet_orgs)
 
     print(f"Done at {datetime.datetime.now():%c}")
 
