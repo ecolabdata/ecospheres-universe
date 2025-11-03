@@ -346,7 +346,7 @@ def feed_universe(
 
     # Build a list of organizations from the list of bouquets
     print("Fetching organizations from bouquets...")
-    bouquets = api.get_bouquets(conf["topic"])
+    bouquets = api.get_bouquets(conf["tag"])
     bouquet_orgs = list(
         {
             o["id"]: Organization(id=o["id"], name=o["name"], slug=o["slug"], type=None)
