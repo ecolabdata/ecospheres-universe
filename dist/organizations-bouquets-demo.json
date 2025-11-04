@@ -1,56 +1,8 @@
 [
   {
-    "id": "5b1138d9c751df2618dc4662",
-    "name": "Agence ORE",
-    "slug": "agence-ore-3",
-    "type": null
-  },
-  {
-    "id": "67373f9ab57ae6297e2a31e7",
-    "name": "Docurba",
-    "slug": "docurba",
-    "type": null
-  },
-  {
-    "id": "5835d0a088ee3842afc65bb3",
-    "name": "DREAL Bourgogne-Franche-Comté",
-    "slug": "direction-regionale-de-lenvironnement-et-du-logement-bourgogne-franche-comte",
-    "type": null
-  },
-  {
     "id": "66f3e3e1aa2ff3ad298699de",
     "name": "ECOLAB",
     "slug": "ecolab",
-    "type": null
-  },
-  {
-    "id": "560d929ac751df40ef756894",
-    "name": "Enedis",
-    "slug": "electricite-reseau-distribution-france",
-    "type": null
-  },
-  {
-    "id": "5c547016634f41337edb2fea",
-    "name": "Makina Corpus",
-    "slug": "makina-corpus",
-    "type": null
-  },
-  {
-    "id": "534fff7aa3a7292c64a77e0c",
-    "name": "Métropole de Lyon",
-    "slug": "grand-lyon",
-    "type": null
-  },
-  {
-    "id": "580735be88ee3814295ff490",
-    "name": "Rennes Métropole en accès libre",
-    "slug": "rennes-metropole-en-acces-libre-1",
-    "type": null
-  },
-  {
-    "id": "67ebe46e23fdcc108cdce09d",
-    "name": "RésO Villes",
-    "slug": "reso-villes",
     "type": null
   },
   {
