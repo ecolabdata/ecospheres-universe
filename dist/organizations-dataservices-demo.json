@@ -112,5 +112,11 @@
     "name": "Système d'Information sur l'Eau",
     "slug": "systeme-d-information-sur-l-eau",
     "type": ""
+  },
+  {
+    "id": "683488ce49c7526820da233d",
+    "name": "Test GeoLittoral",
+    "slug": "test-geolittoral",
+    "type": ""
   }
 ]
