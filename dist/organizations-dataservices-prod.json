@@ -90,6 +90,12 @@
     "type": "Autre"
   },
   {
+    "id": "5be949a9634f415deb46af0e",
+    "name": "Lig'Air",
+    "slug": "ligair",
+    "type": "Association"
+  },
+  {
     "id": "534fff8ba3a7292c64a77ed4",
     "name": "Météo-France",
     "slug": "meteo-france",
