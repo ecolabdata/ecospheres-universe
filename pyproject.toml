@@ -3,11 +3,11 @@ name = "ecospheres-universe"
 version = "0.1.0"
 description = "Manage ecospheres universe topics on data.gouv.fr"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">= 3.13"
 dependencies = [
-    "minicli>=0.5.3",
-    "pyyaml>=6.0.3",
-    "requests>=2.32.5",
+    "minicli >= 0.5.3",
+    "pyyaml >= 6.0.3",
+    "requests >= 2.32.5",
 ]
 
 [project.scripts]
@@ -16,14 +16,24 @@ ecospheres-universe = "ecospheres_universe.__main__:main"
 [dependency-groups]
 dev = [
     "pre-commit",
+    "pytest >= 9",
     "ruff",
 ]
 
-[tool.uv]
-package = true
+[tool.pytest]
+minversion = "9.0"
+strict = true
+addopts = [
+    "-q",
+    "-ra",
+    "--import-mode=importlib"
+]
 
 [tool.ruff]
 line-length = 100
 
 [tool.setuptools]
 packages = ["ecospheres_universe"]
+
+[tool.uv]
+package = true
