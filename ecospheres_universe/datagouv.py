@@ -34,53 +34,11 @@ class DatagouvApi:
         self.dry_run = dry_run
         print(f"API for {self.base_url} ready.")
 
-    @elapsed_and_count
-    def get_objects(self, url, func, xfields="data{id}"):
-        objects = set()
-        try:
-            headers = {"X-Fields": f"{xfields},next_page"}
-            while True:
-                r = session.get(url, headers=headers)
-                r.raise_for_status()
-                c = r.json()
-                objects |= func(c)
-                url = c.get("next_page")
-                if not url:
-                    break
-        except requests.HTTPError as e:
-            if self.fail_on_errors:
-                raise
-            verbose_print(e)
-        return list(objects)
-
     def get_organization(self, org: str):
         url = f"{self.base_url}/api/1/organizations/{org}/"
         r = session.get(url)
         r.raise_for_status()
         return r.json()
-
-    def get_topic_id(self, topic_slug: str) -> str:
-        url = f"{self.base_url}/api/2/topics/{topic_slug}/"
-        r = session.get(url)
-        r.raise_for_status()
-        return r.json()["id"]
-
-    @elapsed_and_count
-    def get_bouquets(self, universe_tag: str, include_private: bool = True) -> list[dict]:
-        """Fetch all bouquets (topics) tagged with the universe tag"""
-        bouquets = []
-        headers = {}
-        url = f"{self.base_url}/api/2/topics/?tag={universe_tag}"
-        if include_private:
-            url = f"{url}&include_private=yes"
-            headers["X-API-KEY"] = self.token
-        while url:
-            r = session.get(url, headers=headers)
-            r.raise_for_status()
-            data = r.json()
-            bouquets.extend(data["data"])
-            url = data.get("next_page")
-        return bouquets
 
     def get_organization_objects(self, org_id: str, element_class: ElementClass) -> list[str]:
         url = f"{self.base_url}/api/2/{element_class.value}/search/?organization={org_id}&page_size=1000"
@@ -106,7 +64,13 @@ class DatagouvApi:
                 )
             }
 
-        return self.get_objects(url, filter_objects, xfields=xfields)
+        return self._get_objects(url, filter_objects, xfields=xfields)
+
+    def get_topic_id(self, topic_slug: str) -> str:
+        url = f"{self.base_url}/api/2/topics/{topic_slug}/"
+        r = session.get(url)
+        r.raise_for_status()
+        return r.json()["id"]
 
     def get_topic_datasets_count(self, topic_id: str, org_id: str, use_search: bool = False):
         url = f"{self.base_url}/api/2/datasets{'/search' if use_search else ''}/?topic={topic_id}&organization={org_id}&page_size=1"
@@ -114,6 +78,7 @@ class DatagouvApi:
         r.raise_for_status()
         return r.json()["total"]
 
+    # TODO: use _get_objects
     def get_topic_elements(self, topic: str, element_class: ElementClass) -> list[ElementJoin]:
         elements = []
         url = f"{self.base_url}/api/2/topics/{topic}/elements/?class={element_class.name}&page_size=1000"
@@ -160,3 +125,40 @@ class DatagouvApi:
         if not self.dry_run:
             headers = {"Content-Type": "application/json", "X-API-KEY": self.token}
             session.delete(url, headers=headers).raise_for_status()
+
+    # TODO: use _get_objects
+    @elapsed_and_count
+    def get_bouquets(self, universe_tag: str, include_private: bool = True) -> list[dict]:
+        """Fetch all bouquets (topics) tagged with the universe tag"""
+        bouquets = []
+        headers = {}
+        url = f"{self.base_url}/api/2/topics/?tag={universe_tag}"
+        if include_private:
+            url = f"{url}&include_private=yes"
+            headers["X-API-KEY"] = self.token
+        while url:
+            r = session.get(url, headers=headers)
+            r.raise_for_status()
+            data = r.json()
+            bouquets.extend(data["data"])
+            url = data.get("next_page")
+        return bouquets
+
+    @elapsed_and_count
+    def _get_objects(self, url, func, xfields="data{id}"):
+        objects = set()
+        try:
+            headers = {"X-Fields": f"{xfields},next_page"}
+            while True:
+                r = session.get(url, headers=headers)
+                r.raise_for_status()
+                c = r.json()
+                objects |= func(c)
+                url = c.get("next_page")
+                if not url:
+                    break
+        except requests.HTTPError as e:
+            if self.fail_on_errors:
+                raise
+            verbose_print(e)
+        return list(objects)
