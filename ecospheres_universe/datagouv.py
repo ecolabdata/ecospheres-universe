@@ -26,7 +26,7 @@ class Organization(NamedTuple):
     type: str | None
 
 
-class ApiHelper:
+class DatagouvApi:
     def __init__(self, base_url, token, fail_on_errors=False, dry_run=False):
         self.base_url = base_url
         self.token = token
@@ -47,7 +47,7 @@ class ApiHelper:
                 url = c.get("next_page")
                 if not url:
                     break
-        except requests.exceptions.HTTPError as e:
+        except requests.HTTPError as e:
             if self.fail_on_errors:
                 raise
             verbose_print(e)
@@ -149,7 +149,7 @@ class ApiHelper:
                 headers = {"X-API-KEY": self.token}
                 if not self.dry_run:
                     session.delete(url, headers=headers).raise_for_status()
-            except requests.exceptions.HTTPError as e:
+            except requests.HTTPError as e:
                 if self.fail_on_errors:
                     raise
                 verbose_print(e)

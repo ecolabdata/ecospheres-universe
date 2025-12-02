@@ -13,8 +13,8 @@ import unicodedata
 
 from minicli import cli, run
 
-from ecospheres_universe.datagouv import ApiHelper, ElementClass, Organization
-from ecospheres_universe.grist import get_grist_orgs
+from ecospheres_universe.datagouv import DatagouvApi, ElementClass, Organization
+from ecospheres_universe.grist import GristApi
 from ecospheres_universe.util import (
     batched,
     load_configs,
@@ -69,13 +69,18 @@ def feed_universe(
 
     conf = load_configs(universe, *extra_configs)
 
-    url = conf["api"]["url"]
-    token = os.getenv("DATAGOUV_API_KEY", conf["api"]["token"])
-    api = ApiHelper(url, token, fail_on_errors=fail_on_errors, dry_run=dry_run)
+    datagouv = DatagouvApi(
+        base_url=conf["api"]["url"],
+        token=os.getenv("DATAGOUV_API_KEY", conf["api"]["token"]),
+        fail_on_errors=fail_on_errors,
+        dry_run=dry_run,
+    )
+
+    grist = GristApi(base_url=conf["grist_url"], env=conf["env"])
 
     topic_slug = conf["topic"]
 
-    grist_orgs = get_grist_orgs(conf["grist_url"], conf["env"])
+    grist_orgs = grist.get_organizations()
 
     print(f"Starting at {datetime.datetime.now():%c}")
     if dry_run:
@@ -90,7 +95,7 @@ def feed_universe(
         for org in grist_orgs:
             verbose_print(f"Checking organization '{org.slug}'")
             try:
-                api_org = api.get_organization(org.slug)
+                api_org = datagouv.get_organization(org.slug)
                 orgs.append(
                     Organization(
                         id=api_org["id"],
@@ -108,7 +113,7 @@ def feed_universe(
 
         if reset:
             print(f"Removing ALL elements from topic '{topic_slug}'")
-            api.delete_all_topic_elements(topic_slug)
+            datagouv.delete_all_topic_elements(topic_slug)
 
         active_orgs: dict[ElementClass, list[Organization]] = defaultdict(list)
 
@@ -117,7 +122,7 @@ def feed_universe(
             new_objects = []
             for org in orgs:
                 verbose_print(f"Fetching {element_class.name} for organization '{org.slug}'...")
-                objects = api.get_organization_objects(org.id, element_class)
+                objects = datagouv.get_organization_objects(org.id, element_class)
                 if not objects and not keep_empty:
                     verbose_print(f"Skipping empty organization '{org.slug}'")
                     continue
@@ -125,7 +130,7 @@ def feed_universe(
                 active_orgs[element_class].append(org)
                 new_objects += objects
 
-            existing_elements = api.get_topic_elements(topic_slug, element_class)
+            existing_elements = datagouv.get_topic_elements(topic_slug, element_class)
             existing_object_ids = set(e.object_id for e in existing_elements)
             print(
                 f"Found {len(existing_object_ids)} existing {element_class.name} in universe topic."
@@ -136,10 +141,10 @@ def feed_universe(
                 raise Exception(f"Too many removals ({len(removals)}), aborting")
             print(f"Feeding {len(additions)} {element_class.value}...")
             for batch in batched(additions, 1000):
-                api.put_topic_elements(topic_slug, element_class, batch)
+                datagouv.put_topic_elements(topic_slug, element_class, batch)
             print(f"Removing {len(removals)} {element_class.value}...")
             elements_removals = [e.element_id for e in existing_elements if e.object_id in removals]
-            api.delete_topic_elements(topic_slug, elements_removals)
+            datagouv.delete_topic_elements(topic_slug, elements_removals)
 
     finally:
         print(f"Elapsed: {time.time() - t_all:.2f} s")
@@ -158,7 +163,7 @@ def feed_universe(
 
     # Build a list of organizations from the list of bouquets
     print("Fetching organizations from bouquets...")
-    bouquets = api.get_bouquets(conf["tag"])
+    bouquets = datagouv.get_bouquets(conf["tag"])
     bouquet_orgs = list(
         {
             o["id"]: Organization(id=o["id"], name=o["name"], slug=o["slug"], type=None)

@@ -7,8 +7,8 @@ import requests
 
 from minicli import cli, run
 
-from ecospheres_universe.datagouv import ApiHelper
-from ecospheres_universe.grist import get_grist_orgs
+from ecospheres_universe.datagouv import DatagouvApi
+from ecospheres_universe.grist import GristApi
 from ecospheres_universe.util import load_configs
 
 
@@ -28,27 +28,33 @@ def check_sync(universe: Path, *extra_configs: Path):
 
     conf = load_configs(universe, *extra_configs)
 
-    url = conf["api"]["url"]
-    api = ApiHelper(url, "no-token-needed", fail_on_errors=False, dry_run=True)
+    datagouv = DatagouvApi(
+        base_url=conf["api"]["url"],
+        token="no-token-needed",
+        fail_on_errors=False,
+        dry_run=True,
+    )
 
-    grist_orgs = get_grist_orgs(conf["grist_url"], conf["env"])
+    grist = GristApi(base_url=conf["grist_url"], env=conf["env"])
+
+    grist_orgs = grist.get_organizations()
     grist_orgs = sorted(grist_orgs, key=lambda o: o.slug)
 
     topic_slug = conf["topic"]
-    topic_id = api.get_topic_id(topic_slug)
+    topic_id = datagouv.get_topic_id(topic_slug)
 
     orgs: set[Organization] = set()
     for org in grist_orgs:
         try:
-            api_org = api.get_organization(org.slug)
+            api_org = datagouv.get_organization(org.slug)
             orgs.add(Organization(id=api_org["id"], name=api_org["name"]))
         except requests.HTTPError:
             print(f"Unknown organization '{org.slug}'", file=sys.stderr)
 
     nb_errors = 0
     for org in orgs:
-        datasets_wo_es = api.get_topic_datasets_count(topic_id, org.id, use_search=False)
-        datasets_w_es = api.get_topic_datasets_count(topic_id, org.id, use_search=True)
+        datasets_wo_es = datagouv.get_topic_datasets_count(topic_id, org.id, use_search=False)
+        datasets_w_es = datagouv.get_topic_datasets_count(topic_id, org.id, use_search=True)
         if datasets_w_es == datasets_wo_es:
             print(f"✅ ({datasets_w_es}) — {org.name}")
         else:
