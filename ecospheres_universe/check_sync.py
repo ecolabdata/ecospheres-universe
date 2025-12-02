@@ -29,13 +29,13 @@ def check_sync(universe: Path, *extra_configs: Path):
     for u in (universe,) + extra_configs:
         conf.update(yaml.safe_load(u.read_text()))
 
-    url = conf['api']['url']
+    url = conf["api"]["url"]
     api = ApiHelper(url, "no-token-needed", fail_on_errors=False, dry_run=True)
 
-    grist_orgs = get_grist_orgs(conf['grist_url'], conf['env'])
+    grist_orgs = get_grist_orgs(conf["grist_url"], conf["env"])
     grist_orgs = sorted(grist_orgs, key=lambda o: o.slug)
 
-    topic_slug = conf['topic']
+    topic_slug = conf["topic"]
     topic_id = api.get_topic_id(topic_slug)
 
     orgs: set[Organization] = set()
