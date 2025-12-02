@@ -10,7 +10,6 @@ from shutil import copyfile
 
 import requests
 import unicodedata
-import yaml
 
 from minicli import cli, run
 
@@ -18,6 +17,7 @@ from ecospheres_universe.datagouv import ApiHelper, ElementClass, Organization
 from ecospheres_universe.grist import get_grist_orgs
 from ecospheres_universe.util import (
     batched,
+    load_configs,
     verbose_print,  # noqa: F401
 )
 
@@ -67,9 +67,7 @@ def feed_universe(
     if verbose:
         verbose_print = print
 
-    conf = {}
-    for u in (universe,) + extra_configs:
-        conf.update(yaml.safe_load(u.read_text()))
+    conf = load_configs(universe, *extra_configs)
 
     url = conf["api"]["url"]
     token = os.getenv("DATAGOUV_API_KEY", conf["api"]["token"])

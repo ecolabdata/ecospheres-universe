@@ -1,5 +1,9 @@
 import functools
 import time
+import yaml
+
+from pathlib import Path
+from typing import Any
 
 
 def batched(iterable, n=1):
@@ -35,6 +39,13 @@ def elapsed(func):
         return val
 
     return wrapper_decorator
+
+
+def load_configs(*paths: Path) -> dict[str, Any]:
+    conf: dict[str, Any] = {}
+    for path in paths:
+        conf.update(yaml.safe_load(path.read_text()))
+    return conf
 
 
 # noop unless args.verbose is set

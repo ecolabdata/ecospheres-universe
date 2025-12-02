@@ -1,5 +1,4 @@
 import sys
-import yaml
 
 from pathlib import Path
 from typing import NamedTuple
@@ -10,6 +9,7 @@ from minicli import cli, run
 
 from ecospheres_universe.datagouv import ApiHelper
 from ecospheres_universe.grist import get_grist_orgs
+from ecospheres_universe.util import load_configs
 
 
 class Organization(NamedTuple):
@@ -26,9 +26,7 @@ def check_sync(universe: Path, *extra_configs: Path):
     """
     print("Running check of universe sync...")
 
-    conf = {}
-    for u in (universe,) + extra_configs:
-        conf.update(yaml.safe_load(u.read_text()))
+    conf = load_configs(universe, *extra_configs)
 
     url = conf["api"]["url"]
     api = ApiHelper(url, "no-token-needed", fail_on_errors=False, dry_run=True)
