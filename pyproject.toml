@@ -13,6 +13,12 @@ dependencies = [
 [project.scripts]
 ecospheres-universe = "ecospheres_universe.__main__:main"
 
+[dependency-groups]
+dev = [
+    "pre-commit",
+    "ruff",
+]
+
 [tool.uv]
 package = true
 

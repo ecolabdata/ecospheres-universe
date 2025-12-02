@@ -20,6 +20,7 @@ REMOVALS_THRESHOLD = 1800
 
 session = requests.Session()
 
+
 # noop unless args.verbose is set
 def verbose_print(*args, **kwargs):
     return None
@@ -55,9 +56,13 @@ def elapsed_and_count(func):
         try:
             val = func(*args, **kwargs)
         finally:
-            verbose_print(f"<{func.__name__}: count={len(val or [])}, elapsed={time.time() - t:.2f}s>")
+            verbose_print(
+                f"<{func.__name__}: count={len(val or [])}, elapsed={time.time() - t:.2f}s>"
+            )
         return val
+
     return wrapper_decorator
+
 
 def elapsed(func):
     @functools.wraps(func)
@@ -68,18 +73,25 @@ def elapsed(func):
         finally:
             verbose_print(f"<{func.__name__}: elapsed={time.time() - t:.2f}s>")
         return val
+
     return wrapper_decorator
 
 
 def batched(iterable, n=1):
     length = len(iterable)
     for ndx in range(0, length, n):
-        yield iterable[ndx:min(ndx + n, length)]
+        yield iterable[ndx : min(ndx + n, length)]
 
 
 def sort_orgs_by_name(orgs: list[Organization]) -> list[Organization]:
     """Sort organizations by name, ignoring diacritics"""
-    return sorted(orgs, key=lambda o: unicodedata.normalize("NFKD", o.name).encode("ascii", "ignore").decode("ascii").lower())
+    return sorted(
+        orgs,
+        key=lambda o: unicodedata.normalize("NFKD", o.name)
+        .encode("ascii", "ignore")
+        .decode("ascii")
+        .lower(),
+    )
 
 
 def write_organizations_file(filename: str, orgs: list[Organization]):
@@ -90,13 +102,18 @@ def write_organizations_file(filename: str, orgs: list[Organization]):
 
 
 def get_grist_orgs(grist_url: str, env: str) -> list[GristOrganization]:
-    r = requests.get(grist_url, params={'filter': json.dumps({'env': [env]}), 'limit': 0})
+    r = requests.get(grist_url, params={"filter": json.dumps({"env": [env]}), "limit": 0})
     r.raise_for_status()
     # deduplicated list
-    return list({
-        o['fields']['slug']: GristOrganization(slug=o['fields']['slug'], type=o['fields']['type'])
-        for o in r.json()['records']
-    }.values())
+    return list(
+        {
+            o["fields"]["slug"]: GristOrganization(
+                slug=o["fields"]["slug"], type=o["fields"]["type"]
+            )
+            for o in r.json()["records"]
+        }.values()
+    )
+
 
 class IndentedDumper(yaml.Dumper):
     def increase_indent(self, flow=False, indentless=False):
@@ -104,7 +121,6 @@ class IndentedDumper(yaml.Dumper):
 
 
 class ApiHelper:
-
     def __init__(self, base_url, token, fail_on_errors=False, dry_run=False):
         self.base_url = base_url
         self.token = token
@@ -113,16 +129,16 @@ class ApiHelper:
         print(f"API for {self.base_url} ready.")
 
     @elapsed_and_count
-    def get_objects(self, url, func, xfields='data{id}'):
+    def get_objects(self, url, func, xfields="data{id}"):
         objects = set()
         try:
-            headers={'X-Fields': f"{xfields},next_page"}
+            headers = {"X-Fields": f"{xfields},next_page"}
             while True:
                 r = session.get(url, headers=headers)
                 r.raise_for_status()
                 c = r.json()
                 objects |= func(c)
-                url = c.get('next_page')
+                url = c.get("next_page")
                 if not url:
                     break
         except requests.exceptions.HTTPError as e:
@@ -141,7 +157,7 @@ class ApiHelper:
         url = f"{self.base_url}/api/2/topics/{topic_slug}/"
         r = session.get(url)
         r.raise_for_status()
-        return r.json()['id']
+        return r.json()["id"]
 
     @elapsed_and_count
     def get_bouquets(self, universe_tag: str, include_private: bool = True) -> list[dict]:
@@ -162,7 +178,8 @@ class ApiHelper:
 
     def get_organization_objects(self, org_id: str, element_class: ElementClass) -> list[str]:
         url = f"{self.base_url}/api/2/{element_class.value}/search/?organization={org_id}&page_size=1000"
-        xfields = 'data{id,archived,archived_at,deleted,deleted_at,private,extras{geop:dataset_id}}'
+        xfields = "data{id,archived,archived_at,deleted,deleted_at,private,extras{geop:dataset_id}}"
+
         def filter_objects(c):
             return {
                 d["id"]
@@ -182,6 +199,7 @@ class ApiHelper:
                     or d.get("extras")
                 )
             }
+
         return self.get_objects(url, filter_objects, xfields=xfields)
 
     def get_topic_datasets_count(self, topic_id: str, org_id: str, use_search: bool = False):
@@ -197,8 +215,13 @@ class ApiHelper:
             r = session.get(url)
             r.raise_for_status()
             c = r.json()
-            elements.extend([ElementJoin(element_id=elt['id'], object_id=elt['element']['id']) for elt in c['data']])
-            url = c.get('next_page')
+            elements.extend(
+                [
+                    ElementJoin(element_id=elt["id"], object_id=elt["element"]["id"])
+                    for elt in c["data"]
+                ]
+            )
+            url = c.get("next_page")
             if not url:
                 break
         return elements
@@ -206,8 +229,8 @@ class ApiHelper:
     @elapsed_and_count
     def put_topic_elements(self, topic, element_class: ElementClass, objects):
         url = f"{self.base_url}/api/2/topics/{topic}/elements/"
-        headers = {'Content-Type': 'application/json', 'X-API-KEY': self.token}
-        data = [{'element': {'class': element_class.name, 'id': d}} for d in objects]
+        headers = {"Content-Type": "application/json", "X-API-KEY": self.token}
+        data = [{"element": {"class": element_class.name, "id": d}} for d in objects]
         if not self.dry_run:
             session.post(url, json=data, headers=headers).raise_for_status()
         return objects
@@ -217,7 +240,7 @@ class ApiHelper:
         for elt in elements:
             try:
                 url = f"{self.base_url}/api/2/topics/{topic}/elements/{elt}/"
-                headers = {'X-API-KEY': self.token}
+                headers = {"X-API-KEY": self.token}
                 if not self.dry_run:
                     session.delete(url, headers=headers).raise_for_status()
             except requests.exceptions.HTTPError as e:
@@ -229,7 +252,7 @@ class ApiHelper:
     def delete_all_topic_elements(self, topic):
         url = f"{self.base_url}/api/2/topics/{topic}/elements/"
         if not self.dry_run:
-            headers = {'Content-Type': 'application/json', 'X-API-KEY': self.token}
+            headers = {"Content-Type": "application/json", "X-API-KEY": self.token}
             session.delete(url, headers=headers).raise_for_status()
 
 
@@ -261,13 +284,13 @@ def feed_universe(
     for u in (universe,) + extra_configs:
         conf.update(yaml.safe_load(u.read_text()))
 
-    url = conf['api']['url']
-    token = os.getenv("DATAGOUV_API_KEY", conf['api']['token'])
+    url = conf["api"]["url"]
+    token = os.getenv("DATAGOUV_API_KEY", conf["api"]["token"])
     api = ApiHelper(url, token, fail_on_errors=fail_on_errors, dry_run=dry_run)
 
-    topic_slug = conf['topic']
+    topic_slug = conf["topic"]
 
-    grist_orgs = get_grist_orgs(conf['grist_url'], conf['env'])
+    grist_orgs = get_grist_orgs(conf["grist_url"], conf["env"])
 
     print(f"Starting at {datetime.datetime.now():%c}")
     if dry_run:
@@ -319,7 +342,9 @@ def feed_universe(
 
             existing_elements = api.get_topic_elements(topic_slug, element_class)
             existing_object_ids = set(e.object_id for e in existing_elements)
-            print(f"Found {len(existing_object_ids)} existing {element_class.name} in universe topic.")
+            print(
+                f"Found {len(existing_object_ids)} existing {element_class.name} in universe topic."
+            )
             additions = list(set(new_objects) - existing_object_ids)
             removals = list(existing_object_ids - set(new_objects))
             if len(removals) > REMOVALS_THRESHOLD:
@@ -342,7 +367,9 @@ def feed_universe(
 
     # FIXME: remove when front uses the new file path
     # retrocompatibility
-    copyfile(f"dist/organizations-datasets-{conf['env']}.json", f"dist/organizations-{conf['env']}.json")
+    copyfile(
+        f"dist/organizations-datasets-{conf['env']}.json", f"dist/organizations-{conf['env']}.json"
+    )
 
     # Build a list of organizations from the list of bouquets
     print("Fetching organizations from bouquets...")
