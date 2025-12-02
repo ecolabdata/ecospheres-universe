@@ -2,14 +2,15 @@ import functools
 import time
 import yaml
 
+from collections.abc import Generator, Sequence
 from pathlib import Path
 from typing import Any
 
 
-def batched(iterable, n=1):
-    length = len(iterable)
+def batched[T](sequence: Sequence[T], n=1) -> Generator[Sequence[T]]:
+    length = len(sequence)
     for ndx in range(0, length, n):
-        yield iterable[ndx : min(ndx + n, length)]
+        yield sequence[ndx : min(ndx + n, length)]
 
 
 def elapsed_and_count(func):

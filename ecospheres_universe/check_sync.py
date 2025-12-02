@@ -40,7 +40,7 @@ def check_sync(universe: Path, *extra_configs: Path):
     grist_orgs = grist.get_organizations()
     grist_orgs = sorted(grist_orgs, key=lambda o: o.slug)
 
-    topic_slug = conf["topic"]
+    topic_slug = str(conf["topic"])
     topic_id = datagouv.get_topic_id(topic_slug)
 
     orgs: set[Organization] = set()

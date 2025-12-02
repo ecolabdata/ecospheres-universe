@@ -76,9 +76,9 @@ def feed_universe(
         dry_run=dry_run,
     )
 
-    grist = GristApi(base_url=conf["grist_url"], env=conf["env"])
+    grist = GristApi(conf["grist_url"], conf["env"])
 
-    topic_slug = conf["topic"]
+    topic_slug = str(conf["topic"])
 
     grist_orgs = grist.get_organizations()
 
@@ -119,31 +119,31 @@ def feed_universe(
 
         print(f"Processing topic '{topic_slug}'")
         for element_class in ElementClass:
-            new_objects = []
+            new_objects_ids = list[str]()
             for org in orgs:
                 verbose_print(f"Fetching {element_class.name} for organization '{org.slug}'...")
-                objects = datagouv.get_organization_objects(org.id, element_class)
-                if not objects and not keep_empty:
+                objects_ids = datagouv.get_organization_objects_ids(org.id, element_class)
+                if not objects_ids and not keep_empty:
                     verbose_print(f"Skipping empty organization '{org.slug}'")
                     continue
-                t_count[element_class] += len(objects)
+                t_count[element_class] += len(objects_ids)
                 active_orgs[element_class].append(org)
-                new_objects += objects
+                new_objects_ids += objects_ids
 
             existing_elements = datagouv.get_topic_elements(topic_slug, element_class)
-            existing_object_ids = set(e.object_id for e in existing_elements)
+            existing_objects_ids = set(e.object_id for e in existing_elements)
             print(
-                f"Found {len(existing_object_ids)} existing {element_class.name} in universe topic."
+                f"Found {len(existing_objects_ids)} existing {element_class.name} in universe topic."
             )
-            additions = list(set(new_objects) - existing_object_ids)
-            removals = list(existing_object_ids - set(new_objects))
+            additions = list(set(new_objects_ids) - existing_objects_ids)
+            removals = list(existing_objects_ids - set(new_objects_ids))
             if len(removals) > REMOVALS_THRESHOLD:
                 raise Exception(f"Too many removals ({len(removals)}), aborting")
             print(f"Feeding {len(additions)} {element_class.value}...")
             for batch in batched(additions, 1000):
-                datagouv.put_topic_elements(topic_slug, element_class, batch)
+                _ = datagouv.put_topic_elements(topic_slug, element_class, batch)
             print(f"Removing {len(removals)} {element_class.value}...")
-            elements_removals = [e.element_id for e in existing_elements if e.object_id in removals]
+            elements_removals = [e.id for e in existing_elements if e.object_id in removals]
             datagouv.delete_topic_elements(topic_slug, elements_removals)
 
     finally:
