@@ -8,7 +8,8 @@ import requests
 
 from minicli import cli, run
 
-from ecospheres_universe.feed_universe import ApiHelper, get_grist_orgs
+from ecospheres_universe.datagouv import ApiHelper
+from ecospheres_universe.grist import get_grist_orgs
 
 
 class Organization(NamedTuple):
@@ -43,7 +44,7 @@ def check_sync(universe: Path, *extra_configs: Path):
         try:
             api_org = api.get_organization(org.slug)
             orgs.add(Organization(id=api_org["id"], name=api_org["name"]))
-        except requests.exceptions.HTTPError:
+        except requests.HTTPError:
             print(f"Unknown organization '{org.slug}'", file=sys.stderr)
 
     nb_errors = 0
