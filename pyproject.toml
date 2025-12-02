@@ -24,3 +24,6 @@ package = true
 
 [tool.ruff]
 line-length = 100
+
+[tool.setuptools]
+packages = ["ecospheres_universe"]
