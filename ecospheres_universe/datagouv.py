@@ -89,11 +89,11 @@ class DatagouvApi:
         while True:
             r = session.get(url)
             r.raise_for_status()
-            json = r.json()
+            data = r.json()
             elements.extend(
-                [Element(id=elt["id"], object_id=elt["element"]["id"]) for elt in json["data"]]
+                [Element(id=elt["id"], object_id=elt["element"]["id"]) for elt in data["data"]]
             )
-            url = json.get("next_page")
+            url = data.get("next_page")
             if not url:
                 break
         return elements
@@ -142,9 +142,9 @@ class DatagouvApi:
         while url:
             r = session.get(url, headers=headers)
             r.raise_for_status()
-            json = r.json()
-            bouquets.extend(json["data"])
-            url = json.get("next_page")
+            data = r.json()
+            bouquets.extend(data["data"])
+            url = data.get("next_page")
         return bouquets
 
     @elapsed_and_count
@@ -157,9 +157,9 @@ class DatagouvApi:
             while True:
                 r = session.get(url, headers=headers)
                 r.raise_for_status()
-                json = r.json()
-                objects_ids |= func(json["data"])
-                url = json.get("next_page")
+                data = r.json()
+                objects_ids |= func(data["data"])
+                url = data.get("next_page")
                 if not url:
                     break
         except requests.HTTPError as e:

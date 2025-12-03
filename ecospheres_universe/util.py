@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 
-def batched[T](sequence: Sequence[T], n=1) -> Generator[Sequence[T]]:
+def batched[T](sequence: Sequence[T], n: int = 1) -> Generator[Sequence[T]]:
     length = len(sequence)
     for ndx in range(0, length, n):
         yield sequence[ndx : min(ndx + n, length)]
