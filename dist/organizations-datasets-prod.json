@@ -210,6 +210,12 @@
     "type": "DDT(M)"
   },
   {
+    "id": "558e9c3ec751df75fea453c7",
+    "name": "DDT de la Marne (DDT51)",
+    "slug": "direction-departementale-des-territoires-de-la-marne-ddt51",
+    "type": "DDT(M)"
+  },
+  {
     "id": "5883d4c488ee3809bb9b81a5",
     "name": "DDT de la Meuse",
     "slug": "ddt-de-la-meuse",
@@ -531,12 +537,6 @@
     "id": "558a7e80c751df627ca453b9",
     "name": "Direction Départementale des Territoires de la Lozère",
     "slug": "direction-departementale-des-territoires-de-la-lozere",
-    "type": "DDT(M)"
-  },
-  {
-    "id": "558e9c3ec751df75fea453c7",
-    "name": "Direction Départementale des Territoires de la Marne (DDT51)",
-    "slug": "direction-departementale-des-territoires-de-la-marne-ddt51",
     "type": "DDT(M)"
   },
   {
