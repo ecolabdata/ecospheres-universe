@@ -3,12 +3,10 @@ import sys
 from pathlib import Path
 from typing import NamedTuple
 
-import requests
-
 from minicli import cli, run
 
 from ecospheres_universe.datagouv import DatagouvApi
-from ecospheres_universe.grist import GristApi
+from ecospheres_universe.grist import GristApi, GristType
 from ecospheres_universe.util import load_configs
 
 
@@ -37,7 +35,8 @@ def check_sync(universe: Path, *extra_configs: Path):
 
     grist = GristApi(base_url=conf["grist_url"], env=conf["env"])
 
-    grist_orgs = grist.get_organizations()
+    # LATER: handle all types
+    grist_orgs = [e for e in grist.get_grist_entries() if e.type is GristType.ORGANIZATION]
     grist_orgs = sorted(grist_orgs, key=lambda o: o.slug)
 
     topic_slug = str(conf["topic"])
@@ -45,11 +44,11 @@ def check_sync(universe: Path, *extra_configs: Path):
 
     orgs: set[Organization] = set()
     for org in grist_orgs:
-        try:
-            api_org = datagouv.get_organization(org.slug)
-            orgs.add(Organization(id=api_org["id"], name=api_org["name"]))
-        except requests.HTTPError:
-            print(f"Unknown organization '{org.slug}'", file=sys.stderr)
+        api_org = datagouv.get_organization(org.slug)
+        if not api_org:
+            print(f"Unknown organization {org.slug}", file=sys.stderr)
+            continue
+        orgs.add(Organization(id=api_org.id, name=api_org.name))
 
     nb_errors = 0
     for org in orgs:

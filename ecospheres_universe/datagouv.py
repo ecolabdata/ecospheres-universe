@@ -3,7 +3,7 @@ import requests
 from enum import Enum
 from typing import Any, Callable, NamedTuple
 
-from ecospheres_universe.util import elapsed, elapsed_and_count, verbose_print
+from ecospheres_universe.util import batched, elapsed, elapsed_and_count, verbose_print
 
 
 session = requests.Session()
@@ -23,7 +23,6 @@ class Organization(NamedTuple):
     id: str
     name: str
     slug: str
-    type: str | None
 
 
 class DatagouvApi:
@@ -36,13 +35,15 @@ class DatagouvApi:
         self.dry_run = dry_run
         print(f"API for {self.base_url} ready.")
 
-    def get_organization(self, org_id_or_slug: str) -> dict[str, Any]:
+    def get_organization(self, org_id_or_slug: str) -> Organization | None:
         url = f"{self.base_url}/api/1/organizations/{org_id_or_slug}/"
         r = session.get(url)
-        r.raise_for_status()
-        return r.json()
+        if not r.ok:
+            return None
+        data = r.json()
+        return Organization(id=data["id"], name=data["name"], slug=data["slug"])
 
-    def get_organization_objects_ids(self, org_id: str, element_class: ElementClass) -> list[str]:
+    def get_organization_object_ids(self, org_id: str, element_class: ElementClass) -> list[str]:
         url = f"{self.base_url}/api/2/{element_class.value}/search/?organization={org_id}&page_size=1000"
         xfields = "data{id,archived,archived_at,deleted,deleted_at,private,extras{geop:dataset_id}}"
 
@@ -100,14 +101,19 @@ class DatagouvApi:
 
     @elapsed_and_count
     def put_topic_elements(
-        self, topic_id_or_slug: str, element_class: ElementClass, objects_ids: list[str]
-    ) -> list[str]:
+        self,
+        topic_id_or_slug: str,
+        element_class: ElementClass,
+        objects_ids: list[str],
+        batch_size: int = 0,
+    ) -> None:
         url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/elements/"
         headers = {"Content-Type": "application/json", "X-API-KEY": self.token}
-        data = [{"element": {"class": element_class.name, "id": id}} for id in objects_ids]
-        if not self.dry_run:
-            session.post(url, json=data, headers=headers).raise_for_status()
-        return objects_ids
+        batches = batched(objects_ids, batch_size) if batch_size else [objects_ids]
+        for batch in batches:
+            data = [{"element": {"class": element_class.name, "id": id}} for id in batch]
+            if not self.dry_run:
+                session.post(url, json=data, headers=headers).raise_for_status()
 
     @elapsed
     def delete_topic_elements(self, topic_id_or_slug: str, elements_ids: list[str]) -> None:

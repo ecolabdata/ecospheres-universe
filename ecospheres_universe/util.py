@@ -2,12 +2,14 @@ import functools
 import time
 import yaml
 
-from collections.abc import Generator, Sequence
+from collections.abc import Generator
 from pathlib import Path
 from typing import Any
 
+import unicodedata
 
-def batched[T](sequence: Sequence[T], n: int = 1) -> Generator[Sequence[T]]:
+
+def batched[T](sequence: list[T], n: int = 1) -> Generator[list[T]]:
     length = len(sequence)
     for ndx in range(0, length, n):
         yield sequence[ndx : min(ndx + n, length)]
@@ -47,6 +49,11 @@ def load_configs(*paths: Path) -> dict[str, Any]:
     for path in paths:
         conf.update(yaml.safe_load(path.read_text()))
     return conf
+
+
+def normalized_string(string: str) -> str:
+    """Return NFKD-normalized, ascii-folded, lowercased form of the input string"""
+    return unicodedata.normalize("NFKD", string).encode("ascii", "ignore").decode("ascii").lower()
 
 
 # noop unless args.verbose is set

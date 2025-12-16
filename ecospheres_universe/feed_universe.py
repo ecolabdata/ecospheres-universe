@@ -1,23 +1,20 @@
 import datetime
 import json
 import os
-import sys
 import time
+import sys
 
-from collections import defaultdict
 from pathlib import Path
 from shutil import copyfile
-
-import requests
-import unicodedata
+from typing import NamedTuple
 
 from minicli import cli, run
 
-from ecospheres_universe.datagouv import DatagouvApi, ElementClass, Organization
-from ecospheres_universe.grist import GristApi
+from ecospheres_universe.datagouv import DatagouvApi, ElementClass
+from ecospheres_universe.grist import GristApi, GristEntry, GristType
 from ecospheres_universe.util import (
-    batched,
     load_configs,
+    normalized_string,
     verbose_print,  # noqa: F401
 )
 
@@ -25,22 +22,50 @@ from ecospheres_universe.util import (
 REMOVALS_THRESHOLD = 1800
 
 
-def sort_orgs_by_name(orgs: list[Organization]) -> list[Organization]:
-    """Sort organizations by name, ignoring diacritics"""
-    return sorted(
-        orgs,
-        key=lambda o: unicodedata.normalize("NFKD", o.name)
-        .encode("ascii", "ignore")
-        .decode("ascii")
-        .lower(),
-    )
+class Organization(NamedTuple):
+    id: str
+    name: str
+    slug: str
+    # LATER: rename type to category - WARNING! impacts dashboard-backend
+    # + fetch from another grist (won't have all orgs in universe with other types being added)
+    type: str = ""
 
 
 def write_organizations_file(filename: str, orgs: list[Organization]):
     """Write organizations list to a JSON file in dist/"""
-    print(f"Generating output file {filename}...")
+    print(f"Generating output file {filename} with {len(orgs)} entries...")
     with open(f"dist/{filename}", "w") as f:
         json.dump([o._asdict() for o in orgs], f, indent=2, ensure_ascii=False)
+
+
+def get_universe_objects(
+    datagouv: DatagouvApi,
+    grist_entries: list[GristEntry],
+    element_class: ElementClass,
+    keep_empty: bool = False,
+) -> tuple[list[str], list[Organization]]:
+    objects_ids = list[str]()
+    active_organizations = list[Organization]()
+    for entry in grist_entries:
+        # LATER: generalise to all entry.type => get_xxx_object_ids, with:
+        #   - organization => multiple object_ids, single active_org
+        #   - keyword, topic => multiple object_ids, multiple active_orgs
+        #   - dataset, dataservice (when matching entry.type) => single object_id, single active_org
+        # LATER: get_organization() not needed since we'll have entry.object_id
+        assert entry.type is GristType.ORGANIZATION
+        org = datagouv.get_organization(entry.slug)
+        if not org:
+            print(f"Unknown organization {entry.slug}", file=sys.stderr)
+            continue
+        verbose_print(f"Fetching {element_class.name} for organization {org.id}...")
+        ids = datagouv.get_organization_object_ids(org.id, element_class)
+        objects_ids += ids
+        if keep_empty or ids:
+            # LATER: get org info from get_xxx_object_ids (topics/tags can have multiple orgs)
+            active_organizations.append(
+                Organization(id=org.id, name=org.name, slug=org.slug, type=entry.category)
+            )
+    return objects_ids, active_organizations
 
 
 @cli
@@ -79,81 +104,57 @@ def feed_universe(
     grist = GristApi(conf["grist_url"], conf["env"])
 
     topic_slug = str(conf["topic"])
-
-    grist_orgs = grist.get_organizations()
+    bouquet_tag = str(conf["tag"])
 
     print(f"Starting at {datetime.datetime.now():%c}")
     if dry_run:
         print("*** DRY RUN ***")
 
-    t_count: dict[ElementClass, int] = defaultdict(int)
     t_all = time.time()
     try:
-        verbose_print(f"Getting existing datasets for topic '{topic_slug}'")
-        orgs: list[Organization] = []
+        print(f"Processing topic {topic_slug}:")
 
-        for org in grist_orgs:
-            verbose_print(f"Checking organization '{org.slug}'")
-            try:
-                api_org = datagouv.get_organization(org.slug)
-                orgs.append(
-                    Organization(
-                        id=api_org["id"],
-                        name=api_org["name"],
-                        slug=org.slug,
-                        type=org.type,
-                    )
-                )
-            except requests.HTTPError:
-                print(f"Unknown organization '{org.slug}'", file=sys.stderr)
-
-        orgs = sort_orgs_by_name(orgs)
-
-        print(f"Processing {len(orgs)} organizations...")
+        verbose_print("Fetching grist universe...")
+        grist_entries = grist.get_grist_entries()
 
         if reset:
-            print(f"Removing ALL elements from topic '{topic_slug}'")
+            print("Removing ALL elements from topic...")
             datagouv.delete_all_topic_elements(topic_slug)
 
-        active_orgs: dict[ElementClass, list[Organization]] = defaultdict(list)
-
-        print(f"Processing topic '{topic_slug}'")
         for element_class in ElementClass:
-            new_objects_ids = list[str]()
-            for org in orgs:
-                verbose_print(f"Fetching {element_class.name} for organization '{org.slug}'...")
-                objects_ids = datagouv.get_organization_objects_ids(org.id, element_class)
-                if not objects_ids and not keep_empty:
-                    verbose_print(f"Skipping empty organization '{org.slug}'")
-                    continue
-                t_count[element_class] += len(objects_ids)
-                active_orgs[element_class].append(org)
-                new_objects_ids += objects_ids
-
-            existing_elements = datagouv.get_topic_elements(topic_slug, element_class)
-            existing_objects_ids = set(e.object_id for e in existing_elements)
-            print(
-                f"Found {len(existing_objects_ids)} existing {element_class.name} in universe topic."
+            # FIXME: move after "fetch existing"
+            verbose_print(f"Fetching new topic {element_class}...")
+            new_objects_ids, active_organizations = get_universe_objects(
+                datagouv, grist_entries, element_class, keep_empty
             )
-            additions = list(set(new_objects_ids) - existing_objects_ids)
-            removals = list(existing_objects_ids - set(new_objects_ids))
-            if len(removals) > REMOVALS_THRESHOLD:
-                raise Exception(f"Too many removals ({len(removals)}), aborting")
-            print(f"Feeding {len(additions)} {element_class.value}...")
-            for batch in batched(additions, 1000):
-                _ = datagouv.put_topic_elements(topic_slug, element_class, batch)
-            print(f"Removing {len(removals)} {element_class.value}...")
-            elements_removals = [e.id for e in existing_elements if e.object_id in removals]
-            datagouv.delete_topic_elements(topic_slug, elements_removals)
+            print(f"Found {len(new_objects_ids)} new {element_class.value}.")
 
+            # TODO: don't run if reset==True?
+            verbose_print(f"Fetching existing topic {element_class}...")
+            existing_elements = datagouv.get_topic_elements(topic_slug, element_class)
+            existing_objects_ids = [e.object_id for e in existing_elements]
+            print(f"Found {len(existing_objects_ids)} existing {element_class.name}.")
+
+            additions = list(set(new_objects_ids) - set(existing_objects_ids))
+            removals = list(set(existing_objects_ids) - set(new_objects_ids))
+            if n := len(removals) > REMOVALS_THRESHOLD:
+                raise Exception(f"Too many removals ({n} > {REMOVALS_THRESHOLD}), aborting.")
+
+            print("Updating topic...")
+            print(f"- Adding {len(additions)} {element_class.value}...")
+            datagouv.put_topic_elements(topic_slug, element_class, additions, 1000)
+
+            # TODO: don't run if reset==True?
+            print(f"- Deleting {len(removals)} {element_class.value}...")
+            elements_ids = [e.id for e in existing_elements if e.object_id in removals]
+            datagouv.delete_topic_elements(topic_slug, elements_ids)
+
+            write_organizations_file(
+                f"organizations-{element_class.value}-{conf['env']}.json",
+                sorted(active_organizations, key=lambda o: normalized_string(o.name)),
+            )
     finally:
         print(f"Elapsed: {time.time() - t_all:.2f} s")
-        for element_class in ElementClass:
-            print(f"Total count {element_class.value}: {t_count[element_class]}")
-
-    for element_class in ElementClass:
-        filename = f"organizations-{element_class.value}-{conf['env']}.json"
-        write_organizations_file(filename, active_orgs[element_class])
 
     # FIXME: remove when front uses the new file path
     # retrocompatibility
@@ -161,18 +162,20 @@ def feed_universe(
         f"dist/organizations-datasets-{conf['env']}.json", f"dist/organizations-{conf['env']}.json"
     )
 
-    # Build a list of organizations from the list of bouquets
+    # TODO: can this be handled by the main update loop? datasets/services in bouquets should also be in universe
     print("Fetching organizations from bouquets...")
-    bouquets = datagouv.get_bouquets(conf["tag"])
+    bouquets = datagouv.get_bouquets(bouquet_tag)
     bouquet_orgs = list(
         {
-            o["id"]: Organization(id=o["id"], name=o["name"], slug=o["slug"], type=None)
+            Organization(id=o["id"], name=o["name"], slug=o["slug"])
             for b in bouquets
             if (o := b.get("organization"))
-        }.values()
+        }
     )
-    bouquet_orgs = sort_orgs_by_name(bouquet_orgs)
-    write_organizations_file(f"organizations-bouquets-{conf['env']}.json", bouquet_orgs)
+    write_organizations_file(
+        f"organizations-bouquets-{conf['env']}.json",
+        sorted(bouquet_orgs, key=lambda o: normalized_string(o.name)),
+    )
 
     print(f"Done at {datetime.datetime.now():%c}")
 
