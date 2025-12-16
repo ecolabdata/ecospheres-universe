@@ -5,6 +5,7 @@ description = "Manage ecospheres universe topics on data.gouv.fr"
 readme = "README.md"
 requires-python = ">= 3.13"
 dependencies = [
+    "dacite >= 1.9.2",
     "minicli >= 0.5.3",
     "pyyaml >= 6.0.3",
     "requests >= 2.32.5",
