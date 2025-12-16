@@ -7,9 +7,9 @@ import requests
 
 from minicli import cli, run
 
+from ecospheres_universe.config import Config
 from ecospheres_universe.datagouv import DatagouvApi
 from ecospheres_universe.grist import GristApi
-from ecospheres_universe.util import load_configs
 
 
 class Organization(NamedTuple):
@@ -26,22 +26,21 @@ def check_sync(universe: Path, *extra_configs: Path):
     """
     print("Running check of universe sync...")
 
-    conf = load_configs(universe, *extra_configs)
+    conf = Config.from_files(universe, *extra_configs)
 
     datagouv = DatagouvApi(
-        base_url=conf["api"]["url"],
+        base_url=conf.api.url,
         token="no-token-needed",
         fail_on_errors=False,
         dry_run=True,
     )
 
-    grist = GristApi(base_url=conf["grist_url"], env=conf["env"])
+    grist = GristApi(base_url=conf.grist_url, env=conf.env)
 
     grist_orgs = grist.get_organizations()
     grist_orgs = sorted(grist_orgs, key=lambda o: o.slug)
 
-    topic_slug = str(conf["topic"])
-    topic_id = datagouv.get_topic_id(topic_slug)
+    topic_id = datagouv.get_topic_id(conf.topic)
 
     orgs: set[Organization] = set()
     for org in grist_orgs:
