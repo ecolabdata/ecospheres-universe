@@ -30,7 +30,7 @@ def test_full_run(responses: RequestsMock, tmp_path: Path):
         Element(dataservices[0]),
     ]
 
-    new_universe = [
+    target_universe = [
         Organization(
             objects={ElementClass.Dataset: [datasets[0], datasets[2]]},
         ),
@@ -56,11 +56,11 @@ def test_full_run(responses: RequestsMock, tmp_path: Path):
                 {"filter": json.dumps({"env": [conf.env.value]}), "limit": 0}
             )
         ],
-        json={"records": [{"fields": {"slug": org.slug, "type": ""}} for org in new_universe]},
+        json={"records": [{"fields": {"slug": org.slug, "type": ""}} for org in target_universe]},
     )
 
     # datagouv.get_organization()
-    for org in new_universe:
+    for org in target_universe:
         _ = responses.get(
             url=f"{datagouv_url}/api/1/organizations/{org.slug}/",
             json={"id": org.id, "slug": org.slug, "name": org.name},
@@ -69,18 +69,18 @@ def test_full_run(responses: RequestsMock, tmp_path: Path):
     # reset=False by default => skip datagouv.delete_all_topic_elements()
 
     for element_class in ElementClass:
-        existing_elems_for_class = [
+        existing_elements = [
             elem for elem in existing_universe if elem.element_class is element_class
         ]
-        new_ids_for_class = [obj.id for org in new_universe for obj in org.objects(element_class)]
+        target_ids = [obj.id for org in target_universe for obj in org.objects(element_class)]
 
         # datagouv.get_organization_objects_ids()
-        for org in new_universe:
+        for org in target_universe:
             _ = responses.get(
                 url=f"{datagouv_url}/api/2/{element_class.value}/search/",
                 match=[matchers.query_param_matcher({"organization": org.id}, strict_match=False)],
                 json={
-                    "data": [{"id": obj_id} for obj_id in new_ids_for_class],
+                    "data": [{"id": obj_id} for obj_id in target_ids],
                     "next_page": None,
                 },
             )
@@ -100,7 +100,7 @@ def test_full_run(responses: RequestsMock, tmp_path: Path):
                         "id": elem.id,
                         "element": {"class": elem.element_class.name, "id": elem.element_id},
                     }
-                    for elem in existing_elems_for_class
+                    for elem in existing_elements
                 ],
                 "next_page": None,
             },
@@ -109,8 +109,8 @@ def test_full_run(responses: RequestsMock, tmp_path: Path):
         # datagouv.put_topic_elements()
         additions = [
             obj_id
-            for obj_id in new_ids_for_class
-            if obj_id not in {elem.element_id for elem in existing_elems_for_class}
+            for obj_id in target_ids
+            if obj_id not in {elem.element_id for elem in existing_elements}
         ]
         _ = responses.post(
             url=f"{datagouv_url}/api/2/topics/{conf.topic}/elements/",
@@ -128,9 +128,7 @@ def test_full_run(responses: RequestsMock, tmp_path: Path):
         )
 
         # datagouv.delete_topic_elements()
-        removals = [
-            elem.id for elem in existing_elems_for_class if elem.element_id not in new_ids_for_class
-        ]
+        removals = [elem.id for elem in existing_elements if elem.element_id not in target_ids]
         for elem_id in removals:
             _ = responses.delete(
                 url=f"{datagouv_url}/api/2/topics/{conf.topic}/elements/{elem_id}/",
@@ -157,11 +155,11 @@ def test_full_run(responses: RequestsMock, tmp_path: Path):
 
     # FIXME: correct subset of orgs
     assert json_load_path(tmp_path / f"organizations-datasets-{conf.env.value}.json") == sorted(
-        [{"id": org.id, "name": org.name, "slug": org.slug, "type": ""} for org in new_universe],
+        [{"id": org.id, "name": org.name, "slug": org.slug, "type": ""} for org in target_universe],
         key=itemgetter("name"),
     )
     assert json_load_path(tmp_path / f"organizations-dataservices-{conf.env.value}.json") == sorted(
-        [{"id": org.id, "name": org.name, "slug": org.slug, "type": ""} for org in new_universe],
+        [{"id": org.id, "name": org.name, "slug": org.slug, "type": ""} for org in target_universe],
         key=itemgetter("name"),
     )
     assert json_load_path(tmp_path / f"organizations-bouquets-{conf.env.value}.json") == []
