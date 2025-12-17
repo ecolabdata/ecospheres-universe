@@ -18,6 +18,7 @@ ecospheres-universe = "ecospheres_universe.__main__:main"
 dev = [
     "pre-commit",
     "pytest >= 9",
+    "pytest-responses >= 0.25.8",
     "ruff",
 ]
 

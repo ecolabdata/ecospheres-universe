@@ -36,39 +36,20 @@ def sort_orgs_by_name(orgs: list[Organization]) -> list[Organization]:
     )
 
 
-def write_organizations_file(filename: str, orgs: list[Organization]):
+def write_organizations_file(filepath: Path, orgs: list[Organization]):
     """Write organizations list to a JSON file in dist/"""
-    print(f"Generating output file {filename}...")
-    with open(f"dist/{filename}", "w") as f:
+    print(f"Generating output file {filepath}...")
+    with filepath.open("w") as f:
         json.dump([o._asdict() for o in orgs], f, indent=2, ensure_ascii=False)
 
 
-@cli
-def feed_universe(
-    universe: Path,
-    *extra_configs: Path,
+def feed(
+    conf: Config,
     keep_empty: bool = False,
     fail_on_errors: bool = False,
     dry_run: bool = False,
     reset: bool = False,
-    verbose: bool = False,
-):
-    """Feed the universe with datasets and dataservices from organizations.
-
-    :universe: Universe yaml config file
-    :extra_configs: Additional config files (optional)
-    :keep_empty: Keep empty organizations in the list
-    :fail_on_errors: Fail the run on http errors
-    :dry_run: Perform a trial run without actual feeding
-    :reset: Empty topic before refeeding it
-    :verbose: Enable verbose mode
-    """
-    global verbose_print
-    if verbose:
-        verbose_print = print
-
-    conf = Config.from_files(universe, *extra_configs)
-
+) -> None:
     datagouv = DatagouvApi(
         base_url=conf.api.url,
         token=os.getenv("DATAGOUV_API_KEY", conf.api.token),
@@ -150,8 +131,10 @@ def feed_universe(
             print(f"Total count {element_class.value}: {t_count[element_class]}")
 
     for element_class in ElementClass:
-        filename = f"organizations-{element_class.value}-{conf.env}.json"
-        write_organizations_file(filename, active_orgs[element_class])
+        write_organizations_file(
+            conf.output_dir / f"organizations-{element_class.value}-{conf.env}.json",
+            active_orgs[element_class],
+        )
 
     # FIXME: remove when front uses the new file path
     # retrocompatibility
@@ -168,9 +151,46 @@ def feed_universe(
         }.values()
     )
     bouquet_orgs = sort_orgs_by_name(bouquet_orgs)
-    write_organizations_file(f"organizations-bouquets-{conf.env}.json", bouquet_orgs)
+    write_organizations_file(
+        conf.output_dir / f"organizations-bouquets-{conf.env}.json", bouquet_orgs
+    )
 
     print(f"Done at {datetime.datetime.now():%c}")
+
+
+@cli
+def feed_universe(
+    universe: Path,
+    *extra_configs: Path,
+    keep_empty: bool = False,
+    fail_on_errors: bool = False,
+    dry_run: bool = False,
+    reset: bool = False,
+    verbose: bool = False,
+):
+    """Feed the universe with datasets and dataservices from organizations.
+
+    :universe: Universe yaml config file
+    :extra_configs: Additional config files (optional)
+    :keep_empty: Keep empty organizations in the list
+    :fail_on_errors: Fail the run on http errors
+    :dry_run: Perform a trial run without actual feeding
+    :reset: Empty topic before refeeding it
+    :verbose: Enable verbose mode
+    """
+    global verbose_print
+    if verbose:
+        verbose_print = print
+
+    conf = Config.from_files(universe, *extra_configs)
+
+    feed(
+        conf=conf,
+        keep_empty=keep_empty,
+        fail_on_errors=fail_on_errors,
+        dry_run=dry_run,
+        reset=reset,
+    )
 
 
 if __name__ == "__main__":

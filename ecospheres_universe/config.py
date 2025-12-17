@@ -24,6 +24,7 @@ class Config:
     tag: str
     grist_url: str
     api: ApiConfig
+    output_dir: Path = Path("dist")
 
     @staticmethod
     def from_files(*paths: Path) -> "Config":
