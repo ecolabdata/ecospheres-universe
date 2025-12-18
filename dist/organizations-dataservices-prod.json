@@ -30,6 +30,12 @@
     "type": "EPIC"
   },
   {
+    "id": "61dc6a1398b3376b6fa0d0d9",
+    "name": "Centre Scientifique et Technique du Batiment",
+    "slug": "centre-scientifique-et-technique-du-batiment",
+    "type": "EPIC"
+  },
+  {
     "id": "5c812a16634f416583ed1876",
     "name": "Cerema",
     "slug": "cerema",
