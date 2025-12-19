@@ -12,6 +12,12 @@
     "type": "GIP"
   },
   {
+    "id": "62da6837cde1491f3727cdb2",
+    "name": "Agence Nationale de l'Habitat",
+    "slug": "agence-nationale-de-lhabitat",
+    "type": "EPA"
+  },
+  {
     "id": "5901f4dfc751df412e7bb92d",
     "name": "Agence nationale de la cohésion des territoires",
     "slug": "agence-nationale-de-la-cohesion-des-territoires",
