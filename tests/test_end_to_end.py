@@ -43,10 +43,12 @@ def test_full_run(responses: RequestsMock, tmp_path: Path):
     existing_universe = Topic(datasets[0], datasets[1], dataservices[0])
 
     target_universe = (
-        existing_universe.clone().add(datasets[2], dataservices[1]).remove(datasets[1])
+        existing_universe.clone()
+        .add_elements(datasets[2], dataservices[1])
+        .remove_elements(datasets[1])
     )
 
-    bouquets = Topic.some_owned(5, [org.set_type(None) for org in Organization.some(n=3)])
+    bouquets = Topic.some_owned(5, [org.with_type(None) for org in Organization.some(n=3)])
 
     conf = Config(
         env=DeployEnv.DEMO,

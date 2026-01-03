@@ -80,12 +80,13 @@ class Organization(DatagouvObject):
             "type": self._type,
         }
 
-    def set_type(self, type: str | None) -> Self:
+    def with_type(self, type: str | None) -> Self:
         self._type = type
         return self
 
-    def add(self, *elements: DatagouvObject):
+    def add_elements(self, *elements: DatagouvObject) -> Self:
         self._objects += elements
+        return self
 
 
 # FIXME: would be better as a mixin
@@ -107,18 +108,18 @@ class OwnedDatagouvObject(DatagouvObject):
             "organization": self.organization.as_dict(),
         }
 
-    def owned_by(self, organization: Organization) -> Self:
+    def with_owner(self, organization: Organization) -> Self:
         self._organization = organization
-        organization.add(self)
+        organization.add_elements(self)
         return self
 
     @classmethod
     def one_owned(cls, organization: Organization) -> Self:
-        return cls().owned_by(organization)
+        return cls().with_owner(organization)
 
     @classmethod
     def some_owned(cls, n: int, organizations: list[Organization]) -> list[Self]:
-        return [cls().owned_by(org) for org in islice(cycle(organizations), n)]
+        return [cls().with_owner(org) for org in islice(cycle(organizations), n)]
 
 
 @final
@@ -167,18 +168,17 @@ class Topic(OwnedDatagouvObject):
         return list(elements)
 
     def organizations(self, element_class: ElementClass | None = None) -> list[Organization]:
-        # FIXME: typing
-        return {e.object.organization for e in self.elements(element_class)}
+        return list({e.object.organization for e in self.elements(element_class)})
 
     def clone(self) -> Self:
         clone = copy(self)
         clone._elements = [e for e in self._elements]
         return clone
 
-    def add(self, *elements: DatagouvObject) -> Self:
+    def add_elements(self, *elements: DatagouvObject) -> Self:
         self._elements += [Element(e) for e in elements]
         return self
 
-    def remove(self, *elements: DatagouvObject) -> Self:
+    def remove_elements(self, *elements: DatagouvObject) -> Self:
         self._elements = [e for e in self._elements if e.object not in elements]
         return self
