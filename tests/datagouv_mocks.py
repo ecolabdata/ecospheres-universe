@@ -50,14 +50,21 @@ class DatagouvObject:
 
 @final
 class Organization(DatagouvObject):
+    _TYPES: list[str | None] = ["type-A", None, "type-B", "type-C"]
+
     _objects: list[DatagouvObject]
 
     def __init__(self, objects: list[DatagouvObject] | None = None):
         super().__init__()
         self._objects = objects if objects else []
+        self._type = Organization._TYPES[self._id % len(Organization._TYPES)]
 
     def __repr__(self) -> str:
         return f"<{self.id} {[o.id for o in self._objects]}>"
+
+    @property
+    def type(self) -> str | None:
+        return self._type
 
     def objects(self, element_class: ElementClass | None = None) -> list[DatagouvObject]:
         return (
@@ -65,6 +72,17 @@ class Organization(DatagouvObject):
             if element_class
             else self._objects
         )
+
+    @override
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            **super().as_dict(),
+            "type": self._type,
+        }
+
+    def set_type(self, type: str | None) -> Self:
+        self._type = type
+        return self
 
     def add(self, *elements: DatagouvObject):
         self._objects += elements

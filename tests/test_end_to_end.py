@@ -1,5 +1,6 @@
 import json
 
+from collections.abc import Iterable
 from operator import itemgetter
 from pathlib import Path
 from typing import Any
@@ -19,10 +20,10 @@ def json_load_path(path: Path):
         return json.load(f)
 
 
-def mock_organizations_file(organizations: list[Organization]) -> list[dict[str, Any]]:
+def mock_organizations_file(organizations: Iterable[Organization]) -> list[dict[str, Any]]:
     return sorted(
         [
-            {"id": org.id, "name": org.name, "slug": org.slug, "type": None}  # TODO: type
+            {"id": org.id, "name": org.name, "slug": org.slug, "type": org.type}
             for org in organizations
         ],
         key=itemgetter("name"),
@@ -38,13 +39,14 @@ def test_full_run(responses: RequestsMock, tmp_path: Path):
 
     datasets = Dataset.some_owned(3, organizations)
     dataservices = Dataservice.some_owned(2, list(reversed(organizations)))
-    bouquets = Topic.some_owned(4, organizations)
 
     existing_universe = Topic(datasets[0], datasets[1], dataservices[0])
 
     target_universe = (
         existing_universe.clone().add(datasets[2], dataservices[1]).remove(datasets[1])
     )
+
+    bouquets = Topic.some_owned(5, [org.set_type(None) for org in Organization.some(n=3)])
 
     conf = Config(
         env=DeployEnv.DEMO,
@@ -61,7 +63,7 @@ def test_full_run(responses: RequestsMock, tmp_path: Path):
         match=[query_param_matcher({"filter": json.dumps({"env": [conf.env.value]}), "limit": 0})],
         json={
             "records": [
-                {"fields": {"slug": org.slug, "type": None}}  # TODO: type
+                {"fields": {"slug": org.slug, "type": org.type}}
                 for org in target_universe.organizations()
             ]
         },
@@ -145,4 +147,4 @@ def test_full_run(responses: RequestsMock, tmp_path: Path):
 
     assert json_load_path(
         tmp_path / f"organizations-bouquets-{conf.env.value}.json"
-    ) == mock_organizations_file([b.organization for b in bouquets])
+    ) == mock_organizations_file({b.organization for b in bouquets})
