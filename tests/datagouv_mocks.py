@@ -1,6 +1,6 @@
 from copy import copy
 from itertools import cycle, islice
-from typing import final, Self
+from typing import final, override, Any, Self
 
 from ecospheres_universe.datagouv import ElementClass
 
@@ -31,6 +31,13 @@ class DatagouvObject:
     def element_class(self) -> ElementClass:
         # FIXME: this can fail
         return ElementClass[self.__class__.__name__]
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "id": self.id,
+            "slug": self.slug,
+            "name": self.name,
+        }
 
     @classmethod
     def one(cls) -> Self:
@@ -75,6 +82,13 @@ class OwnedDatagouvObject(DatagouvObject):
     def organization(self) -> Organization:
         return self._organization
 
+    @override
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            **super().as_dict(),
+            "organization": self.organization.as_dict(),
+        }
+
     def owned_by(self, organization: Organization) -> Self:
         self._organization = organization
         organization.add(self)
@@ -114,7 +128,7 @@ class Element(DatagouvObject):
 
 
 @final
-class Topic(DatagouvObject):
+class Topic(OwnedDatagouvObject):
     _elements: list[Element]
 
     def __init__(self, *elements: DatagouvObject):

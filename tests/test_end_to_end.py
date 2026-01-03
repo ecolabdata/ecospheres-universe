@@ -2,6 +2,8 @@ import json
 
 from operator import itemgetter
 from pathlib import Path
+from typing import Any
+
 from responses import RequestsMock
 from responses.matchers import header_matcher, json_params_matcher, query_param_matcher
 
@@ -17,9 +19,12 @@ def json_load_path(path: Path):
         return json.load(f)
 
 
-def mock_organizations_file(organizations: list[Organization]) -> list[dict[str, str]]:
+def mock_organizations_file(organizations: list[Organization]) -> list[dict[str, Any]]:
     return sorted(
-        [{"id": org.id, "name": org.name, "slug": org.slug, "type": ""} for org in organizations],
+        [
+            {"id": org.id, "name": org.name, "slug": org.slug, "type": None}  # TODO: type
+            for org in organizations
+        ],
         key=itemgetter("name"),
     )
 
@@ -29,10 +34,11 @@ def test_full_run(responses: RequestsMock, tmp_path: Path):
     grist_url = "https://www.example.com/grist"
     fake_token = "fake-token"
 
-    organizations = Organization.some(2)
+    organizations = Organization.some(5)
 
     datasets = Dataset.some_owned(3, organizations)
-    dataservices = Dataservice.some_owned(2, organizations)
+    dataservices = Dataservice.some_owned(2, list(reversed(organizations)))
+    bouquets = Topic.some_owned(4, organizations)
 
     existing_universe = Topic(datasets[0], datasets[1], dataservices[0])
 
@@ -55,7 +61,7 @@ def test_full_run(responses: RequestsMock, tmp_path: Path):
         match=[query_param_matcher({"filter": json.dumps({"env": [conf.env.value]}), "limit": 0})],
         json={
             "records": [
-                {"fields": {"slug": org.slug, "type": ""}}
+                {"fields": {"slug": org.slug, "type": None}}  # TODO: type
                 for org in target_universe.organizations()
             ]
         },
@@ -121,23 +127,22 @@ def test_full_run(responses: RequestsMock, tmp_path: Path):
             )
 
     # datagouv.get_bouquets()
-    # TODO: add bouquets
     _ = responses.get(
         url=f"{datagouv_url}/api/2/topics/",
         match=[
             header_matcher({"X-API-KEY": fake_token}),
             query_param_matcher({"tag": conf.tag, "include_private": "yes"}),
         ],
-        json={"data": [], "next_page": None},
+        json={"data": [b.as_dict() for b in bouquets], "next_page": None},
     )
 
     feed(conf)
 
     for element_class in ElementClass:
-        actual = json_load_path(
+        assert json_load_path(
             tmp_path / f"organizations-{element_class.value}-{conf.env.value}.json"
-        )
-        expected = mock_organizations_file(target_universe.organizations(element_class))
-        assert actual == expected
+        ) == mock_organizations_file(target_universe.organizations(element_class))
 
-    assert json_load_path(tmp_path / f"organizations-bouquets-{conf.env.value}.json") == []
+    assert json_load_path(
+        tmp_path / f"organizations-bouquets-{conf.env.value}.json"
+    ) == mock_organizations_file([b.organization for b in bouquets])
