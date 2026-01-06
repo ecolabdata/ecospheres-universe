@@ -119,7 +119,7 @@ requires-dist = [
 dev = [
     { name = "pre-commit" },
     { name = "pytest", specifier = ">=9" },
-    { name = "pytest-responses" },
+    { name = "pytest-responses", specifier = ">=0.5.1" },
     { name = "ruff" },
 ]
 
