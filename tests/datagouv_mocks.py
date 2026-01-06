@@ -140,6 +140,9 @@ class Element(DatagouvObject):
         super().__init__()
         self._object = object
 
+    def __repr__(self) -> str:
+        return f"<{self.id} [{self._object.id}]>"
+
     @property
     def object(self):
         return self._object
@@ -154,16 +157,12 @@ class Topic(OwnedDatagouvObject):
         self._elements = [Element(e) for e in elements] if elements else []
 
     def __repr__(self) -> str:
-        return f"<{self.id} {[e.object for e in self._elements]}>"
+        return f"<{self.id} {self._elements}>"
 
-    def elements(
-        self, element_class: ElementClass | None = None, organization: Organization | None = None
-    ) -> list[Element]:
+    def elements(self, element_class: ElementClass | None = None) -> list[Element]:
         elements = self._elements
         if element_class:
             elements = filter(lambda e: e.object.element_class is element_class, elements)
-        if organization:
-            elements = filter(lambda e: e.object.organization == organization, elements)
         return list(elements)
 
     def organizations(self, element_class: ElementClass | None = None) -> list[Organization]:

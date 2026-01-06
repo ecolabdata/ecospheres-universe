@@ -82,8 +82,8 @@ def run_mock_feed(responses: RequestsMock) -> Callable:
         # TODO: support reset=True
 
         for element_class in ElementClass:
-            existing_elements = existing_universe.elements(element_class)
             target_elements = target_universe.elements(element_class)
+            existing_elements = existing_universe.elements(element_class)
 
             # datagouv.get_organization_objects_ids()
             for org in target_universe.organizations():
@@ -93,7 +93,8 @@ def run_mock_feed(responses: RequestsMock) -> Callable:
                     json={
                         "data": [
                             {"id": e.object.id}
-                            for e in target_universe.elements(element_class, org)
+                            for e in target_elements
+                            if e.object.organization == org
                         ],
                         "next_page": None,
                     },
@@ -112,8 +113,13 @@ def run_mock_feed(responses: RequestsMock) -> Callable:
                 },
             )
 
+            existing_object_ids = {e.object.id for e in existing_elements}
+            target_object_ids = {e.object.id for e in target_elements}
+
             # datagouv.put_topic_elements()
-            additions = [e.object.id for e in target_elements if e not in existing_elements]
+            additions = sorted(
+                {e.object.id for e in target_elements if e.object.id not in existing_object_ids}
+            )
             if additions:
                 # TODO: support batching
                 _ = responses.post(
@@ -132,7 +138,9 @@ def run_mock_feed(responses: RequestsMock) -> Callable:
                 )
 
             # datagouv.delete_topic_elements()
-            removals = [e.id for e in existing_elements if e not in target_elements]
+            removals = sorted(
+                {e.id for e in existing_elements if e.object.id not in target_object_ids}
+            )
             for eid in removals:
                 _ = responses.delete(
                     url=f"{config.api.url}/api/2/topics/{config.topic}/elements/{eid}/",
