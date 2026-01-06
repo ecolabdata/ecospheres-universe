@@ -31,4 +31,4 @@ class Config:
         conf = {}
         for path in paths:
             conf.update(yaml.safe_load(path.read_text()))
-        return dacite.from_dict(Config, conf)
+        return dacite.from_dict(Config, conf, config=dacite.Config(cast=[DeployEnv]))
