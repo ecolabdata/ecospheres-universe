@@ -113,17 +113,21 @@ def run_mock_feed(responses: RequestsMock) -> Callable:
 
             # datagouv.put_topic_elements()
             additions = [e.object.id for e in target_elements if e not in existing_elements]
-            _ = responses.post(
-                url=f"{config.api.url}/api/2/topics/{config.topic}/elements/",
-                match=[
-                    header_matcher(
-                        {"Content-Type": "application/json", "X-API-KEY": config.api.token}
-                    ),
-                    json_params_matcher(
-                        [{"element": {"class": element_class.name, "id": oid}} for oid in additions]
-                    ),
-                ],
-            )
+            if additions:
+                _ = responses.post(
+                    url=f"{config.api.url}/api/2/topics/{config.topic}/elements/",
+                    match=[
+                        header_matcher(
+                            {"Content-Type": "application/json", "X-API-KEY": config.api.token}
+                        ),
+                        json_params_matcher(
+                            [
+                                {"element": {"class": element_class.name, "id": oid}}
+                                for oid in additions
+                            ]
+                        ),
+                    ],
+                )
 
             # datagouv.delete_topic_elements()
             removals = [e.id for e in existing_elements if e not in target_elements]

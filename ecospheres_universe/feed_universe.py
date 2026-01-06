@@ -114,8 +114,9 @@ def feed(
             print(
                 f"Found {len(existing_objects_ids)} existing {element_class.name} in universe topic."
             )
-            additions = list(set(new_objects_ids) - existing_objects_ids)
-            removals = list(existing_objects_ids - set(new_objects_ids))
+            # sorting isn't required in prod, but needed for testing
+            additions = sorted(list(set(new_objects_ids) - existing_objects_ids))
+            removals = sorted(list(existing_objects_ids - set(new_objects_ids)))
             if len(removals) > REMOVALS_THRESHOLD:
                 raise Exception(f"Too many removals ({len(removals)}), aborting")
             print(f"Feeding {len(additions)} {element_class.value}...")
