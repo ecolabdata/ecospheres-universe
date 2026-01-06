@@ -29,7 +29,7 @@ class DatagouvObject:
 
     @property
     def element_class(self) -> ElementClass:
-        # FIXME: this can fail
+        # TODO: this can fail, should only exist when valid
         return ElementClass[self.__class__.__name__]
 
     def as_dict(self) -> dict[str, Any]:
@@ -89,8 +89,7 @@ class Organization(DatagouvObject):
         return self
 
 
-# FIXME: would be better as a mixin
-# FIXME: better x_owned/owned_by
+# TODO: better {one,some}_owned? tricky without polymorphism?
 class OwnedDatagouvObject(DatagouvObject):
     _organization: Organization
 
@@ -136,7 +135,7 @@ class Dataservice(OwnedDatagouvObject):
 class Element(DatagouvObject):
     _object: DatagouvObject
 
-    # FIXME: restrict to "acceptable" DatagouvObject
+    # TODO: restrict to "acceptable" DatagouvObject
     def __init__(self, object: DatagouvObject):
         super().__init__()
         self._object = object

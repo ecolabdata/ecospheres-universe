@@ -78,7 +78,8 @@ def run_mock_feed(responses: RequestsMock) -> Callable:
                 json={"id": org.id, "slug": org.slug, "name": org.name},
             )
 
-        # reset=False by default => skip datagouv.delete_all_topic_elements()
+        # datagouv.delete_all_topic_elements()
+        # TODO: support reset=True
 
         for element_class in ElementClass:
             existing_elements = existing_universe.elements(element_class)
@@ -114,6 +115,7 @@ def run_mock_feed(responses: RequestsMock) -> Callable:
             # datagouv.put_topic_elements()
             additions = [e.object.id for e in target_elements if e not in existing_elements]
             if additions:
+                # TODO: support batching
                 _ = responses.post(
                     url=f"{config.api.url}/api/2/topics/{config.topic}/elements/",
                     match=[
