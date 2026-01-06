@@ -3,21 +3,21 @@ import json
 from collections.abc import Iterable
 from operator import itemgetter
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import pytest
 
 from responses import RequestsMock
 from responses.matchers import header_matcher, json_params_matcher, query_param_matcher
 
-from ecospheres_universe.config import Config
+from ecospheres_universe.config import ApiConfig, Config, DeployEnv
 from ecospheres_universe.datagouv import ElementClass
 from ecospheres_universe.feed_universe import feed
 
 from .datagouv_mocks import Organization, Topic
 
 
-def json_load_path(path: Path):
+def json_load_path(path: Path) -> dict[str, Any]:
     with open(path, "r") as f:
         return json.load(f)
 
@@ -33,10 +33,30 @@ def mock_organizations_file(organizations: Iterable[Organization]) -> list[dict[
 
 
 @pytest.fixture
-def mock_feed(responses: RequestsMock, tmp_path: Path):
-    def _mock_feed(
-        config: Config, existing_universe: Topic, target_universe: Topic, bouquets: list[Topic]
+def feed_config(tmp_path: Path) -> Config:
+    return Config(
+        env=DeployEnv.DEMO,
+        topic="test-topic",
+        tag="test-tag",
+        grist_url="https://www.example.com/grist",
+        output_dir=tmp_path,
+        api=ApiConfig(
+            url="https://www.example.com/datagouv",
+            token="fake-token",
+        ),
+    )
+
+
+@pytest.fixture
+def run_mock_feed(responses: RequestsMock) -> Callable:
+    def _run_mock_feed(
+        config: Config,
+        existing_universe: Topic,
+        target_universe: Topic,
+        bouquets: list[Topic] | None = None,
     ):
+        bouquets: list[Topic] = bouquets or []
+
         # grist.get_organizations()
         _ = responses.get(
             url=config.grist_url,
@@ -127,11 +147,11 @@ def mock_feed(responses: RequestsMock, tmp_path: Path):
 
         for element_class in ElementClass:
             assert json_load_path(
-                tmp_path / f"organizations-{element_class.value}-{config.env.value}.json"
+                config.output_dir / f"organizations-{element_class.value}-{config.env.value}.json"
             ) == mock_organizations_file(target_universe.organizations(element_class))
 
         assert json_load_path(
-            tmp_path / f"organizations-bouquets-{config.env.value}.json"
+            config.output_dir / f"organizations-bouquets-{config.env.value}.json"
         ) == mock_organizations_file({b.organization for b in bouquets})
 
-    return _mock_feed
+    return _run_mock_feed
