@@ -43,6 +43,41 @@ def write_organizations_file(filepath: Path, orgs: list[Organization]):
         json.dump([o._asdict() for o in orgs], f, indent=2, ensure_ascii=False)
 
 
+@cli
+def feed_universe(
+    universe: Path,
+    *extra_configs: Path,
+    keep_empty: bool = False,
+    fail_on_errors: bool = False,
+    dry_run: bool = False,
+    reset: bool = False,
+    verbose: bool = False,
+):
+    """Feed the universe with datasets and dataservices from organizations.
+
+    :universe: Universe yaml config file
+    :extra_configs: Additional config files (optional)
+    :keep_empty: Keep empty organizations in the list
+    :fail_on_errors: Fail the run on http errors
+    :dry_run: Perform a trial run without actual feeding
+    :reset: Empty topic before refeeding it
+    :verbose: Enable verbose mode
+    """
+    global verbose_print
+    if verbose:
+        verbose_print = print
+
+    conf = Config.from_files(universe, *extra_configs)
+
+    feed(
+        conf=conf,
+        keep_empty=keep_empty,
+        fail_on_errors=fail_on_errors,
+        dry_run=dry_run,
+        reset=reset,
+    )
+
+
 def feed(
     conf: Config,
     keep_empty: bool = False,
@@ -157,41 +192,6 @@ def feed(
     )
 
     print(f"Done at {datetime.datetime.now():%c}")
-
-
-@cli
-def feed_universe(
-    universe: Path,
-    *extra_configs: Path,
-    keep_empty: bool = False,
-    fail_on_errors: bool = False,
-    dry_run: bool = False,
-    reset: bool = False,
-    verbose: bool = False,
-):
-    """Feed the universe with datasets and dataservices from organizations.
-
-    :universe: Universe yaml config file
-    :extra_configs: Additional config files (optional)
-    :keep_empty: Keep empty organizations in the list
-    :fail_on_errors: Fail the run on http errors
-    :dry_run: Perform a trial run without actual feeding
-    :reset: Empty topic before refeeding it
-    :verbose: Enable verbose mode
-    """
-    global verbose_print
-    if verbose:
-        verbose_print = print
-
-    conf = Config.from_files(universe, *extra_configs)
-
-    feed(
-        conf=conf,
-        keep_empty=keep_empty,
-        fail_on_errors=fail_on_errors,
-        dry_run=dry_run,
-        reset=reset,
-    )
 
 
 if __name__ == "__main__":
