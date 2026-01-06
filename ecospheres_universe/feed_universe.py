@@ -5,10 +5,10 @@ import sys
 import time
 
 from collections import defaultdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from shutil import copyfile
 
-import requests
 import unicodedata
 
 from minicli import cli, run
@@ -25,8 +25,13 @@ from ecospheres_universe.util import (
 REMOVALS_THRESHOLD = 1800
 
 
-def sort_orgs_by_name(orgs: list[Organization]) -> list[Organization]:
-    """Sort organizations by name, ignoring diacritics"""
+@dataclass(frozen=True)
+class UniverseOrg(Organization):
+    type: str | None = None  # TODO: rename to category !! impacts dashboard-backend
+
+
+def sort_orgs_by_name(orgs: list[UniverseOrg]) -> list[UniverseOrg]:
+    """Sort organizations by normalized name"""
     return sorted(
         orgs,
         key=lambda o: unicodedata.normalize("NFKD", o.name)
@@ -36,11 +41,11 @@ def sort_orgs_by_name(orgs: list[Organization]) -> list[Organization]:
     )
 
 
-def write_organizations_file(filepath: Path, orgs: list[Organization]):
+def write_organizations_file(filepath: Path, orgs: list[UniverseOrg]):
     """Write organizations list to a JSON file in dist/"""
     print(f"Generating output file {filepath}...")
     with filepath.open("w") as f:
-        json.dump([o._asdict() for o in orgs], f, indent=2, ensure_ascii=False)
+        json.dump([asdict(o) for o in orgs], f, indent=2, ensure_ascii=False)
 
 
 @cli
@@ -104,22 +109,16 @@ def feed(
     t_all = time.time()
     try:
         verbose_print(f"Getting existing datasets for topic '{conf.topic}'")
-        orgs: list[Organization] = []
+        orgs = list[UniverseOrg]()
 
-        for org in grist_orgs:
-            verbose_print(f"Checking organization '{org.slug}'")
-            try:
-                api_org = datagouv.get_organization(org.slug)
-                orgs.append(
-                    Organization(
-                        id=api_org["id"],
-                        name=api_org["name"],
-                        slug=org.slug,
-                        type=org.type,
-                    )
-                )
-            except requests.HTTPError:
-                print(f"Unknown organization '{org.slug}'", file=sys.stderr)
+        for grist_org in grist_orgs:
+            verbose_print(f"Checking organization '{grist_org.slug}'")
+            org = datagouv.get_organization(grist_org.slug)
+            if not org:
+                print(f"Unknown organization {grist_org.slug}", file=sys.stderr)
+                continue
+            # TODO: fetch category from another grist, we won't have every org in our universe when adding other entry types
+            orgs.append(UniverseOrg(id=org.id, name=org.name, slug=org.slug, type=grist_org.type))
 
         orgs = sort_orgs_by_name(orgs)
 
@@ -129,34 +128,36 @@ def feed(
             print(f"Removing ALL elements from topic '{conf.topic}'")
             datagouv.delete_all_topic_elements(conf.topic)
 
-        active_orgs: dict[ElementClass, list[Organization]] = defaultdict(list)
+        active_orgs: dict[ElementClass, list[UniverseOrg]] = defaultdict(list)
 
         print(f"Processing topic '{conf.topic}'")
         for element_class in ElementClass:
-            new_objects_ids = list[str]()
+            new_object_ids = list[str]()
             for org in orgs:
-                verbose_print(f"Fetching {element_class.name} for organization '{org.slug}'...")
-                objects_ids = datagouv.get_organization_objects_ids(org.id, element_class)
-                if not objects_ids and not keep_empty:
+                verbose_print(
+                    f"Fetching {element_class.name} for organization '{grist_org.slug}'..."
+                )
+                object_ids = datagouv.get_organization_object_ids(org.id, element_class)
+                if not object_ids and not keep_empty:
                     verbose_print(f"Skipping empty organization '{org.slug}'")
                     continue
-                t_count[element_class] += len(objects_ids)
+                t_count[element_class] += len(object_ids)
                 active_orgs[element_class].append(org)
-                new_objects_ids += objects_ids
+                new_object_ids += object_ids
 
             existing_elements = datagouv.get_topic_elements(conf.topic, element_class)
-            existing_objects_ids = set(e.object_id for e in existing_elements)
+            existing_object_ids = set(e.object_id for e in existing_elements)
             print(
-                f"Found {len(existing_objects_ids)} existing {element_class.name} in universe topic."
+                f"Found {len(existing_object_ids)} existing {element_class.name} in universe topic."
             )
             # sorting isn't required in prod, but needed for testing
-            additions = sorted(list(set(new_objects_ids) - existing_objects_ids))
-            removals = sorted(list(existing_objects_ids - set(new_objects_ids)))
+            additions = sorted(list(set(new_object_ids) - existing_object_ids))
+            removals = sorted(list(existing_object_ids - set(new_object_ids)))
             if len(removals) > REMOVALS_THRESHOLD:
                 raise Exception(f"Too many removals ({len(removals)}), aborting")
             print(f"Feeding {len(additions)} {element_class.value}...")
             for batch in batched(additions, 1000):
-                _ = datagouv.put_topic_elements(conf.topic, element_class, batch)
+                datagouv.put_topic_elements(conf.topic, element_class, batch)
             print(f"Removing {len(removals)} {element_class.value}...")
             elements_removals = [e.id for e in existing_elements if e.object_id in removals]
             datagouv.delete_topic_elements(conf.topic, elements_removals)
@@ -176,15 +177,15 @@ def feed(
     # retrocompatibility
     copyfile(f"dist/organizations-datasets-{conf.env}.json", f"dist/organizations-{conf.env}.json")
 
-    # Build a list of organizations from the list of bouquets
+    # TODO: can this be handled by the main update loop? datasets/services in bouquets should also be in universe?
     print("Fetching organizations from bouquets...")
     bouquets = datagouv.get_bouquets(conf.tag)
     bouquet_orgs = list(
         {
-            o["id"]: Organization(id=o["id"], name=o["name"], slug=o["slug"], type=None)
+            UniverseOrg(id=o.id, name=o.name, slug=o.slug, type=None)
             for b in bouquets
-            if (o := b.get("organization"))
-        }.values()
+            if (o := b.organization)
+        }
     )
     bouquet_orgs = sort_orgs_by_name(bouquet_orgs)
     write_organizations_file(

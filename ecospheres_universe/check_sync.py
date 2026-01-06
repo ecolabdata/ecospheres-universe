@@ -1,20 +1,13 @@
 import sys
 
 from pathlib import Path
-from typing import NamedTuple
 
-import requests
 
 from minicli import cli, run
 
 from ecospheres_universe.config import Config
-from ecospheres_universe.datagouv import DatagouvApi
+from ecospheres_universe.datagouv import DatagouvApi, Organization
 from ecospheres_universe.grist import GristApi
-
-
-class Organization(NamedTuple):
-    id: str
-    name: str
 
 
 @cli
@@ -42,13 +35,13 @@ def check_sync(universe: Path, *extra_configs: Path):
 
     topic_id = datagouv.get_topic_id(conf.topic)
 
-    orgs: set[Organization] = set()
-    for org in grist_orgs:
-        try:
-            api_org = datagouv.get_organization(org.slug)
-            orgs.add(Organization(id=api_org["id"], name=api_org["name"]))
-        except requests.HTTPError:
-            print(f"Unknown organization '{org.slug}'", file=sys.stderr)
+    orgs = set[Organization]()
+    for grist_org in grist_orgs:
+        org = datagouv.get_organization(grist_org.slug)
+        if not org:
+            print(f"Unknown organization {grist_org.slug}", file=sys.stderr)
+            continue
+        orgs.add(org)
 
     nb_errors = 0
     for org in orgs:
