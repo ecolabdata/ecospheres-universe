@@ -28,7 +28,7 @@ class Organization:
     slug: str
 
 
-@dataclass
+@dataclass(frozen=True)
 class Topic:
     id: str
     name: str
