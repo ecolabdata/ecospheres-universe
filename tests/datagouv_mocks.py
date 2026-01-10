@@ -27,11 +27,6 @@ class DatagouvObject:
     def name(self) -> str:
         return f"{self.__class__.__name__} {self._id}"
 
-    @property
-    def element_class(self) -> ElementClass:
-        # TODO: this can fail, should only exist when valid
-        return ElementClass[self.__class__.__name__]
-
     def as_dict(self) -> dict[str, Any]:
         return {
             "id": self.id,
@@ -39,22 +34,14 @@ class DatagouvObject:
             "name": self.name,
         }
 
-    @classmethod
-    def one(cls) -> Self:
-        return cls()
-
-    @classmethod
-    def some(cls, n: int) -> list[Self]:
-        return [cls() for _ in range(n)]
-
 
 @final
 class Organization(DatagouvObject):
     _TYPES: list[str | None] = ["type-A", None, "type-B", "type-C"]
 
-    _objects: list[DatagouvObject]
+    _objects: list["DatagouvRecord"]
 
-    def __init__(self, objects: list[DatagouvObject] | None = None):
+    def __init__(self, objects: list["DatagouvRecord"] | None = None):
         super().__init__()
         self._objects = objects if objects else []
         self._type = Organization._TYPES[self._id % len(Organization._TYPES)]
@@ -66,7 +53,7 @@ class Organization(DatagouvObject):
     def type(self) -> str | None:
         return self._type
 
-    def objects(self, element_class: ElementClass | None = None) -> list[DatagouvObject]:
+    def objects(self, element_class: ElementClass | None = None) -> list["DatagouvRecord"]:
         return (
             [o for o in self._objects if o.element_class is element_class]
             if element_class
@@ -84,13 +71,20 @@ class Organization(DatagouvObject):
         self._type = type
         return self
 
-    def add_elements(self, *elements: DatagouvObject) -> Self:
+    def add_elements(self, *elements: "DatagouvRecord") -> Self:
         self._objects += elements
         return self
 
+    @classmethod
+    def one(cls) -> Self:
+        return cls()
 
-# TODO: better {one,some}_owned? tricky without polymorphism?
-class OwnedDatagouvObject(DatagouvObject):
+    @classmethod
+    def some(cls, n: int) -> list[Self]:
+        return [cls() for _ in range(n)]
+
+
+class DatagouvRecord(DatagouvObject):
     _organization: Organization
 
     def __repr__(self) -> str:
@@ -99,6 +93,11 @@ class OwnedDatagouvObject(DatagouvObject):
     @property
     def organization(self) -> Organization:
         return self._organization
+
+    @property
+    def element_class(self) -> ElementClass:
+        # TODO: this can fail, should only exist when valid
+        return ElementClass[self.__class__.__name__]
 
     @override
     def as_dict(self) -> dict[str, Any]:
@@ -113,30 +112,29 @@ class OwnedDatagouvObject(DatagouvObject):
         return self
 
     @classmethod
-    def one_owned(cls, organization: Organization) -> Self:
-        return cls().with_owner(organization)
+    def one(cls) -> Self:
+        return cls()
 
     @classmethod
-    def some_owned(cls, n: int, organizations: list[Organization]) -> list[Self]:
+    def some(cls, n: int, organizations: list[Organization]) -> list[Self]:
         return [cls().with_owner(org) for org in islice(cycle(organizations), n)]
 
 
 @final
-class Dataset(OwnedDatagouvObject):
+class Dataset(DatagouvRecord):
     pass
 
 
 @final
-class Dataservice(OwnedDatagouvObject):
+class Dataservice(DatagouvRecord):
     pass
 
 
 @final
 class Element(DatagouvObject):
-    _object: DatagouvObject
+    _object: DatagouvRecord
 
-    # TODO: restrict to "acceptable" DatagouvObject
-    def __init__(self, object: DatagouvObject):
+    def __init__(self, object: DatagouvRecord):
         super().__init__()
         self._object = object
 
@@ -144,15 +142,15 @@ class Element(DatagouvObject):
         return f"<{self.id} [{self._object.id}]>"
 
     @property
-    def object(self):
+    def object(self) -> DatagouvRecord:
         return self._object
 
 
 @final
-class Topic(OwnedDatagouvObject):
+class Topic(DatagouvRecord):
     _elements: list[Element]
 
-    def __init__(self, *elements: DatagouvObject):
+    def __init__(self, *elements: DatagouvRecord):
         super().__init__()
         self._elements = [Element(e) for e in elements] if elements else []
 
@@ -173,10 +171,10 @@ class Topic(OwnedDatagouvObject):
         clone._elements = [e for e in self._elements]
         return clone
 
-    def add_elements(self, *elements: DatagouvObject) -> Self:
+    def add_elements(self, *elements: DatagouvRecord) -> Self:
         self._elements += [Element(e) for e in elements]
         return self
 
-    def remove_elements(self, *elements: DatagouvObject) -> Self:
+    def remove_elements(self, *elements: DatagouvRecord) -> Self:
         self._elements = [e for e in self._elements if e.object not in elements]
         return self

@@ -23,7 +23,6 @@ dev = [
 ]
 
 [tool.pytest]
-minversion = "9.0"
 strict = true
 addopts = [
     "-q",
