@@ -55,7 +55,7 @@ def run_mock_feed(responses: RequestsMock) -> Callable:
         upcoming_universe: Topic,
         bouquets: list[Topic] | None = None,
     ):
-        bouquets: list[Topic] = bouquets or []
+        bouquets = bouquets or list[Topic]()
 
         # grist.get_organizations()
         _ = responses.get(
