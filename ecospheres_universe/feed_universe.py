@@ -134,9 +134,7 @@ def feed(
         for element_class in ElementClass:
             new_object_ids = list[str]()
             for org in orgs:
-                verbose_print(
-                    f"Fetching {element_class.name} for organization '{grist_org.slug}'..."
-                )
+                verbose_print(f"Fetching {element_class.name} for organization '{org.slug}'...")
                 object_ids = datagouv.get_organization_object_ids(org.id, element_class)
                 if not object_ids and not keep_empty:
                     verbose_print(f"Skipping empty organization '{org.slug}'")
