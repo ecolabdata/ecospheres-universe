@@ -53,10 +53,10 @@ class Organization(DatagouvObject):
     def type(self) -> str | None:
         return self._type
 
-    def objects(self, element_class: ElementClass | None = None) -> list["DatagouvRecord"]:
+    def objects(self, object_class: ElementClass | None = None) -> list["DatagouvRecord"]:
         return (
-            [o for o in self._objects if o.element_class is element_class]
-            if element_class
+            [o for o in self._objects if o.element_class is object_class]
+            if object_class
             else self._objects
         )
 
@@ -71,8 +71,8 @@ class Organization(DatagouvObject):
         self._type = type
         return self
 
-    def add_elements(self, *elements: "DatagouvRecord") -> Self:
-        self._objects += elements
+    def add_objects(self, *objects: "DatagouvRecord") -> Self:
+        self._objects += objects
         return self
 
     @classmethod
@@ -108,7 +108,7 @@ class DatagouvRecord(DatagouvObject):
 
     def with_ownership(self, organization: Organization) -> Self:
         self._organization = organization
-        organization.add_elements(self)
+        organization.add_objects(self)
         return self
 
     @classmethod
