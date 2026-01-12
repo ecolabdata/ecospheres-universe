@@ -80,7 +80,7 @@ class Organization(DatagouvObject):
         return cls()
 
     @classmethod
-    def some(cls, n: int) -> list[Self]:
+    def many(cls, n: int) -> list[Self]:
         return [cls() for _ in range(n)]
 
 
@@ -106,7 +106,7 @@ class DatagouvRecord(DatagouvObject):
             "organization": self.organization.as_dict(),
         }
 
-    def with_owner(self, organization: Organization) -> Self:
+    def with_ownership(self, organization: Organization) -> Self:
         self._organization = organization
         organization.add_elements(self)
         return self
@@ -116,8 +116,8 @@ class DatagouvRecord(DatagouvObject):
         return cls()
 
     @classmethod
-    def some(cls, n: int, organizations: list[Organization]) -> list[Self]:
-        return [cls().with_owner(org) for org in islice(cycle(organizations), n)]
+    def many(cls, n: int, organizations: list[Organization]) -> list[Self]:
+        return [cls().with_ownership(org) for org in islice(cycle(organizations), n)]
 
 
 @final

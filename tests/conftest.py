@@ -48,7 +48,7 @@ def feed_config(tmp_path: Path) -> Config:
 
 
 @pytest.fixture
-def run_mock_feed(responses: RequestsMock) -> Callable:
+def mock_feed_and_assert(responses: RequestsMock) -> Callable:
     def _run_mock_feed(
         config: Config,
         existing_universe: Topic,
