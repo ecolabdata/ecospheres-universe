@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable
 
-from ecospheres_universe.util import elapsed, elapsed_and_count, verbose_print
+from ecospheres_universe.util import batched, elapsed, elapsed_and_count, verbose_print
 
 
 session = requests.Session()
@@ -111,13 +111,19 @@ class DatagouvApi:
 
     @elapsed_and_count
     def put_topic_elements(
-        self, topic_id_or_slug: str, element_class: ElementClass, object_ids: list[str]
+        self,
+        topic_id_or_slug: str,
+        element_class: ElementClass,
+        object_ids: list[str],
+        batch_size: int = 0,
     ) -> None:
         url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/elements/"
         headers = {"Content-Type": "application/json", "X-API-KEY": self.token}
-        data = [{"element": {"class": element_class.name, "id": id}} for id in object_ids]
-        if not self.dry_run:
-            session.post(url, json=data, headers=headers).raise_for_status()
+        batches = batched(object_ids, batch_size) if batch_size else [object_ids]
+        for batch in batches:
+            data = [{"element": {"class": element_class.name, "id": id}} for id in batch]
+            if not self.dry_run:
+                session.post(url, json=data, headers=headers).raise_for_status()
 
     @elapsed
     def delete_topic_elements(self, topic_id_or_slug: str, element_ids: list[str]) -> None:
