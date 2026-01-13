@@ -25,7 +25,7 @@ def json_load_path(path: Path) -> dict[str, Any]:
 def mock_organizations_file(organizations: Iterable[Organization]) -> list[dict[str, Any]]:
     return sorted(
         [
-            {"id": org.id, "name": org.name, "slug": org.slug, "type": org.type}
+            {"id": org.id, "name": org.name, "slug": org.slug, "type": org.kind}
             for org in organizations
         ],
         key=itemgetter("name"),
@@ -57,7 +57,7 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
     ):
         bouquets = bouquets or list[Topic]()
 
-        # grist.get_organizations()
+        # grist.get_entries()
         _ = responses.get(
             url=config.grist_url,
             match=[
@@ -65,7 +65,7 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
             ],
             json={
                 "records": [
-                    {"fields": {"slug": org.slug, "type": org.type}}
+                    {"fields": {"type": "organization", "identifier": org.slug, "kind": org.kind}}
                     for org in upcoming_universe.organizations()
                 ]
             },

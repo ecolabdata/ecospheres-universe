@@ -12,7 +12,7 @@ class GristType(StrEnum):
 class GristEntry(NamedTuple):
     type: GristType
     id: str
-    category: str  # LATER: drop (backcompat ecologie for now)
+    kind: str | None  # LATER: drop (backcompat ecologie for now)
 
 
 class GristApi:
@@ -28,9 +28,9 @@ class GristApi:
         return list(  # deduplicated list
             {
                 GristEntry(
-                    type=GristType.ORGANIZATION,  # LATER: switch to fields.type
-                    id=rec["fields"]["slug"],  # LATER: switch to fields.identifier
-                    category=rec["fields"]["type"],  # LATER: fields.category
+                    type=GristType(rec["fields"]["type"]),
+                    id=rec["fields"]["identifier"],
+                    kind=rec["fields"].get("kind"),
                 )
                 for rec in r.json()["records"]
             }
