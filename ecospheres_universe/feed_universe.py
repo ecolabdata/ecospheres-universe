@@ -43,6 +43,11 @@ def get_upcoming_universe_perimeter(
     object_ids = set[str]()
     orgs = set[UniverseOrg]()
 
+    def _update_perimeter(ids: list[str], org: Organization | None):
+        object_ids.update(ids)
+        if org and (keep_empty or ids):
+            orgs.add(UniverseOrg(id=org.id, name=org.name, slug=org.slug, type=entry.kind))
+
     for entry in grist_entries:
         match entry.type:
             case GristType.ORGANIZATION:
@@ -52,12 +57,9 @@ def get_upcoming_universe_perimeter(
                     continue
                 verbose_print(f"Fetching {element_class.value} for organization {org.id}...")
                 ids = datagouv.get_organization_object_ids(org.id, element_class)
+                _update_perimeter(ids, org)
             case _:
                 continue
-
-        object_ids |= set(ids)
-        if keep_empty or ids:
-            orgs.add(UniverseOrg(id=org.id, name=org.name, slug=org.slug, type=entry.category))
 
     return list(object_ids), list(orgs)
 

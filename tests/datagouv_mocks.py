@@ -37,21 +37,21 @@ class DatagouvObject:
 
 @final
 class Organization(DatagouvObject):
-    _TYPES: list[str | None] = ["type-A", None, "type-B", "type-C"]
+    _KINDS: list[str | None] = ["kind-A", None, "kind-B", "kind-C"]
 
     _objects: list["DatagouvRecord"]
 
     def __init__(self, objects: list["DatagouvRecord"] | None = None):
         super().__init__()
         self._objects = objects if objects else []
-        self._type = Organization._TYPES[self._id % len(Organization._TYPES)]
+        self._kind = Organization._KINDS[self._id % len(Organization._KINDS)]
 
     def __repr__(self) -> str:
         return f"<{self.id} {[o.id for o in self._objects]}>"
 
     @property
-    def type(self) -> str | None:
-        return self._type
+    def kind(self) -> str | None:
+        return self._kind
 
     def objects(self, object_class: ElementClass | None = None) -> list["DatagouvRecord"]:
         return (
@@ -64,11 +64,11 @@ class Organization(DatagouvObject):
     def as_dict(self) -> dict[str, Any]:
         return {
             **super().as_dict(),
-            "type": self._type,
+            "kind": self._kind,
         }
 
-    def with_type(self, type: str | None) -> Self:
-        self._type = type
+    def with_kind(self, kind: str | None) -> Self:
+        self._kind = kind
         return self
 
     def add_objects(self, *objects: "DatagouvRecord") -> Self:
