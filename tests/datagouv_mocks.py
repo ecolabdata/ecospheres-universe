@@ -2,7 +2,7 @@ from copy import copy
 from itertools import cycle, islice
 from typing import final, override, Any, Self
 
-from ecospheres_universe.datagouv import ElementClass
+from ecospheres_universe.datagouv import ElementClass, ObjectType
 
 
 class DatagouvObject:
@@ -48,6 +48,10 @@ class Organization(DatagouvObject):
 
     def __repr__(self) -> str:
         return f"<{self.id} {[o.id for o in self._objects]}>"
+
+    @property
+    def type(self) -> ObjectType:
+        return ObjectType.ORGANIZATION
 
     @property
     def kind(self) -> str | None:
