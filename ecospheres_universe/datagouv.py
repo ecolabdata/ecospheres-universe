@@ -2,9 +2,16 @@ import requests
 
 from dataclasses import dataclass
 from enum import Enum
+from functools import total_ordering
 from typing import Any, Callable
 
-from ecospheres_universe.util import batched, elapsed, elapsed_and_count, verbose_print
+from ecospheres_universe.util import (
+    batched,
+    elapsed,
+    elapsed_and_count,
+    normalize_string,
+    verbose_print,
+)
 
 
 session = requests.Session()
@@ -21,11 +28,17 @@ class Element:
     object_id: str
 
 
+@total_ordering
 @dataclass(frozen=True)
 class Organization:
     id: str
     name: str
     slug: str
+
+    def __lt__(self, other):
+        self_name = normalize_string(self.name)
+        other_name = normalize_string(other.name)
+        return self_name < other_name or (self_name == other_name and self.slug < other.slug)
 
 
 @dataclass(frozen=True)
