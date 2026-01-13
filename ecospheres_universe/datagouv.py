@@ -1,7 +1,8 @@
 import requests
 
+from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, NamedTuple
+from typing import Any, Callable
 
 from ecospheres_universe.util import elapsed, elapsed_and_count, verbose_print
 
@@ -14,16 +15,24 @@ class ElementClass(Enum):
     Dataservice = "dataservices"
 
 
-class Element(NamedTuple):
+@dataclass(frozen=True)
+class Element:
     id: str
     object_id: str
 
 
-class Organization(NamedTuple):
+@dataclass(frozen=True)
+class Organization:
     id: str
     name: str
     slug: str
-    type: str | None
+
+
+@dataclass(frozen=True)
+class Topic:
+    id: str
+    name: str
+    organization: Organization | None
 
 
 class DatagouvApi:
@@ -36,13 +45,15 @@ class DatagouvApi:
         self.dry_run = dry_run
         print(f"API for {self.base_url} ready.")
 
-    def get_organization(self, org_id_or_slug: str) -> dict[str, Any]:
+    def get_organization(self, org_id_or_slug: str) -> Organization | None:
         url = f"{self.base_url}/api/1/organizations/{org_id_or_slug}/"
         r = session.get(url)
-        r.raise_for_status()
-        return r.json()
+        if not r.ok:
+            return None
+        data = r.json()
+        return Organization(id=data["id"], name=data["name"], slug=data["slug"])
 
-    def get_organization_objects_ids(self, org_id: str, element_class: ElementClass) -> list[str]:
+    def get_organization_object_ids(self, org_id: str, element_class: ElementClass) -> list[str]:
         url = f"{self.base_url}/api/2/{element_class.value}/search/?organization={org_id}&page_size=1000"
         xfields = "data{id,archived,archived_at,deleted,deleted_at,private,extras{geop:dataset_id}}"
 
@@ -66,7 +77,7 @@ class DatagouvApi:
                 )
             }
 
-        return self._get_objects_ids(url, filter_objects, xfields=xfields)
+        return self._get_object_ids(url, filter_objects, xfields=xfields)
 
     def get_topic_id(self, topic_id_or_slug: str) -> str:
         url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/"
@@ -100,18 +111,17 @@ class DatagouvApi:
 
     @elapsed_and_count
     def put_topic_elements(
-        self, topic_id_or_slug: str, element_class: ElementClass, objects_ids: list[str]
-    ) -> list[str]:
+        self, topic_id_or_slug: str, element_class: ElementClass, object_ids: list[str]
+    ) -> None:
         url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/elements/"
         headers = {"Content-Type": "application/json", "X-API-KEY": self.token}
-        data = [{"element": {"class": element_class.name, "id": id}} for id in objects_ids]
+        data = [{"element": {"class": element_class.name, "id": id}} for id in object_ids]
         if not self.dry_run:
             session.post(url, json=data, headers=headers).raise_for_status()
-        return objects_ids
 
     @elapsed
-    def delete_topic_elements(self, topic_id_or_slug: str, elements_ids: list[str]) -> None:
-        for element_id in elements_ids:
+    def delete_topic_elements(self, topic_id_or_slug: str, element_ids: list[str]) -> None:
+        for element_id in element_ids:
             try:
                 url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/elements/{element_id}/"
                 headers = {"X-API-KEY": self.token}
@@ -131,9 +141,9 @@ class DatagouvApi:
 
     # TODO: use _get_objects
     @elapsed_and_count
-    def get_bouquets(self, universe_tag: str, include_private: bool = True) -> list[dict[str, Any]]:
+    def get_bouquets(self, universe_tag: str, include_private: bool = True) -> list[Topic]:
         """Fetch all bouquets (topics) tagged with the universe tag"""
-        bouquets = list[dict[str, Any]]()
+        bouquets = list[Topic]()
         headers = {}
         url = f"{self.base_url}/api/2/topics/?tag={universe_tag}"
         if include_private:
@@ -143,22 +153,33 @@ class DatagouvApi:
             r = session.get(url, headers=headers)
             r.raise_for_status()
             data = r.json()
-            bouquets.extend(data["data"])
+            bouquets.extend(
+                [
+                    Topic(
+                        id=d["id"],
+                        name=d["name"],
+                        organization=Organization(id=o["id"], name=o["name"], slug=o["slug"])
+                        if (o := d.get("organization"))
+                        else None,
+                    )
+                    for d in data["data"]
+                ]
+            )
             url = data.get("next_page")
         return bouquets
 
     @elapsed_and_count
-    def _get_objects_ids(
+    def _get_object_ids(
         self, url: str, func: Callable[[list[dict[str, Any]]], set[str]], xfields: str = "data{id}"
     ) -> list[str]:
-        objects_ids = set[str]()
+        object_ids = set[str]()
         try:
             headers = {"X-Fields": f"{xfields},next_page"}
             while True:
                 r = session.get(url, headers=headers)
                 r.raise_for_status()
                 data = r.json()
-                objects_ids |= func(data["data"])
+                object_ids |= func(data["data"])
                 url = data.get("next_page")
                 if not url:
                     break
@@ -166,4 +187,4 @@ class DatagouvApi:
             if self.fail_on_errors:
                 raise
             verbose_print(e)
-        return list(objects_ids)
+        return list(object_ids)
