@@ -12,7 +12,7 @@ from minicli import cli, run
 
 from ecospheres_universe.config import Config
 from ecospheres_universe.datagouv import DatagouvApi, ElementClass, Organization
-from ecospheres_universe.grist import GristApi, Organization as GristOrg
+from ecospheres_universe.grist import GristApi, GristType, GristEntry
 from ecospheres_universe.util import (
     verbose_print,  # noqa: F401
 )
@@ -36,23 +36,30 @@ def write_organizations_file(filepath: Path, orgs: list[UniverseOrg]):
 
 def get_upcoming_universe_perimeter(
     datagouv: DatagouvApi,
-    grist_orgs: list[GristOrg],
+    grist_entries: list[GristEntry],
     element_class: ElementClass,
     keep_empty: bool = False,
 ) -> tuple[list[str], list[UniverseOrg]]:
     object_ids = set[str]()
-    orgs = list[UniverseOrg]()  # FIXME: should be a set
-    for grist_org in grist_orgs:
-        org = datagouv.get_organization(grist_org.slug)
-        if not org:
-            print(f"Unknown organization {grist_org.slug}", file=sys.stderr)
-            continue
-        verbose_print(f"Fetching {element_class.value} for organization {org.id}...")
-        ids = datagouv.get_organization_object_ids(org.id, element_class)
+    orgs = set[UniverseOrg]()
+
+    for entry in grist_entries:
+        match entry.type:
+            case GristType.ORGANIZATION:
+                org = datagouv.get_organization(entry.id)
+                if not org:
+                    print(f"Unknown organization {entry.id}", file=sys.stderr)
+                    continue
+                verbose_print(f"Fetching {element_class.value} for organization {org.id}...")
+                ids = datagouv.get_organization_object_ids(org.id, element_class)
+            case _:
+                continue
+
         object_ids |= set(ids)
         if keep_empty or ids:
-            orgs.append(UniverseOrg(id=org.id, name=org.name, slug=org.slug, type=grist_org.type))
-    return list(object_ids), orgs
+            orgs.add(UniverseOrg(id=org.id, name=org.name, slug=org.slug, type=entry.category))
+
+    return list(object_ids), list(orgs)
 
 
 @cli
@@ -115,8 +122,8 @@ def feed(
         print(f"Processing universe topic '{conf.topic}'.")
 
         verbose_print("Fetching grist universe definition...")
-        grist_orgs = grist.get_organizations()
-        print(f"Found {len(grist_orgs)} organizations in grist.")
+        grist_entries = grist.get_entries()
+        print(f"Found {len(grist_entries)} entries in grist.")
 
         if reset:
             print("Removing ALL elements from topic...")
@@ -125,7 +132,7 @@ def feed(
         for element_class in ElementClass:
             verbose_print(f"Fetching upcoming {element_class.value}...")
             upcoming_object_ids, upcoming_orgs = get_upcoming_universe_perimeter(
-                datagouv, grist_orgs, element_class, keep_empty
+                datagouv, grist_entries, element_class, keep_empty
             )
             print(
                 f"Found {len(upcoming_object_ids)} {element_class.value} matching the upcoming universe."
