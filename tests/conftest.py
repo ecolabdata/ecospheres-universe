@@ -65,7 +65,7 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
             ],
             json={
                 "records": [
-                    {"fields": {"type": "organization", "identifier": org.slug, "kind": org.kind}}
+                    {"fields": {"type": org.type, "identifier": org.slug, "kind": org.kind}}
                     for org in upcoming_universe.organizations()
                 ]
             },

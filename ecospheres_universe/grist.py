@@ -1,16 +1,13 @@
 import json
 import requests
 
-from enum import auto, StrEnum
 from typing import NamedTuple
 
-
-class GristType(StrEnum):
-    ORGANIZATION = auto()
+from ecospheres_universe.datagouv import ObjectType
 
 
 class GristEntry(NamedTuple):
-    type: GristType
+    type: ObjectType
     id: str
     kind: str | None  # LATER: drop (backcompat ecologie for now)
 
@@ -28,9 +25,9 @@ class GristApi:
         return list(  # deduplicated list
             {
                 GristEntry(
-                    type=GristType(rec["fields"]["type"]),
-                    id=rec["fields"]["identifier"],
-                    kind=rec["fields"].get("kind"),
+                    type=ObjectType.ORGANIZATION,  # LATER: ObjectType(rec["fields"]["type"])
+                    id=rec["fields"]["slug"],  # LATER: rec["fields"]["identifier"]
+                    kind=rec["fields"].get("type"),  # LATER: rec["fields"].get("kind"), then drop
                 )
                 for rec in r.json()["records"]
             }

@@ -11,8 +11,8 @@ from shutil import copyfile
 from minicli import cli, run
 
 from ecospheres_universe.config import Config
-from ecospheres_universe.datagouv import DatagouvApi, ElementClass, Organization
-from ecospheres_universe.grist import GristApi, GristType, GristEntry
+from ecospheres_universe.datagouv import DatagouvApi, ElementClass, ObjectType, Organization
+from ecospheres_universe.grist import GristApi, GristEntry
 from ecospheres_universe.util import (
     verbose_print,  # noqa: F401
 )
@@ -50,7 +50,7 @@ def get_upcoming_universe_perimeter(
 
     for entry in grist_entries:
         match entry.type:
-            case GristType.ORGANIZATION:
+            case ObjectType.ORGANIZATION:
                 org = datagouv.get_organization(entry.id)
                 if not org:
                     print(f"Unknown organization {entry.id}", file=sys.stderr)

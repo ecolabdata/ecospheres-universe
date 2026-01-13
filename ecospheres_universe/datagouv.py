@@ -1,7 +1,7 @@
 import requests
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import auto, Enum, StrEnum
 from functools import total_ordering
 from typing import Any, Callable
 
@@ -15,6 +15,10 @@ from ecospheres_universe.util import (
 
 
 session = requests.Session()
+
+
+class ObjectType(StrEnum):
+    ORGANIZATION = auto()
 
 
 class ElementClass(Enum):
