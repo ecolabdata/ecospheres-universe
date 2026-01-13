@@ -1,5 +1,6 @@
 import functools
 import time
+import unicodedata
 
 from collections.abc import Generator
 
@@ -37,6 +38,11 @@ def elapsed(func):
         return val
 
     return wrapper_decorator
+
+
+def normalize_string(string: str) -> str:
+    """Return NFKD-normalized, ascii-folded, lowercased form of the input string"""
+    return unicodedata.normalize("NFKD", string).encode("ascii", "ignore").decode("ascii").lower()
 
 
 # noop unless args.verbose is set

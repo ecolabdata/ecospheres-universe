@@ -30,12 +30,10 @@ def check_sync(universe: Path, *extra_configs: Path):
 
     grist = GristApi(base_url=conf.grist_url, env=conf.env)
 
-    grist_orgs = grist.get_organizations()
-    grist_orgs = sorted(grist_orgs, key=lambda o: o.slug)
-
     topic_id = datagouv.get_topic_id(conf.topic)
 
     orgs = set[Organization]()
+    grist_orgs = grist.get_organizations()
     for grist_org in grist_orgs:
         org = datagouv.get_organization(grist_org.slug)
         if not org:
@@ -44,7 +42,7 @@ def check_sync(universe: Path, *extra_configs: Path):
         orgs.add(org)
 
     nb_errors = 0
-    for org in orgs:
+    for org in sorted(orgs):
         datasets_wo_es = datagouv.get_topic_datasets_count(topic_id, org.id, use_search=False)
         datasets_w_es = datagouv.get_topic_datasets_count(topic_id, org.id, use_search=True)
         if datasets_w_es == datasets_wo_es:

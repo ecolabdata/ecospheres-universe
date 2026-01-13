@@ -8,8 +8,6 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from shutil import copyfile
 
-import unicodedata
-
 from minicli import cli, run
 
 from ecospheres_universe.config import Config
@@ -27,17 +25,6 @@ REMOVALS_THRESHOLD = 1800
 @dataclass(frozen=True)
 class UniverseOrg(Organization):
     type: str | None = None  # TODO: rename to category !! impacts dashboard-backend
-
-
-def sort_orgs_by_name(orgs: list[UniverseOrg]) -> list[UniverseOrg]:
-    """Sort organizations by normalized name"""
-    return sorted(
-        orgs,
-        key=lambda o: unicodedata.normalize("NFKD", o.name)
-        .encode("ascii", "ignore")
-        .decode("ascii")
-        .lower(),
-    )
 
 
 def write_organizations_file(filepath: Path, orgs: list[UniverseOrg]):
@@ -167,7 +154,7 @@ def feed(
 
             write_organizations_file(
                 conf.output_dir / f"organizations-{element_class.value}-{conf.env}.json",
-                sort_orgs_by_name(upcoming_orgs),
+                sorted(upcoming_orgs),
             )
 
         # FIXME: remove when front uses the new file path
@@ -190,7 +177,7 @@ def feed(
         )
         write_organizations_file(
             conf.output_dir / f"organizations-bouquets-{conf.env}.json",
-            sort_orgs_by_name(bouquet_orgs),
+            sorted(bouquet_orgs),
         )
 
     finally:
