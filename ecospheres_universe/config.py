@@ -12,7 +12,13 @@ class DeployEnv(StrEnum):
 
 
 @dataclass
-class ApiConfig:
+class DatagouvConfig:
+    url: str
+    token: str
+
+
+@dataclass
+class GristConfig:
     url: str
     token: str
 
@@ -22,8 +28,8 @@ class Config:
     env: DeployEnv
     topic: str
     tag: str
-    grist_url: str
-    api: ApiConfig
+    datagouv: DatagouvConfig
+    grist: GristConfig
     output_dir: Path = Path("dist")
 
     @staticmethod

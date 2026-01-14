@@ -10,7 +10,7 @@ import pytest
 from responses import RequestsMock
 from responses.matchers import header_matcher, json_params_matcher, query_param_matcher
 
-from ecospheres_universe.config import ApiConfig, Config, DeployEnv
+from ecospheres_universe.config import Config, DatagouvConfig, DeployEnv, GristConfig
 from ecospheres_universe.datagouv import ElementClass
 from ecospheres_universe.feed_universe import feed
 
@@ -38,12 +38,9 @@ def feed_config(tmp_path: Path) -> Config:
         env=DeployEnv.DEMO,
         topic="test-topic",
         tag="test-tag",
-        grist_url="https://www.example.com/grist",
+        grist=GristConfig(url="https://www.example.com/grist", token="grist-token"),
+        datagouv=DatagouvConfig(url="https://www.example.com/datagouv", token="datagouv-token"),
         output_dir=tmp_path,
-        api=ApiConfig(
-            url="https://www.example.com/datagouv",
-            token="fake-token",
-        ),
     )
 
 
@@ -59,10 +56,8 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
 
         # grist.get_entries()
         _ = responses.get(
-            url=config.grist_url,
-            match=[
-                query_param_matcher({"filter": json.dumps({"env": [config.env.value]}), "limit": 0})
-            ],
+            url=config.grist.url,
+            match=[query_param_matcher({"limit": 0})],
             json={
                 "records": [
                     {"fields": {"type": org.type, "identifier": org.slug, "kind": org.kind}}
@@ -74,7 +69,7 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
         # datagouv.get_organization()
         for org in upcoming_universe.organizations():
             _ = responses.get(
-                url=f"{config.api.url}/api/1/organizations/{org.slug}/",
+                url=f"{config.datagouv.url}/api/1/organizations/{org.slug}/",
                 json={"id": org.id, "slug": org.slug, "name": org.name},
             )
 
@@ -88,7 +83,7 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
             # datagouv.get_organization_objects_ids()
             for org in upcoming_universe.organizations():
                 _ = responses.get(
-                    url=f"{config.api.url}/api/2/{element_class.value}/search/",
+                    url=f"{config.datagouv.url}/api/2/{element_class.value}/search/",
                     match=[query_param_matcher({"organization": org.id}, strict_match=False)],
                     json={
                         "data": [
@@ -102,7 +97,7 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
 
             # datagouv.get_topic_elements()
             _ = responses.get(
-                url=f"{config.api.url}/api/2/topics/{config.topic}/elements/",
+                url=f"{config.datagouv.url}/api/2/topics/{config.topic}/elements/",
                 match=[query_param_matcher({"class": element_class.name}, strict_match=False)],
                 json={
                     "data": [
@@ -123,10 +118,10 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
             if additions:
                 # TODO: support batching
                 _ = responses.post(
-                    url=f"{config.api.url}/api/2/topics/{config.topic}/elements/",
+                    url=f"{config.datagouv.url}/api/2/topics/{config.topic}/elements/",
                     match=[
                         header_matcher(
-                            {"Content-Type": "application/json", "X-API-KEY": config.api.token}
+                            {"Content-Type": "application/json", "X-API-KEY": config.datagouv.token}
                         ),
                         json_params_matcher(
                             [
@@ -143,15 +138,15 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
             )
             for eid in removals:
                 _ = responses.delete(
-                    url=f"{config.api.url}/api/2/topics/{config.topic}/elements/{eid}/",
-                    match=[header_matcher({"X-API-KEY": config.api.token})],
+                    url=f"{config.datagouv.url}/api/2/topics/{config.topic}/elements/{eid}/",
+                    match=[header_matcher({"X-API-KEY": config.datagouv.token})],
                 )
 
         # datagouv.get_bouquets()
         _ = responses.get(
-            url=f"{config.api.url}/api/2/topics/",
+            url=f"{config.datagouv.url}/api/2/topics/",
             match=[
-                header_matcher({"X-API-KEY": config.api.token}),
+                header_matcher({"X-API-KEY": config.datagouv.token}),
                 query_param_matcher({"tag": config.tag, "include_private": "yes"}),
             ],
             json={"data": [b.as_dict() for b in bouquets], "next_page": None},

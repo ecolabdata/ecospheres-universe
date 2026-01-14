@@ -2,7 +2,9 @@
 env: demo
 topic: univers-ecospheres
 tag: ecospheres
-grist_url: "https://grist.numerique.gouv.fr/o/ecospheres/api/docs/k3YQHL3Bmrhmpk8frjznZL/tables/Universe/records"
-api:
-  url: https://demo.data.gouv.fr
-  token: CONFIGURE_ME
+datagouv:
+  url:
+  token:
+grist:
+  url:
+  token:
