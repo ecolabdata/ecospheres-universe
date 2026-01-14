@@ -60,6 +60,12 @@
     "type": "EPA"
   },
   {
+    "id": "5b1138d9c751df2618dc4662",
+    "name": "Agence ORE",
+    "slug": "agence-ore-3",
+    "type": "Association"
+  },
+  {
     "id": "5a4381adc751df74bae4627d",
     "name": "Airparif",
     "slug": "airparif-1",
@@ -206,7 +212,7 @@
   {
     "id": "558e9c3ec751df75fea453c7",
     "name": "DDT de la Marne (DDT51)",
-    "slug": "direction-departementale-des-territoires-de-la-marne-ddt51",
+    "slug": "ddt-de-la-marne-ddt51",
     "type": "DDT(M), DTAM, DEAL"
   },
   {
@@ -872,7 +878,7 @@
   {
     "id": "534fff80a3a7292c64a77e54",
     "name": "Institut national de l'origine et de la qualité",
-    "slug": "institut-national-de-l-origine-et-de-la-qualite-inao",
+    "slug": "institut-national-de-lorigine-et-de-la-qualite",
     "type": "EPA"
   },
   {
