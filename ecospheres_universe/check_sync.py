@@ -1,3 +1,4 @@
+import os
 import sys
 
 from pathlib import Path
@@ -21,22 +22,25 @@ def check_sync(universe: Path, *extra_configs: Path):
     conf = Config.from_files(universe, *extra_configs)
 
     datagouv = DatagouvApi(
-        base_url=conf.api.url,
+        base_url=conf.datagouv.url,
         token="no-token-needed",
         fail_on_errors=False,
         dry_run=True,
     )
 
-    grist = GristApi(base_url=conf.grist_url, env=conf.env)
+    grist = GristApi(
+        base_url=conf.grist.url,
+        token=os.getenv("GRIST_API_KEY", conf.grist.token),
+    )
 
     topic_id = datagouv.get_topic_id(conf.topic)
 
     orgs = set[Organization]()
     grist_orgs = [e for e in grist.get_entries() if e.type is ObjectType.ORGANIZATION]
     for grist_org in grist_orgs:
-        org = datagouv.get_organization(grist_org.id)
+        org = datagouv.get_organization(grist_org.identifier)
         if not org:
-            print(f"Unknown organization {grist_org.id}", file=sys.stderr)
+            print(f"Unknown organization {grist_org.identifier}", file=sys.stderr)
             continue
         orgs.add(org)
 

@@ -51,9 +51,9 @@ def get_upcoming_universe_perimeter(
     for entry in grist_entries:
         match entry.type:
             case ObjectType.ORGANIZATION:
-                org = datagouv.get_organization(entry.id)
+                org = datagouv.get_organization(entry.identifier)
                 if not org:
-                    print(f"Unknown organization {entry.id}", file=sys.stderr)
+                    print(f"Unknown organization {entry.identifier}", file=sys.stderr)
                     continue
                 verbose_print(f"Fetching {element_class.value} for organization {org.id}...")
                 ids = datagouv.get_organization_object_ids(org.id, element_class)
@@ -107,13 +107,16 @@ def feed(
     reset: bool = False,
 ) -> None:
     datagouv = DatagouvApi(
-        base_url=conf.api.url,
-        token=os.getenv("DATAGOUV_API_KEY", conf.api.token),
+        base_url=conf.datagouv.url,
+        token=os.getenv("DATAGOUV_API_KEY", conf.datagouv.token),
         fail_on_errors=fail_on_errors,
         dry_run=dry_run,
     )
 
-    grist = GristApi(conf.grist_url, conf.env)
+    grist = GristApi(
+        base_url=conf.grist.url,
+        token=os.getenv("GRIST_API_KEY", conf.grist.token),
+    )
 
     print(f"Starting at {datetime.datetime.now():%c}.")
     if dry_run:

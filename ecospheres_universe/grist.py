@@ -1,4 +1,3 @@
-import json
 import requests
 
 from typing import NamedTuple
@@ -8,26 +7,29 @@ from ecospheres_universe.datagouv import ObjectType
 
 class GristEntry(NamedTuple):
     type: ObjectType
-    id: str
+    identifier: str
     kind: str | None  # LATER: drop (backcompat ecologie for now)
 
 
 class GristApi:
-    def __init__(self, base_url: str, env: str):
+    def __init__(self, base_url: str, token: str):
         self.base_url = base_url
-        self.env = env
+        # TODO: can we have a default universe-bot token hard-coded from the template?
+        self.token = token
 
     def get_entries(self) -> list[GristEntry]:
         r = requests.get(
-            self.base_url, params={"filter": json.dumps({"env": [self.env]}), "limit": 0}
+            f"{self.base_url}/records",
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
+            params={"limit": 0},
         )
         r.raise_for_status()
         return list(  # deduplicated list
             {
                 GristEntry(
-                    type=ObjectType.ORGANIZATION,  # LATER: ObjectType(rec["fields"]["type"])
-                    id=rec["fields"]["slug"],  # LATER: rec["fields"]["identifier"]
-                    kind=rec["fields"].get("type"),  # LATER: rec["fields"].get("kind"), then drop
+                    type=ObjectType(rec["fields"]["type"]),
+                    identifier=rec["fields"]["identifier"],
+                    kind=rec["fields"].get("kind"),
                 )
                 for rec in r.json()["records"]
             }
