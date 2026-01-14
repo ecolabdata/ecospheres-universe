@@ -6,15 +6,15 @@
     "type": null
   },
   {
-    "id": "67884b4da4fca9c97bbef479",
-    "name": "Ecolab",
-    "slug": "ecolab-1",
-    "type": null
-  },
-  {
     "id": "66f3e3e1aa2ff3ad298699de",
     "name": "ECOLAB",
     "slug": "ecolab",
+    "type": null
+  },
+  {
+    "id": "67884b4da4fca9c97bbef479",
+    "name": "Ecolab",
+    "slug": "ecolab-1",
     "type": null
   },
   {
