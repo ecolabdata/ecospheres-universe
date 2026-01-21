@@ -1,20 +1,32 @@
 from copy import copy
 from itertools import cycle, islice
-from typing import final, override, Self
+from typing import final, override, ClassVar, Self
 
-from ecospheres_universe.datagouv import ElementClass, ObjectType
+from ecospheres_universe.datagouv import (
+    DatagouvObject,
+    Dataservice,
+    Dataset,
+    Organization,
+    Topic,
+    TopicElement,
+    TopicObject,
+)
 from ecospheres_universe.util import JSONObject, uniquify
 
 
-class DatagouvObject:
-    _id_counter: int = 0
+class MockObject(DatagouvObject):
+    _id_counter: ClassVar[int] = 0
+    _id: int
 
     def __init__(self):
-        DatagouvObject._id_counter += 1
-        self._id: int = DatagouvObject._id_counter
+        self._id_counter += 1
+        self._id = self._id_counter
 
     def __repr__(self) -> str:
         return f"<{self.id}>"
+
+    def __hash__(self) -> int:
+        return hash(self.id)
 
     @property
     def id(self) -> str:
@@ -37,30 +49,27 @@ class DatagouvObject:
 
 
 @final
-class Organization(DatagouvObject):
-    _CATEGORIES: list[str | None] = ["category-A", None, "category-B", "category-C"]
+class MockOrganization(MockObject, Organization):
+    _CATEGORIES: ClassVar[list[str | None]] = ["category-A", None, "category-B", "category-C"]
+    _objects: list["MockOwnedObject"]
+    _category: str | None
 
-    _objects: list["DatagouvRecord"]
-
-    def __init__(self, objects: list["DatagouvRecord"] | None = None):
+    def __init__(self, objects: list["MockOwnedObject"] | None = None):
         super().__init__()
         self._objects = objects if objects else []
-        self._category = Organization._CATEGORIES[self._id % len(Organization._CATEGORIES)]
+        self._category = self._CATEGORIES[self._id % len(self._CATEGORIES)]
 
     def __repr__(self) -> str:
         return f"<{self.id} {[o.id for o in self._objects]}>"
 
     @property
-    def type(self) -> ObjectType:
-        return ObjectType.ORGANIZATION
-
-    @property
     def category(self) -> str | None:
         return self._category
 
-    def objects(self, object_class: ElementClass | None = None) -> list["DatagouvRecord"]:
+    # FIXME: DatagouvObject is too wide
+    def objects(self, object_class: type[DatagouvObject] | None = None) -> list["MockOwnedObject"]:
         return (
-            [o for o in self._objects if o.element_class is object_class]
+            [o for o in self._objects if isinstance(o, object_class)]
             if object_class
             else self._objects
         )
@@ -76,7 +85,7 @@ class Organization(DatagouvObject):
         self._category = category
         return self
 
-    def add_objects(self, *objects: "DatagouvRecord") -> Self:
+    def add_objects(self, *objects: "MockOwnedObject") -> Self:
         self._objects += objects
         return self
 
@@ -89,20 +98,15 @@ class Organization(DatagouvObject):
         return [cls() for _ in range(n)]
 
 
-class DatagouvRecord(DatagouvObject):
-    _organization: Organization
+class MockOwnedObject(MockObject):
+    _organization: MockOrganization
 
     def __repr__(self) -> str:
         return f"<{self.id} @{self._organization.id}>"
 
     @property
-    def organization(self) -> Organization:
+    def organization(self) -> MockOrganization:
         return self._organization
-
-    @property
-    def element_class(self) -> ElementClass:
-        # TODO: this can fail, should only exist when valid
-        return ElementClass[self.__class__.__name__]
 
     @override
     def as_json(self) -> JSONObject:
@@ -111,7 +115,7 @@ class DatagouvRecord(DatagouvObject):
             "organization": self.organization.as_json(),
         }
 
-    def with_ownership(self, organization: Organization) -> Self:
+    def with_ownership(self, organization: MockOrganization) -> Self:
         self._organization = organization
         organization.add_objects(self)
         return self
@@ -121,25 +125,25 @@ class DatagouvRecord(DatagouvObject):
         return cls()
 
     @classmethod
-    def many(cls, n: int, organizations: list[Organization]) -> list[Self]:
+    def many(cls, n: int, organizations: list[MockOrganization]) -> list[Self]:
         return [cls().with_ownership(org) for org in islice(cycle(organizations), n)]
 
 
 @final
-class Dataset(DatagouvRecord):
+class MockDataset(MockOwnedObject, Dataset):
     pass
 
 
 @final
-class Dataservice(DatagouvRecord):
+class MockDataservice(MockOwnedObject, Dataservice):
     pass
 
 
 @final
-class Element(DatagouvObject):
-    _object: DatagouvRecord
+class MockElement(MockObject, TopicElement):
+    _object: MockOwnedObject
 
-    def __init__(self, object: DatagouvRecord):
+    def __init__(self, object: MockOwnedObject):
         super().__init__()
         self._object = object
 
@@ -147,39 +151,41 @@ class Element(DatagouvObject):
         return f"<{self.id} [{self._object.id}]>"
 
     @property
-    def object(self) -> DatagouvRecord:
+    def object(self) -> MockOwnedObject:
         return self._object
 
 
 @final
-class Topic(DatagouvRecord):
-    _elements: list[Element]
+class MockTopic(MockOwnedObject, Topic):
+    _elements: list[MockElement]
 
-    def __init__(self, *elements: DatagouvRecord):
+    def __init__(self, *elements: MockOwnedObject):
         super().__init__()
-        self._elements = [Element(e) for e in elements] if elements else []
+        self._elements = [MockElement(e) for e in elements] if elements else []
 
     def __repr__(self) -> str:
         return f"<{self.id} {self._elements}>"
 
-    def elements(self, element_class: ElementClass | None = None) -> list[Element]:
+    def elements(self, object_class: type[TopicObject] | None = None) -> list[MockElement]:
         elements = self._elements
-        if element_class:
-            elements = filter(lambda e: e.object.element_class is element_class, elements)
+        if object_class:
+            elements = filter(lambda e: type(e.object) is object_class, elements)
         return list(elements)
 
-    def organizations(self, element_class: ElementClass | None = None) -> list[Organization]:
-        return uniquify(e.object.organization for e in self.elements(element_class))
+    def organizations(
+        self, object_class: type[TopicObject] | None = None
+    ) -> list[MockOrganization]:
+        return uniquify(e.object.organization for e in self.elements(object_class))
 
     def clone(self) -> Self:
         clone = copy(self)
         clone._elements = [e for e in self._elements]
         return clone
 
-    def add_elements(self, *elements: DatagouvRecord) -> Self:
-        self._elements += [Element(e) for e in elements]
+    def add_elements(self, *elements: MockOwnedObject) -> Self:
+        self._elements += [MockElement(e) for e in elements]
         return self
 
-    def remove_elements(self, *elements: DatagouvRecord) -> Self:
+    def remove_elements(self, *elements: MockOwnedObject) -> Self:
         self._elements = [e for e in self._elements if e.object not in elements]
         return self
