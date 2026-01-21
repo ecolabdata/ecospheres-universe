@@ -10,7 +10,7 @@ uv sync
 
 La configuration est stockée dans un fichier `config-{env}.yaml` en fonction du `env` sur lequel on travaille (`demo` ou `prod`).
 
-Pour renseigner le token d'API, utiliser la variable d'environnement `DATAGOUV_API_KEY` ou un autre fichier d'environnement (`env.yaml` dans les exemples ci-dessous) :
+Pour renseigner le token d'API, utiliser la variable d'environnement `DATAGOUV_API_KEY` ou un autre fichier d'environnement :
 
 ```yaml
 api:
@@ -21,7 +21,7 @@ api:
 ## Créer ou mettre à jour un univers
 
 ```shell
-uv run ecospheres-universe feed-universe [options] config-{env}.yaml [env.yaml]
+uv run ecospheres-universe feed-universe [options] config-{env}.yaml [config-overrides.yaml ...]
 ```
 
 Options :
@@ -36,7 +36,7 @@ Options :
 Vérifie la synchronisation entre l'index Elasticsearch de data.gouv.fr et la base de données MongoDB de data.gouv.fr pour les organisations de l'univers.
 
 ```shell
-uv run ecospheres-universe check-sync config-{env}.yaml [env.yaml]
+uv run ecospheres-universe check-sync config-{env}.yaml [config-overrides.yaml ...]
 ```
 
 

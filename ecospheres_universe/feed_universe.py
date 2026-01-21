@@ -77,7 +77,7 @@ def feed_universe(
     """Feed the universe with datasets and dataservices from organizations.
 
     :universe: Universe yaml config file
-    :extra_configs: Additional config files (optional)
+    :extra_configs: Additional config files (optional overrides)
     :keep_empty: Keep empty organizations in the list
     :fail_on_errors: Fail the run on http errors
     :dry_run: Perform a trial run without actual feeding
