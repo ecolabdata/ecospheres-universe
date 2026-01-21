@@ -30,7 +30,7 @@ def check_sync(universe: Path, *extra_configs: Path):
 
     grist = GristApi(
         base_url=conf.grist.url,
-        table=conf.grist.url,
+        table=conf.grist.table,
         token=os.getenv("GRIST_API_KEY", conf.grist.token),
     )
 
