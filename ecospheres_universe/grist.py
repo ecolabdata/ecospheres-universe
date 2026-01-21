@@ -15,7 +15,6 @@ class GristApi:
     def __init__(self, base_url: str, table: str, token: str):
         self.base_url = base_url
         self.table = table
-        # TODO: can we have a default universe-bot token hard-coded from the template?
         self.token = token
 
     def get_entries(self) -> list[GristEntry]:

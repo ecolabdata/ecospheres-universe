@@ -24,7 +24,7 @@ REMOVALS_THRESHOLD = 1800
 
 @dataclass(frozen=True)
 class UniverseOrg(Organization):
-    type: str | None = None  # TODO: rename to category !! impacts dashboard-backend
+    type: str | None = None  # TODO: rename to kind !! impacts dashboard-backend
 
 
 def write_organizations_file(filepath: Path, orgs: list[UniverseOrg]):
