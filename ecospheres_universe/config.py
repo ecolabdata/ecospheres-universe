@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from deepmerge import merge_or_raise
+from deepmerge import always_merger
 from enum import StrEnum, auto
 from pathlib import Path
 
@@ -37,5 +37,5 @@ class Config:
     @staticmethod
     def from_files(*paths: Path) -> "Config":
         dicts = [yaml.safe_load(path.read_text()) for path in paths]
-        conf = merge_or_raise.merge(*dicts)
+        conf = always_merger.merge(*dicts)
         return dacite.from_dict(Config, conf, config=dacite.Config(cast=[DeployEnv]))
