@@ -21,6 +21,7 @@ class DatagouvConfig:
 @dataclass
 class GristConfig:
     url: str
+    table: str
     token: str
 
 

@@ -38,8 +38,8 @@ def feed_config(tmp_path: Path) -> Config:
         env=DeployEnv.DEMO,
         topic="test-topic",
         tag="test-tag",
-        grist=GristConfig(url="https://www.example.com/grist", token="grist-token"),
         datagouv=DatagouvConfig(url="https://www.example.com/datagouv", token="datagouv-token"),
+        grist=GristConfig(url="https://www.example.com/grist", table="test", token="grist-token"),
         output_dir=tmp_path,
     )
 
@@ -56,7 +56,7 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
 
         # grist.get_entries()
         _ = responses.get(
-            url=config.grist.url,
+            url=f"{config.grist.url}/tables/{config.grist.table}/records",
             match=[query_param_matcher({"limit": 0})],
             json={
                 "records": [
