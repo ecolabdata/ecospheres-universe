@@ -28,9 +28,9 @@ class GristApi:
         return list(  # deduplicated list
             {
                 GristEntry(
-                    type=ObjectType(rec["fields"]["type"]),
-                    identifier=rec["fields"]["identifier"],
-                    kind=rec["fields"].get("kind"),
+                    type=ObjectType(rec["fields"]["Type"]),
+                    identifier=rec["fields"]["Identifiant"],
+                    kind=rec["fields"].get("Categorie"),
                 )
                 for rec in r.json()["records"]
             }

@@ -60,7 +60,7 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
             match=[query_param_matcher({"limit": 0})],
             json={
                 "records": [
-                    {"fields": {"type": org.type, "identifier": org.slug, "kind": org.kind}}
+                    {"fields": {"Type": org.type, "Identifiant": org.slug, "Categorie": org.kind}}
                     for org in upcoming_universe.organizations()
                 ]
             },
