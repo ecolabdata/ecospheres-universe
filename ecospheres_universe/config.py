@@ -31,4 +31,4 @@ class Config:
     def from_files(*paths: Path) -> "Config":
         dicts = [yaml.safe_load(path.read_text()) for path in paths]
         conf = always_merger.merge(*dicts)
-        return dacite.from_dict(Config, conf)
+        return dacite.from_dict(Config, conf, config=dacite.Config(cast=[Path]))
