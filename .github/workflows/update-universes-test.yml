@@ -5,6 +5,8 @@ on:
   #   # this should run right after most of harvesting is finished on data.gouv.fr
   #   - cron: '4 5 * * *'
   workflow_dispatch:
+  pull_request:
+    types: [opened]
 
 jobs:
 
