@@ -1,10 +1,12 @@
-name: Update universes
+name: Update universes [TEST]
 
 on:
-  schedule:
-    # this should run right after most of harvesting is finished on data.gouv.fr
-    - cron: '4 5 * * *'
+  # schedule:
+  #   # this should run right after most of harvesting is finished on data.gouv.fr
+  #   - cron: '4 5 * * *'
   workflow_dispatch:
+  pull_request:
+    types: [opened]
 
 jobs:
 
@@ -45,7 +47,7 @@ jobs:
           GRIST_API_KEY: ${{ secrets.GRIST_API_KEY }}
           PYTHONUNBUFFERED: 1
         run: |
-          uv run ecospheres-universe feed-universe ${{ env.CONFIG_FILE }} --fail-on-errors 2>&1 | tee ${{ env.LOG_FILE }}
+          uv run ecospheres-universe feed-universe --dry-run ${{ env.CONFIG_FILE }} --fail-on-errors 2>&1 | tee ${{ env.LOG_FILE }}
           exit ${PIPESTATUS[0]}
 
       - name: Commit artifacts
