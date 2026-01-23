@@ -1,9 +1,9 @@
 from copy import copy
 from itertools import cycle, islice
-from typing import final, override, Any, Self
+from typing import final, override, Self
 
 from ecospheres_universe.datagouv import ElementClass, ObjectType
-from ecospheres_universe.util import uniquify
+from ecospheres_universe.util import JSONObject, uniquify
 
 
 class DatagouvObject:
@@ -28,7 +28,7 @@ class DatagouvObject:
     def name(self) -> str:
         return f"{self.__class__.__name__} {self._id}"
 
-    def as_dict(self) -> dict[str, Any]:
+    def as_json(self) -> JSONObject:
         return {
             "id": self.id,
             "slug": self.slug,
@@ -66,9 +66,9 @@ class Organization(DatagouvObject):
         )
 
     @override
-    def as_dict(self) -> dict[str, Any]:
+    def as_json(self) -> JSONObject:
         return {
-            **super().as_dict(),
+            **super().as_json(),
             "category": self._category,
         }
 
@@ -105,10 +105,10 @@ class DatagouvRecord(DatagouvObject):
         return ElementClass[self.__class__.__name__]
 
     @override
-    def as_dict(self) -> dict[str, Any]:
+    def as_json(self) -> JSONObject:
         return {
-            **super().as_dict(),
-            "organization": self.organization.as_dict(),
+            **super().as_json(),
+            "organization": self.organization.as_json(),
         }
 
     def with_ownership(self, organization: Organization) -> Self:

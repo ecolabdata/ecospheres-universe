@@ -11,7 +11,7 @@ from responses import RequestsMock
 from responses.matchers import header_matcher, json_params_matcher, query_param_matcher
 
 from ecospheres_universe.config import Config, DatagouvConfig, GristConfig
-from ecospheres_universe.datagouv import ElementClass
+from ecospheres_universe.datagouv import ElementClass, INACTIVE_OBJECT_MARKERS
 from ecospheres_universe.feed_universe import feed
 
 from .datagouv_mocks import Organization, Topic
@@ -89,7 +89,14 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
             for org in upcoming_universe.organizations():
                 _ = responses.get(
                     url=f"{config.datagouv.url}/api/2/{element_class.value}/search/",
-                    match=[query_param_matcher({"organization": org.id}, strict_match=False)],
+                    match=[
+                        header_matcher(
+                            {
+                                "X-Fields": f"data{{id,{','.join(INACTIVE_OBJECT_MARKERS)}}},next_page"
+                            }
+                        ),
+                        query_param_matcher({"organization": org.id}, strict_match=False),
+                    ],
                     json={
                         "data": [
                             {"id": e.object.id}
@@ -103,7 +110,10 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
             # datagouv.get_topic_elements()
             _ = responses.get(
                 url=f"{config.datagouv.url}/api/2/topics/{config.topic}/elements/",
-                match=[query_param_matcher({"class": element_class.name}, strict_match=False)],
+                match=[
+                    header_matcher({"X-Fields": "data{id,element{id}},next_page"}),
+                    query_param_matcher({"class": element_class.name}, strict_match=False),
+                ],
                 json={
                     "data": [
                         {"id": e.id, "element": {"class": element_class.name, "id": e.object.id}}
@@ -151,12 +161,16 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
         _ = responses.get(
             url=f"{config.datagouv.url}/api/2/topics/",
             match=[
-                header_matcher({"X-API-KEY": config.datagouv.token}),
+                header_matcher(
+                    {
+                        "X-API-KEY": config.datagouv.token,
+                        "X-Fields": "data{id,name,organization{id,name,slug}},next_page",
+                    }
+                ),
                 query_param_matcher({"tag": config.tag, "include_private": "yes"}),
             ],
-            json={"data": [b.as_dict() for b in bouquets], "next_page": None},
+            json={"data": [b.as_json() for b in bouquets], "next_page": None},
         )
-
         feed(config)
 
         for element_class in ElementClass:

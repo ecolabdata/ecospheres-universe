@@ -3,13 +3,15 @@ import requests
 from dataclasses import dataclass
 from enum import auto, Enum, StrEnum
 from functools import total_ordering
-from typing import Any, Callable
+from typing import Any, Generator
 
 from ecospheres_universe.util import (
+    JSONObject,
     batched,
     elapsed,
     elapsed_and_count,
     normalize_string,
+    uniquify,
     verbose_print,
 )
 
@@ -52,6 +54,16 @@ class Topic:
     organization: Organization | None
 
 
+INACTIVE_OBJECT_MARKERS = [
+    "archived",  # dataset
+    "archived_at",  # dataservice
+    "deleted",  # dataset
+    "deleted_at",  # dataservice
+    "private",  # dataset,dataservice
+    "extras{geop:dataset_id}",  # dataset
+]
+
+
 class DatagouvApi:
     def __init__(
         self, base_url: str, token: str, fail_on_errors: bool = False, dry_run: bool = False
@@ -70,31 +82,11 @@ class DatagouvApi:
         data = r.json()
         return Organization(id=data["id"], name=data["name"], slug=data["slug"])
 
+    @elapsed_and_count
     def get_organization_object_ids(self, org_id: str, element_class: ElementClass) -> list[str]:
         url = f"{self.base_url}/api/2/{element_class.value}/search/?organization={org_id}&page_size=1000"
-        xfields = "data{id,archived,archived_at,deleted,deleted_at,private,extras{geop:dataset_id}}"
-
-        def filter_objects(data: list[dict[str, Any]]) -> set[str]:
-            return {
-                d["id"]
-                for d in data
-                if not bool(
-                    # dataset.archived
-                    d.get("archived")
-                    # dataservice.archived_at
-                    or d.get("archived_at")
-                    # dataset.deleted
-                    or d.get("deleted")
-                    # dataservice.deleted_at
-                    or d.get("deleted_at")
-                    # (dataset|dataservice).private
-                    or d.get("private")
-                    # dataset.extras[geop:dataset_id]
-                    or d.get("extras")
-                )
-            }
-
-        return self._get_object_ids(url, filter_objects, xfields=xfields)
+        objs = self._get_objects(url=url, fields=INACTIVE_OBJECT_MARKERS)
+        return uniquify(o["id"] for o in objs if DatagouvApi._is_active(o))
 
     def get_topic_id(self, topic_id_or_slug: str) -> str:
         url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/"
@@ -108,23 +100,13 @@ class DatagouvApi:
         r.raise_for_status()
         return int(r.json()["total"])
 
-    # TODO: use _get_objects
+    @elapsed_and_count
     def get_topic_elements(
         self, topic_id_or_slug: str, element_class: ElementClass
     ) -> list[Element]:
-        elements = list[Element]()
         url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/elements/?class={element_class.name}&page_size=1000"
-        while True:
-            r = session.get(url)
-            r.raise_for_status()
-            data = r.json()
-            elements.extend(
-                [Element(id=elt["id"], object_id=elt["element"]["id"]) for elt in data["data"]]
-            )
-            url = data.get("next_page")
-            if not url:
-                break
-        return elements
+        objs = self._get_objects(url=url, fields=["id", "element{id}"])
+        return [Element(id=o["id"], object_id=o["element"]["id"]) for o in objs]
 
     @elapsed_and_count
     def put_topic_elements(
@@ -162,52 +144,48 @@ class DatagouvApi:
             headers = {"Content-Type": "application/json", "X-API-KEY": self.token}
             session.delete(url, headers=headers).raise_for_status()
 
-    # TODO: use _get_objects
     @elapsed_and_count
     def get_bouquets(self, universe_tag: str, include_private: bool = True) -> list[Topic]:
         """Fetch all bouquets (topics) tagged with the universe tag"""
-        bouquets = list[Topic]()
-        headers = {}
         url = f"{self.base_url}/api/2/topics/?tag={universe_tag}"
+        headers = {}
         if include_private:
             url = f"{url}&include_private=yes"
             headers["X-API-KEY"] = self.token
-        while url:
-            r = session.get(url, headers=headers)
-            r.raise_for_status()
-            data = r.json()
-            bouquets.extend(
-                [
-                    Topic(
-                        id=d["id"],
-                        name=d["name"],
-                        organization=Organization(id=o["id"], name=o["name"], slug=o["slug"])
-                        if (o := d.get("organization"))
-                        else None,
-                    )
-                    for d in data["data"]
-                ]
+        objs = self._get_objects(
+            url=url, headers=headers, fields=["id", "name", "organization{id,name,slug}"]
+        )
+        return [
+            Topic(
+                id=d["id"],
+                name=d["name"],
+                organization=Organization(id=o["id"], name=o["name"], slug=o["slug"])
+                if (o := d.get("organization"))
+                else None,
             )
-            url = data.get("next_page")
-        return bouquets
+            for d in objs
+        ]
 
-    @elapsed_and_count
-    def _get_object_ids(
-        self, url: str, func: Callable[[list[dict[str, Any]]], set[str]], xfields: str = "data{id}"
-    ) -> list[str]:
-        object_ids = set[str]()
+    def _get_objects(
+        self, url: str, headers: dict[str, Any] | None = None, fields: list[str] | None = None
+    ) -> Generator[JSONObject]:
         try:
-            headers = {"X-Fields": f"{xfields},next_page"}
+            headers = dict(headers or {})  # local copy
+            if fields:
+                f = uniquify(["id", *fields])
+                headers["X-Fields"] = "data{" + ",".join(f) + "},next_page"
             while True:
                 r = session.get(url, headers=headers)
                 r.raise_for_status()
                 data = r.json()
-                object_ids |= func(data["data"])
+                yield from data["data"]
                 url = data.get("next_page")
                 if not url:
-                    break
+                    return
         except requests.HTTPError as e:
             if self.fail_on_errors:
                 raise
             verbose_print(e)
-        return list(object_ids)
+
+    def _is_active(object: JSONObject) -> bool:
+        return not any(object.get(m) for m in INACTIVE_OBJECT_MARKERS)
