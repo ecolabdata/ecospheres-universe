@@ -165,7 +165,7 @@ def feed(
             datagouv.delete_topic_elements(conf.topic, element_ids)
 
             write_organizations_file(
-                conf.output_dir / f"organizations-{element_class.value}-{conf.env}.json",
+                conf.output_dir / f"organizations-{element_class.value}.json",
                 sorted(upcoming_orgs),
             )
 
@@ -182,7 +182,7 @@ def feed(
             }
         )
         write_organizations_file(
-            conf.output_dir / f"organizations-bouquets-{conf.env}.json",
+            conf.output_dir / "organizations-bouquets.json",
             sorted(bouquet_orgs),
         )
 

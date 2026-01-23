@@ -8,81 +8,55 @@ on:
 
 jobs:
 
-  run-demo-update:
+  run-update:
     runs-on: ubuntu-latest
+    concurrency:
+      # TODO: enable concurrency? make sure git commits don't step on eachother
+      group: no_concurrency
+      cancel-in-progress: false
+    strategy:
+      matrix:
+        universe:
+          - ecospheres-demo
+          - ecospheres-prod
+    environment: ${{ matrix.universe }}
+    env:
+      CONFIG_FILE: configs/${{ matrix.universe }}.yaml
+      DIST_FILES: dist/${{ matrix.universe }}/organizations-*.json
+      LOG_FILE: logs/${{ matrix.universe }}.log
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up uv
-      uses: astral-sh/setup-uv@v7
-      with:
-        enable-cache: true
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
 
-    - name: Install dependencies
-      run: uv sync
+      - name: Install dependencies
+        run: uv sync
 
-    - name: Update demo universe
-      env:
-        DATAGOUV_API_KEY: ${{ secrets.DATAGOUV_API_KEY_DEMO }}
-        GRIST_API_KEY: ${{ secrets.GRIST_API_KEY }}
-        PYTHONUNBUFFERED: 1
-      run: |
-        uv run ecospheres-universe feed-universe config-demo.yaml --fail-on-errors 2>&1 | tee logs/run_log_demo.txt
-        exit ${PIPESTATUS[0]}
+      - name: Update ${{ matrix.universe }} universe
+        env:
+          DATAGOUV_API_KEY: ${{ secrets.DATAGOUV_API_KEY  }}
+          GRIST_API_KEY: ${{ secrets.GRIST_API_KEY }}
+          PYTHONUNBUFFERED: 1
+        run: |
+          uv run ecospheres-universe feed-universe --dry-run ${{ env.CONFIG_FILE }} --fail-on-errors 2>&1 | tee ${{ env.LOG_FILE }}
+          exit ${PIPESTATUS[0]}
 
-    - name: Commit artifacts
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add logs/run_log_demo.txt
-        git commit -m "Update daily run log for demo"
-        git add dist/organizations*-demo.json
-        git diff-index --cached --quiet HEAD || git commit -m "Update organizations JSON for demo"
+      - name: Commit artifacts
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add ${{ env.LOG_FILE }}
+          git commit -m "Update daily run log for ${{ matrix.universe }}"
+          git add ${{ env.DIST_FILES }}
+          git diff-index --cached --quiet HEAD || git commit -m "Update organizations JSONs for ${{ matrix.universe }}"
 
-    - name: Push changes
-      run: |
-        git pull --rebase origin ${{ github.ref_name }}
-        git push
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
-  run-prod-update:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up uv
-      uses: astral-sh/setup-uv@v7
-      with:
-        enable-cache: true
-
-    - name: Install dependencies
-      run: uv sync
-
-    - name: Update prod universe
-      env:
-        DATAGOUV_API_KEY: ${{ secrets.DATAGOUV_API_KEY_PROD }}
-        GRIST_API_KEY: ${{ secrets.GRIST_API_KEY }}
-        PYTHONUNBUFFERED: 1
-      run: |
-        uv run ecospheres-universe feed-universe config-prod.yaml --fail-on-errors 2>&1 | tee logs/run_log_prod.txt
-        exit ${PIPESTATUS[0]}
-
-    - name: Commit artifacts
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add logs/run_log_prod.txt
-        git commit -m "Update daily run log for prod"
-        git add dist/organizations*-prod.json
-        git diff-index --cached --quiet HEAD || git commit -m "Update organizations JSON for prod"
-
-    - name: Push changes
-      run: |
-        git pull --rebase origin ${{ github.ref_name }}
-        git push
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git pull --rebase origin ${{ github.ref_name }}
+          git push

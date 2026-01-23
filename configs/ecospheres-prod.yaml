@@ -1,11 +1,11 @@
 # WARNING: overload tokens with envvars or a separate config file to avoid leaking secrets
-env: demo
 topic: univers-ecospheres
-tag: ecospheres
+tag: univers-ecospheres
 datagouv:
-  url: https://demo.data.gouv.fr
+  url: https://www.data.gouv.fr
   token: CONFIGURE_ME
 grist:
   url: https://grist.numerique.gouv.fr/o/ecospheres/api/docs/5BC7vx8gyUF6Ff4dkkLo85
-  table: Demo
+  table: Prod
   token: CONFIGURE_ME
+output_dir: dist/ecospheres-prod

@@ -10,7 +10,7 @@ import pytest
 from responses import RequestsMock
 from responses.matchers import header_matcher, json_params_matcher, query_param_matcher
 
-from ecospheres_universe.config import Config, DatagouvConfig, DeployEnv, GristConfig
+from ecospheres_universe.config import Config, DatagouvConfig, GristConfig
 from ecospheres_universe.datagouv import ElementClass
 from ecospheres_universe.feed_universe import feed
 
@@ -35,7 +35,6 @@ def mock_organizations_file(organizations: Iterable[Organization]) -> list[dict[
 @pytest.fixture
 def feed_config(tmp_path: Path) -> Config:
     return Config(
-        env=DeployEnv.DEMO,
         topic="test-topic",
         tag="test-tag",
         datagouv=DatagouvConfig(url="https://www.example.com/datagouv", token="datagouv-token"),
@@ -156,11 +155,11 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
 
         for element_class in ElementClass:
             assert json_load_path(
-                config.output_dir / f"organizations-{element_class.value}-{config.env.value}.json"
+                config.output_dir / f"organizations-{element_class.value}.json"
             ) == mock_organizations_file(upcoming_universe.organizations(element_class))
 
         assert json_load_path(
-            config.output_dir / f"organizations-bouquets-{config.env.value}.json"
+            config.output_dir / "organizations-bouquets.json"
         ) == mock_organizations_file({b.organization for b in bouquets})
 
     return _run_mock_feed
