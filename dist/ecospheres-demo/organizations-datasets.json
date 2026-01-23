@@ -6,6 +6,12 @@
     "type": ""
   },
   {
+    "id": "534fff4ea3a7292c64a77cad",
+    "name": "Agence de l'eau Rhône-Méditerranée et Corse",
+    "slug": "agence-de-l-eau-rhone-mediterranee-et-corse",
+    "type": ""
+  },
+  {
     "id": "634916955ef1b4d57ca08835",
     "name": "Agence de l'eau Seine-Normandie",
     "slug": "agence-de-leau-seine-normandie-1",
@@ -57,6 +63,12 @@
     "id": "5889ea7a88ee385a5e9b81a4",
     "name": "ATMO Grand Est",
     "slug": "atmo-grand-est",
+    "type": ""
+  },
+  {
+    "id": "5b9fb3678b4c416ff2277bb5",
+    "name": "AtmoSud",
+    "slug": "atmosud",
     "type": ""
   },
   {
@@ -750,6 +762,12 @@
     "type": ""
   },
   {
+    "id": "5eb035fd32d114765d6e8389",
+    "name": "Fédération des Parcs Naturels Régionaux de France",
+    "slug": "federation-des-parcs-naturels-regionaux-de-france",
+    "type": ""
+  },
+  {
     "id": "5ddc086f634f41190d4c1006",
     "name": "Géo2France",
     "slug": "geo2france",
@@ -771,6 +789,12 @@
     "id": "54f461f8c751df0f88882844",
     "name": "Institut français de recherche pour l'exploitation de la mer (IFREMER)",
     "slug": "institut-francais-de-recherche-pour-lexploitation-de-la-mer",
+    "type": ""
+  },
+  {
+    "id": "56e02813c751df1c1a1ffccd",
+    "name": "Institut National de l'Environnement Industriel et des Risques",
+    "slug": "institut-national-de-lenvironnement-industriel-et-des-risques",
     "type": ""
   },
   {
@@ -814,6 +838,12 @@
     "name": "Muséum National d'Histoire Naturelle",
     "slug": "museum-national-dhistoire-naturelle",
     "type": ""
+  },
+  {
+    "id": "5c8f5e3d8b4c4110e6286460",
+    "name": "namR",
+    "slug": "namr",
+    "type": "Autre"
   },
   {
     "id": "56c44eb7c751df689e6c6de0",
@@ -879,6 +909,18 @@
     "id": "5bf88b3a8b4c4151badafa03",
     "name": "Parc national des Écrins",
     "slug": "parc-national-des-ecrins",
+    "type": ""
+  },
+  {
+    "id": "57a0a78788ee383e74d73ff5",
+    "name": "Parc naturel régional de la Montagne de Reims",
+    "slug": "parc-naturel-regional-de-la-montagne-de-reims",
+    "type": ""
+  },
+  {
+    "id": "5dc53b1b6f4441145da42202",
+    "name": "Parc Naturel régional de la Montagne de Reims",
+    "slug": "parc-naturel-regional-de-la-montagne-de-reims-1",
     "type": ""
   },
   {
