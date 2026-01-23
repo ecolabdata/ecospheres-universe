@@ -6,7 +6,6 @@ import time
 
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from shutil import copyfile
 
 from minicli import cli, run
 
@@ -156,12 +155,6 @@ def feed(
                 conf.output_dir / f"organizations-{element_class.value}-{conf.env}.json",
                 sorted(upcoming_orgs),
             )
-
-        # FIXME: remove when front uses the new file path
-        # retrocompatibility
-        copyfile(
-            f"dist/organizations-datasets-{conf.env}.json", f"dist/organizations-{conf.env}.json"
-        )
 
         # TODO: custom ecologie => make that an option?
         # TODO: can this be handled by the main update loop? datasets/services in bouquets should also be in universe?
