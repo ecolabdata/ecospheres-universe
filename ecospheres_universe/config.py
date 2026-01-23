@@ -36,6 +36,7 @@ class Config:
 
     @staticmethod
     def from_files(*paths: Path) -> "Config":
+        assert len(paths) > 0
         dicts = [yaml.safe_load(path.read_text()) for path in paths]
-        conf = always_merger.merge(*dicts)
+        conf = dicts[0] if len(dicts) == 1 else always_merger.merge(*dicts)
         return dacite.from_dict(Config, conf, config=dacite.Config(cast=[DeployEnv]))
