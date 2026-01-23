@@ -3,7 +3,11 @@ import time
 import unicodedata
 
 from collections.abc import Generator
-from typing import Iterable
+from typing import Any, Iterable, Mapping
+
+
+# weak mapping to avoid having to cast nested json
+JSONObject = Mapping[str, Any]
 
 
 def batched[T](sequence: list[T], n: int = 1) -> Generator[list[T]]:

@@ -149,7 +149,7 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
                 header_matcher({"X-API-KEY": config.datagouv.token}),
                 query_param_matcher({"tag": config.tag, "include_private": "yes"}),
             ],
-            json={"data": [b.as_dict() for b in bouquets], "next_page": None},
+            json={"data": [b.as_json() for b in bouquets], "next_page": None},
         )
 
         feed(config)

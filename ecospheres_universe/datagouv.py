@@ -3,9 +3,10 @@ import requests
 from dataclasses import dataclass
 from enum import auto, Enum, StrEnum
 from functools import total_ordering
-from typing import Any, Callable
+from typing import Callable
 
 from ecospheres_universe.util import (
+    JSONObject,
     batched,
     elapsed,
     elapsed_and_count,
@@ -74,7 +75,7 @@ class DatagouvApi:
         url = f"{self.base_url}/api/2/{element_class.value}/search/?organization={org_id}&page_size=1000"
         xfields = "data{id,archived,archived_at,deleted,deleted_at,private,extras{geop:dataset_id}}"
 
-        def filter_objects(data: list[dict[str, Any]]) -> set[str]:
+        def filter_objects(data: list[JSONObject]) -> set[str]:
             return {
                 d["id"]
                 for d in data
@@ -193,7 +194,7 @@ class DatagouvApi:
 
     @elapsed_and_count
     def _get_object_ids(
-        self, url: str, func: Callable[[list[dict[str, Any]]], set[str]], xfields: str = "data{id}"
+        self, url: str, func: Callable[[list[JSONObject]], set[str]], xfields: str = "data{id}"
     ) -> list[str]:
         object_ids = set[str]()
         try:
