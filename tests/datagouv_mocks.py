@@ -3,6 +3,7 @@ from itertools import cycle, islice
 from typing import final, override, Any, Self
 
 from ecospheres_universe.datagouv import ElementClass, ObjectType
+from ecospheres_universe.util import uniquify
 
 
 class DatagouvObject:
@@ -168,7 +169,7 @@ class Topic(DatagouvRecord):
         return list(elements)
 
     def organizations(self, element_class: ElementClass | None = None) -> list[Organization]:
-        return list({e.object.organization for e in self.elements(element_class)})
+        return uniquify(e.object.organization for e in self.elements(element_class))
 
     def clone(self) -> Self:
         clone = copy(self)

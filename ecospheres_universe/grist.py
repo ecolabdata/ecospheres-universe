@@ -3,6 +3,7 @@ import requests
 from typing import NamedTuple
 
 from ecospheres_universe.datagouv import ObjectType
+from ecospheres_universe.util import uniquify
 
 
 class GristEntry(NamedTuple):
@@ -24,13 +25,11 @@ class GristApi:
             params={"limit": 0},
         )
         r.raise_for_status()
-        return list(  # deduplicated list
-            {
-                GristEntry(
-                    type=ObjectType(rec["fields"]["Type"]),
-                    identifier=rec["fields"]["Identifiant"],
-                    category=rec["fields"].get("Categorie"),
-                )
-                for rec in r.json()["records"]
-            }
+        return uniquify(
+            GristEntry(
+                type=ObjectType(rec["fields"]["Type"]),
+                identifier=rec["fields"]["Identifiant"],
+                category=rec["fields"].get("Categorie"),
+            )
+            for rec in r.json()["records"]
         )

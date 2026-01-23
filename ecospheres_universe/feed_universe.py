@@ -14,6 +14,7 @@ from ecospheres_universe.config import Config
 from ecospheres_universe.datagouv import DatagouvApi, ElementClass, ObjectType, Organization
 from ecospheres_universe.grist import GristApi, GristEntry
 from ecospheres_universe.util import (
+    uniquify,
     verbose_print,  # noqa: F401
 )
 
@@ -150,7 +151,7 @@ def feed(
 
             verbose_print(f"Fetching existing {element_class.value}...")
             existing_elements = datagouv.get_topic_elements(conf.topic, element_class)
-            existing_object_ids = list({e.object_id for e in existing_elements})
+            existing_object_ids = uniquify(e.object_id for e in existing_elements)
             print(
                 f"Found {len(existing_object_ids)} {element_class.value} currently in the universe."
             )
@@ -185,12 +186,10 @@ def feed(
         verbose_print("Fetching additional organizations from bouquets...")
         bouquets = datagouv.get_bouquets(conf.tag)
         print(f"Found {len(bouquets)} bouquets with the universe tag.")
-        bouquet_orgs = list(
-            {
-                UniverseOrg(id=o.id, name=o.name, slug=o.slug, type=None)
-                for b in bouquets
-                if (o := b.organization)
-            }
+        bouquet_orgs = uniquify(
+            UniverseOrg(id=o.id, name=o.name, slug=o.slug, type=None)
+            for b in bouquets
+            if (o := b.organization)
         )
         write_organizations_file(
             conf.output_dir / "organizations-bouquets.json",
