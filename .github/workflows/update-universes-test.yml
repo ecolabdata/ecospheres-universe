@@ -17,6 +17,9 @@ jobs:
       group: no_concurrency
       cancel-in-progress: false
     strategy:
+      # max-parallel=1 as workaround to preserve matrix execution order
+      # https://github.com/actions/runner/issues/703
+      max-parallel: 1
       matrix:
         universe:
           - ecospheres-demo
