@@ -38,14 +38,14 @@ class DatagouvObject:
 
 @final
 class Organization(DatagouvObject):
-    _KINDS: list[str | None] = ["kind-A", None, "kind-B", "kind-C"]
+    _CATEGORIES: list[str | None] = ["category-A", None, "category-B", "category-C"]
 
     _objects: list["DatagouvRecord"]
 
     def __init__(self, objects: list["DatagouvRecord"] | None = None):
         super().__init__()
         self._objects = objects if objects else []
-        self._kind = Organization._KINDS[self._id % len(Organization._KINDS)]
+        self._category = Organization._CATEGORIES[self._id % len(Organization._CATEGORIES)]
 
     def __repr__(self) -> str:
         return f"<{self.id} {[o.id for o in self._objects]}>"
@@ -55,8 +55,8 @@ class Organization(DatagouvObject):
         return ObjectType.ORGANIZATION
 
     @property
-    def kind(self) -> str | None:
-        return self._kind
+    def category(self) -> str | None:
+        return self._category
 
     def objects(self, object_class: ElementClass | None = None) -> list["DatagouvRecord"]:
         return (
@@ -69,11 +69,11 @@ class Organization(DatagouvObject):
     def as_json(self) -> JSONObject:
         return {
             **super().as_json(),
-            "kind": self._kind,
+            "category": self._category,
         }
 
-    def with_kind(self, kind: str | None) -> Self:
-        self._kind = kind
+    def with_category(self, category: str | None) -> Self:
+        self._category = category
         return self
 
     def add_objects(self, *objects: "DatagouvRecord") -> Self:
