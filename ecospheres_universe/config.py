@@ -1,15 +1,9 @@
 from dataclasses import dataclass
 from deepmerge import always_merger
-from enum import StrEnum, auto
 from pathlib import Path
 
 import dacite
 import yaml
-
-
-class DeployEnv(StrEnum):
-    DEMO = auto()
-    PROD = auto()
 
 
 @dataclass
@@ -27,7 +21,6 @@ class GristConfig:
 
 @dataclass
 class Config:
-    env: DeployEnv
     topic: str
     tag: str
     datagouv: DatagouvConfig
@@ -39,4 +32,4 @@ class Config:
         assert len(paths) > 0
         dicts = [yaml.safe_load(path.read_text()) for path in paths]
         conf = dicts[0] if len(dicts) == 1 else always_merger.merge(*dicts)
-        return dacite.from_dict(Config, conf, config=dacite.Config(cast=[DeployEnv]))
+        return dacite.from_dict(Config, conf, config=dacite.Config(cast=[Path]))
