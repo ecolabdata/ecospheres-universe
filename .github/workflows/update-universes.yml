@@ -24,8 +24,8 @@ jobs:
 
     - name: Update demo universe
       env:
-        DATAGOUV_URL: https://demo.data.gouv.fr
         DATAGOUV_API_KEY: ${{ secrets.DATAGOUV_API_KEY_DEMO }}
+        GRIST_API_KEY: ${{ secrets.GRIST_API_KEY_DEMO }}
         PYTHONUNBUFFERED: 1
       run: |
         uv run ecospheres-universe feed-universe config-demo.yaml --fail-on-errors 2>&1 | tee logs/run_log_demo.txt
@@ -64,8 +64,8 @@ jobs:
 
     - name: Update prod universe
       env:
-        DATAGOUV_URL: https://www.data.gouv.fr
         DATAGOUV_API_KEY: ${{ secrets.DATAGOUV_API_KEY_PROD }}
+        GRIST_API_KEY: ${{ secrets.GRIST_API_KEY_PROD }}
         PYTHONUNBUFFERED: 1
       run: |
         uv run ecospheres-universe feed-universe config-prod.yaml --fail-on-errors 2>&1 | tee logs/run_log_prod.txt
