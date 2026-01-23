@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from functools import total_ordering
 from typing import Any, ClassVar, Generator
 
+import dacite
+
 from ecospheres_universe.util import (
     JSONObject,
     batched,
@@ -76,7 +78,6 @@ class TopicElement:
 class Dataset(TopicObject, DatagouvObject):
     CLASS_NAME: ClassVar[str] = "dataset"
     id: str
-    name: str
     organization: Organization | None
 
 
@@ -84,7 +85,6 @@ class Dataset(TopicObject, DatagouvObject):
 class Dataservice(TopicObject, DatagouvObject):
     CLASS_NAME: ClassVar[str] = "dataservice"
     id: str
-    name: str
     organization: Organization | None
 
 
@@ -149,6 +149,12 @@ class DatagouvApi:
         url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/elements/?class={object_class.classname()}&page_size=1000"
         objs = self._get_objects(url=url, fields=["id", "element{id}"])
         return [TopicElement(id=o["id"], object_id=o["element"]["id"]) for o in objs]
+
+    # TODO: @elapsed_and_count whenever decorator typing works for bounded generics
+    def get_topic_objects[T: TopicObject](self, topic_id: str, object_class: type[T]) -> list[T]:
+        url = f"{self.base_url}/api/2/{object_class.namespace()}/?topic={topic_id}&page_size=1000"
+        objs = self._get_objects(url=url, fields=["id", "organization{id, name, slug}"])
+        return [dacite.from_dict(object_class, o) for o in objs]
 
     @elapsed_and_count
     def put_topic_elements(
