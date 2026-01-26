@@ -36,9 +36,9 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add logs/run_log_demo.txt
-        git commit -m "Update daily run log for demo"
+        git commit -m "workflow: update daily run log for demo"
         git add dist/organizations*-demo.json
-        git diff-index --cached --quiet HEAD || git commit -m "Update organizations JSON for demo"
+        git diff-index --cached --quiet HEAD || git commit -m "workflow: update organizations JSON for demo"
 
     - name: Push changes
       run: |
@@ -76,9 +76,9 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add logs/run_log_prod.txt
-        git commit -m "Update daily run log for prod"
+        git commit -m "workflow: update daily run log for prod"
         git add dist/organizations*-prod.json
-        git diff-index --cached --quiet HEAD || git commit -m "Update organizations JSON for prod"
+        git diff-index --cached --quiet HEAD || git commit -m "workflow: update organizations JSON for prod"
 
     - name: Push changes
       run: |
