@@ -6,6 +6,7 @@ import time
 
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from shutil import copyfile
 
 from minicli import cli, run
 
@@ -105,6 +106,10 @@ def feed(
     dry_run: bool = False,
     reset: bool = False,
 ) -> None:
+    # FIXME: remove when front uses the new file path
+    # retrocompatibility
+    env = conf.output_dir.name.rsplit("-", 1)[1]
+
     datagouv = DatagouvApi(
         base_url=conf.datagouv.url,
         token=os.getenv("DATAGOUV_API_KEY", conf.datagouv.token),
@@ -168,6 +173,12 @@ def feed(
                 conf.output_dir / f"organizations-{element_class.value}.json",
                 sorted(upcoming_orgs),
             )
+            # FIXME: remove when front uses the new file path
+            # retrocompatibility
+            copyfile(
+                conf.output_dir / f"organizations-{element_class.value}.json",
+                f"dist/organizations-{element_class.value}-{env}.json",
+            )
 
         # TODO: custom ecologie => make that an option?
         # TODO: can this be handled by the main update loop? datasets/services in bouquets should also be in universe?
@@ -184,6 +195,12 @@ def feed(
         write_organizations_file(
             conf.output_dir / "organizations-bouquets.json",
             sorted(bouquet_orgs),
+        )
+        # FIXME: remove when front uses the new file path
+        # retrocompatibility
+        copyfile(
+            conf.output_dir / "organizations-bouquets.json",
+            f"dist/organizations-bouquets-{env}.json",
         )
 
     finally:
