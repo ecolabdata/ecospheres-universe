@@ -187,5 +187,6 @@ class DatagouvApi:
                 raise
             verbose_print(e)
 
+    @staticmethod
     def _is_active(object: JSONObject) -> bool:
         return not any(object.get(m) for m in INACTIVE_OBJECT_MARKERS)
