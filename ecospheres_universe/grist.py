@@ -8,7 +8,7 @@ from ecospheres_universe.datagouv import ObjectType
 class GristEntry(NamedTuple):
     type: ObjectType
     identifier: str
-    kind: str | None  # LATER: drop (backcompat ecologie for now)
+    category: str | None  # LATER: drop (backcompat ecologie for now)
 
 
 class GristApi:
@@ -29,7 +29,7 @@ class GristApi:
                 GristEntry(
                     type=ObjectType(rec["fields"]["Type"]),
                     identifier=rec["fields"]["Identifiant"],
-                    kind=rec["fields"].get("Categorie"),
+                    category=rec["fields"].get("Categorie"),
                 )
                 for rec in r.json()["records"]
             }

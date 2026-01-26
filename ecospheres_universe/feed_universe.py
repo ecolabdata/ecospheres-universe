@@ -23,7 +23,7 @@ REMOVALS_THRESHOLD = 1800
 
 @dataclass(frozen=True)
 class UniverseOrg(Organization):
-    type: str | None = None  # TODO: rename to kind !! impacts dashboard-backend
+    type: str | None = None  # TODO: rename to category !! impacts dashboard-backend
 
 
 def write_organizations_file(filepath: Path, orgs: list[UniverseOrg]):
@@ -45,7 +45,7 @@ def get_upcoming_universe_perimeter(
     def _update_perimeter(ids: list[str], org: Organization | None):
         object_ids.update(ids)
         if org and (keep_empty or ids):
-            orgs.add(UniverseOrg(id=org.id, name=org.name, slug=org.slug, type=entry.kind))
+            orgs.add(UniverseOrg(id=org.id, name=org.name, slug=org.slug, type=entry.category))
 
     for entry in grist_entries:
         match entry.type:

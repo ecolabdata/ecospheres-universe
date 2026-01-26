@@ -25,7 +25,7 @@ def json_load_path(path: Path) -> dict[str, Any]:
 def mock_organizations_file(organizations: Iterable[Organization]) -> list[dict[str, Any]]:
     return sorted(
         [
-            {"id": org.id, "name": org.name, "slug": org.slug, "type": org.kind}
+            {"id": org.id, "name": org.name, "slug": org.slug, "type": org.category}
             for org in organizations
         ],
         key=itemgetter("name"),
@@ -60,7 +60,13 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
             match=[query_param_matcher({"limit": 0})],
             json={
                 "records": [
-                    {"fields": {"Type": org.type, "Identifiant": org.slug, "Categorie": org.kind}}
+                    {
+                        "fields": {
+                            "Type": org.type,
+                            "Identifiant": org.slug,
+                            "Categorie": org.category,
+                        }
+                    }
                     for org in upcoming_universe.organizations()
                 ]
             },
