@@ -2,12 +2,12 @@ import requests
 
 from typing import NamedTuple
 
-from ecospheres_universe.datagouv import ObjectType
+from ecospheres_universe.datagouv import DatagouvObject
 from ecospheres_universe.util import uniquify
 
 
 class GristEntry(NamedTuple):
-    type: ObjectType
+    object_class: type[DatagouvObject]
     identifier: str
     category: str | None  # LATER: drop (backcompat ecologie for now)
 
@@ -27,7 +27,7 @@ class GristApi:
         r.raise_for_status()
         return uniquify(
             GristEntry(
-                type=ObjectType(rec["fields"]["Type"]),
+                object_class=DatagouvObject.class_from_name(rec["fields"]["Type"]),
                 identifier=rec["fields"]["Identifiant"],
                 category=rec["fields"].get("Categorie"),
             )

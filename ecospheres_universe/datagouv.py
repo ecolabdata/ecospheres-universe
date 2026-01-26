@@ -1,7 +1,9 @@
+import inspect
 import requests
+import sys
 
+from abc import abstractmethod
 from dataclasses import dataclass
-from enum import auto, Enum, StrEnum
 from functools import total_ordering
 from typing import Any, Generator
 
@@ -19,27 +21,39 @@ from ecospheres_universe.util import (
 session = requests.Session()
 
 
-class ObjectType(StrEnum):
-    ORGANIZATION = auto()
+class DatagouvObject:
+    """Abstract base class for datagouv objects."""
 
+    @classmethod
+    @abstractmethod
+    def object_name(cls) -> str:
+        """Name of the object class as declared in `udata.udata.core.*.models`."""
+        pass
 
-class ElementClass(Enum):
-    Dataset = "datasets"
-    Dataservice = "dataservices"
+    @classmethod
+    def namespace(cls) -> str:
+        return f"{cls.object_name().lower()}s"
 
-
-@dataclass(frozen=True)
-class Element:
-    id: str
-    object_id: str
+    @staticmethod
+    def class_from_name(name: str) -> type["DatagouvObject"]:
+        for clazz_name, clazz in inspect.getmembers(
+            sys.modules[__name__], predicate=inspect.isclass
+        ):
+            if clazz_name.lower() == name.lower() and issubclass(clazz, DatagouvObject):
+                return clazz
+        raise TypeError(f"{name} is not a DatagouvObject")
 
 
 @total_ordering
-@dataclass(frozen=True)
-class Organization:
+@dataclass
+class Organization(DatagouvObject):
     id: str
     name: str
     slug: str
+
+    @classmethod
+    def object_name(cls) -> str:
+        return Organization.__name__
 
     def __lt__(self, other):
         self_name = normalize_string(self.name)
@@ -47,11 +61,55 @@ class Organization:
         return self_name < other_name or (self_name == other_name and self.slug < other.slug)
 
 
-@dataclass(frozen=True)
-class Topic:
+class TopicObject(DatagouvObject):
+    """Abstract base class for datagouv objects that can be part of a topic."""
+
+    @classmethod
+    def element_class(cls) -> str:
+        return cls.object_name()
+
+
+@dataclass
+class Topic(DatagouvObject):
     id: str
     name: str
     organization: Organization | None
+
+    @classmethod
+    def object_name(cls) -> str:
+        return Topic.__name__
+
+    @classmethod
+    def object_classes(cls) -> list[type[TopicObject]]:
+        return TopicObject.__subclasses__()
+
+
+@dataclass
+class TopicElement:
+    id: str
+    object_id: str
+
+
+@dataclass
+class Dataset(TopicObject, DatagouvObject):
+    id: str
+    name: str
+    organization: Organization | None
+
+    @classmethod
+    def object_name(cls) -> str:
+        return Dataset.__name__
+
+
+@dataclass
+class Dataservice(TopicObject, DatagouvObject):
+    id: str
+    name: str
+    organization: Organization | None
+
+    @classmethod
+    def object_name(cls) -> str:
+        return Dataservice.__name__
 
 
 INACTIVE_OBJECT_MARKERS = [
@@ -83,8 +141,10 @@ class DatagouvApi:
         return Organization(id=data["id"], name=data["name"], slug=data["slug"])
 
     @elapsed_and_count
-    def get_organization_object_ids(self, org_id: str, element_class: ElementClass) -> list[str]:
-        url = f"{self.base_url}/api/2/{element_class.value}/search/?organization={org_id}&page_size=1000"
+    def get_organization_object_ids(
+        self, org_id: str, object_class: type[DatagouvObject]
+    ) -> list[str]:
+        url = f"{self.base_url}/api/2/{object_class.namespace()}/search/?organization={org_id}&page_size=1000"
         objs = self._get_objects(url=url, fields=INACTIVE_OBJECT_MARKERS)
         return uniquify(o["id"] for o in objs if DatagouvApi._is_active(o))
 
@@ -102,17 +162,17 @@ class DatagouvApi:
 
     @elapsed_and_count
     def get_topic_elements(
-        self, topic_id_or_slug: str, element_class: ElementClass
-    ) -> list[Element]:
-        url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/elements/?class={element_class.name}&page_size=1000"
+        self, topic_id_or_slug: str, object_class: type[TopicObject]
+    ) -> list[TopicElement]:
+        url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/elements/?class={object_class.element_class()}&page_size=1000"
         objs = self._get_objects(url=url, fields=["id", "element{id}"])
-        return [Element(id=o["id"], object_id=o["element"]["id"]) for o in objs]
+        return [TopicElement(id=o["id"], object_id=o["element"]["id"]) for o in objs]
 
     @elapsed_and_count
     def put_topic_elements(
         self,
         topic_id_or_slug: str,
-        element_class: ElementClass,
+        object_class: type[TopicObject],
         object_ids: list[str],
         batch_size: int = 0,
     ) -> None:
@@ -120,7 +180,7 @@ class DatagouvApi:
         headers = {"Content-Type": "application/json", "X-API-KEY": self.token}
         batches = batched(object_ids, batch_size) if batch_size else [object_ids]
         for batch in batches:
-            data = [{"element": {"class": element_class.name, "id": id}} for id in batch]
+            data = [{"element": {"class": object_class.element_class(), "id": id}} for id in batch]
             if not self.dry_run:
                 session.post(url, json=data, headers=headers).raise_for_status()
 
