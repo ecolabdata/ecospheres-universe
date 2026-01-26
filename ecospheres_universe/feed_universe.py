@@ -108,7 +108,7 @@ def feed(
 ) -> None:
     # FIXME: remove when front uses the new file path
     # retrocompatibility
-    env = conf.output_dir.name.rsplit("-", 1)[1]
+    env = conf.output_dir.name.rsplit("-", 1)[1] if "-" in conf.output_dir.name else "unknown"
 
     datagouv = DatagouvApi(
         base_url=conf.datagouv.url,
