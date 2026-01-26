@@ -1,30 +1,36 @@
-import json
 import requests
 
 from typing import NamedTuple
 
+from ecospheres_universe.datagouv import ObjectType
 
-class Organization(NamedTuple):
-    slug: str
-    type: str
+
+class GristEntry(NamedTuple):
+    type: ObjectType
+    identifier: str
+    category: str | None  # LATER: drop (backcompat ecologie for now)
 
 
 class GristApi:
-    def __init__(self, base_url: str, env: str):
+    def __init__(self, base_url: str, table: str, token: str):
         self.base_url = base_url
-        self.env = env
+        self.table = table
+        self.token = token
 
-    def get_organizations(self) -> list[Organization]:
+    def get_entries(self) -> list[GristEntry]:
         r = requests.get(
-            self.base_url, params={"filter": json.dumps({"env": [self.env]}), "limit": 0}
+            f"{self.base_url}/tables/{self.table}/records",
+            headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
+            params={"limit": 0},
         )
         r.raise_for_status()
-        # deduplicated list
-        return list(
+        return list(  # deduplicated list
             {
-                o["fields"]["slug"]: Organization(
-                    slug=o["fields"]["slug"], type=o["fields"]["type"]
+                GristEntry(
+                    type=ObjectType(rec["fields"]["Type"]),
+                    identifier=rec["fields"]["Identifiant"],
+                    category=rec["fields"].get("Categorie"),
                 )
-                for o in r.json()["records"]
-            }.values()
+                for rec in r.json()["records"]
+            }
         )

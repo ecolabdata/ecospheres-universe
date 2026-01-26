@@ -2,7 +2,7 @@ from copy import copy
 from itertools import cycle, islice
 from typing import final, override, Any, Self
 
-from ecospheres_universe.datagouv import ElementClass
+from ecospheres_universe.datagouv import ElementClass, ObjectType
 
 
 class DatagouvObject:
@@ -37,21 +37,25 @@ class DatagouvObject:
 
 @final
 class Organization(DatagouvObject):
-    _TYPES: list[str | None] = ["type-A", None, "type-B", "type-C"]
+    _CATEGORIES: list[str | None] = ["category-A", None, "category-B", "category-C"]
 
     _objects: list["DatagouvRecord"]
 
     def __init__(self, objects: list["DatagouvRecord"] | None = None):
         super().__init__()
         self._objects = objects if objects else []
-        self._type = Organization._TYPES[self._id % len(Organization._TYPES)]
+        self._category = Organization._CATEGORIES[self._id % len(Organization._CATEGORIES)]
 
     def __repr__(self) -> str:
         return f"<{self.id} {[o.id for o in self._objects]}>"
 
     @property
-    def type(self) -> str | None:
-        return self._type
+    def type(self) -> ObjectType:
+        return ObjectType.ORGANIZATION
+
+    @property
+    def category(self) -> str | None:
+        return self._category
 
     def objects(self, object_class: ElementClass | None = None) -> list["DatagouvRecord"]:
         return (
@@ -64,11 +68,11 @@ class Organization(DatagouvObject):
     def as_dict(self) -> dict[str, Any]:
         return {
             **super().as_dict(),
-            "type": self._type,
+            "category": self._category,
         }
 
-    def with_type(self, type: str | None) -> Self:
-        self._type = type
+    def with_category(self, category: str | None) -> Self:
+        self._category = category
         return self
 
     def add_objects(self, *objects: "DatagouvRecord") -> Self:

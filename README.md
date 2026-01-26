@@ -2,26 +2,38 @@
 
 ## Mise en place
 
-Installer les dépendances avec [uv](https://docs.astral.sh/uv/):
+### Configuration
+
+La configuration est stockée dans un fichier `config-{env}.yaml` en fonction du `env` data.gouv.fr sur lequel on travaille (`demo` ou `prod`).
+
+Pour renseigner les tokens d'API sans fuiter de secrets, utiliser les variables d'environnement `DATAGOUV_API_KEY` et `GRIST_API_KEY` ou surcharger la config à l'aide d'un autre fichier qui ne sera pas commité dans git :
+
+```yaml
+datagouv:
+  token: ...
+grist:
+  token: ...
+```
+
+### Installation locale
 
 ```shell
 uv sync
 ```
 
-La configuration est stockée dans un fichier `config-{env}.yaml` en fonction du `env` sur lequel on travaille (`demo` ou `prod`).
+### Automatisation via GitHub Actions
 
-Pour renseigner le token d'API, utiliser la variable d'environnement `DATAGOUV_API_KEY` ou un autre fichier d'environnement (`env.yaml` dans les exemples ci-dessous) :
+Le [workflow `update-universes`](https://github.com/ecolabdata/ecospheres-universe/blob/main/.github/workflows/update-universes.yml) met quotidiennement à jour les univers `demo` et `prod`.
 
-```yaml
-api:
-  url: https://demo.data.gouv.fr
-  token: ...
-```
 
-## Créer ou mettre à jour un univers
+## Utilisation
+
+### Créer ou mettre à jour un univers
+
+Crée ou met à jour un univers à partir de sa définition Grist.
 
 ```shell
-uv run ecospheres-universe feed-universe [options] config-{env}.yaml [env.yaml]
+uv run ecospheres-universe feed-universe [options] config-{env}.yaml [config-overrides.yaml ...]
 ```
 
 Options :
@@ -31,15 +43,12 @@ Options :
 - `--reset` : Empty topic before refeeding it
 - `--verbose` : Enable verbose mode
 
-## Vérifier la synchronisation
+En plus de la mise à jour de l'univers sur data.gouv.fr, le script génère plusieurs fichiers `dist/organizations-{type}-{env}.json` contenant les organisations data.gouv.fr qui référencent des objets appartenant à l'univers mis à jour. Ces fichiers peuvent être [utilisés comme API par `udata-front-kit`](https://github.com/opendatateam/udata-front-kit/blob/main/configs/ecospheres/config.yaml).
 
-Vérifie la synchronisation entre l'index Elasticsearch de data.gouv.fr et la base de données MongoDB de data.gouv.fr pour les organisations de l'univers.
+### Vérifier la synchronisation
+
+Vérifie la synchronisation entre l'index Elasticsearch et la base de données MongoDB de data.gouv.fr pour les organisations de l'univers.
 
 ```shell
-uv run ecospheres-universe check-sync config-{env}.yaml [env.yaml]
+uv run ecospheres-universe check-sync config-{env}.yaml [config-overrides.yaml ...]
 ```
-
-
-## Utilisation du référentiel
-
-Le script génère un fichier `dist/organizations-{env}.json` avec les informations extraites de data.gouv.fr des organisations valides et possédant des jeux de données. Ce fichier peut être utilisé comme API.
