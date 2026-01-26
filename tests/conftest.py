@@ -3,7 +3,7 @@ import json
 from collections.abc import Iterable
 from operator import itemgetter
 from pathlib import Path
-from typing import Any, Callable
+from typing import Callable
 
 import pytest
 
@@ -13,16 +13,18 @@ from responses.matchers import header_matcher, json_params_matcher, query_param_
 from ecospheres_universe.config import Config, DatagouvConfig, GristConfig
 from ecospheres_universe.datagouv import ElementClass, INACTIVE_OBJECT_MARKERS
 from ecospheres_universe.feed_universe import feed
+from ecospheres_universe.util import JSONObject
+
 
 from .datagouv_mocks import Organization, Topic
 
 
-def json_load_path(path: Path) -> dict[str, Any]:
+def json_load_path(path: Path) -> JSONObject:
     with open(path, "r") as f:
         return json.load(f)
 
 
-def mock_organizations_file(organizations: Iterable[Organization]) -> list[dict[str, Any]]:
+def mock_organizations_file(organizations: Iterable[Organization]) -> list[JSONObject]:
     return sorted(
         [
             {"id": org.id, "name": org.name, "slug": org.slug, "type": org.category}
