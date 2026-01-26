@@ -55,9 +55,9 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add ${{ env.LOG_FILE }}
-          git commit -m "Update daily run log for ${{ matrix.universe }}"
+          git commit -m "workflow: update daily run log for ${{ matrix.universe }}"
           git add ${{ env.DIST_FILES }}
-          git diff-index --cached --quiet HEAD || git commit -m "Update organizations JSONs for ${{ matrix.universe }}"
+          git diff-index --cached --quiet HEAD || git commit -m "workflow: update organizations JSONs for ${{ matrix.universe }}"
 
       - name: Push changes
         env:
