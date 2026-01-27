@@ -3,7 +3,12 @@ import time
 import unicodedata
 
 from collections.abc import Generator
-from typing import Iterable
+from types import FunctionType
+from typing import Any, Callable, Iterable, Mapping
+
+
+# weak mapping to avoid having to cast nested json
+JSONObject = Mapping[str, Any]
 
 
 def batched[T](sequence: list[T], n: int = 1) -> Generator[list[T]]:
@@ -12,7 +17,10 @@ def batched[T](sequence: list[T], n: int = 1) -> Generator[list[T]]:
         yield sequence[ndx : min(ndx + n, length)]
 
 
-def elapsed_and_count(func):
+def elapsed_and_count[T, **P](func: Callable[P, T]) -> Callable[P, T]:
+    # https://docs.astral.sh/ty/reference/typing-faq/#why-does-ty-say-callable-has-no-attribute-__name__
+    assert isinstance(func, FunctionType)
+
     @functools.wraps(func)
     def wrapper_decorator(*args, **kwargs):
         t = time.time()
@@ -28,9 +36,11 @@ def elapsed_and_count(func):
     return wrapper_decorator
 
 
-def elapsed(func):
+def elapsed[T, **P](func: Callable[P, T]) -> Callable[P, T]:
+    assert isinstance(func, FunctionType)
+
     @functools.wraps(func)
-    def wrapper_decorator(*args, **kwargs):
+    def wrapper_decorator(*args: P.args, **kwargs: P.kwargs) -> T:
         t = time.time()
         try:
             val = func(*args, **kwargs)
