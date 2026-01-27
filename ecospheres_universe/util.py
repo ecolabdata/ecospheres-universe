@@ -3,6 +3,7 @@ import time
 import unicodedata
 
 from collections.abc import Generator
+from typing import Iterable
 
 
 def batched[T](sequence: list[T], n: int = 1) -> Generator[list[T]]:
@@ -43,6 +44,11 @@ def elapsed(func):
 def normalize_string(string: str) -> str:
     """Return NFKD-normalized, ascii-folded, lowercased form of the input string"""
     return unicodedata.normalize("NFKD", string).encode("ascii", "ignore").decode("ascii").lower()
+
+
+def uniquify[T](sequence: Iterable[T]) -> list[T]:
+    """Return list of unique elements from `sequence`, preserving original order"""
+    return list(dict.fromkeys(sequence))
 
 
 # noop unless args.verbose is set
