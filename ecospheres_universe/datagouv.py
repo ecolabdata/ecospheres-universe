@@ -173,7 +173,7 @@ class DatagouvApi:
             headers = dict(headers or {})  # local copy
             if fields:
                 f = uniquify(["id", *fields])
-                headers["X-Fields"] = "data{" + ",".join(f) + "},next_page"
+                headers["X-Fields"] = f"data{{{','.join(f)}}},next_page"
             while True:
                 r = session.get(url, headers=headers)
                 r.raise_for_status()
