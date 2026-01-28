@@ -17,7 +17,7 @@ def test_all_at_once(mock_feed_and_assert: Callable, feed_config: Config):
         .remove_elements_m(datasets[1])
     )
 
-    bouquets = MockTopic.many(5, [org.with_type_m(None) for org in MockOrganization.many(n=3)])
+    bouquets = MockTopic.many(5, [org.with_category_m(None) for org in MockOrganization.many(n=3)])
 
     mock_feed_and_assert(feed_config, existing_universe, upcoming_universe, bouquets)
 
@@ -76,7 +76,7 @@ def test_bouquets_orgs(mock_feed_and_assert: Callable, feed_config: Config):
     existing_universe = MockTopic.one()
     upcoming_universe = existing_universe.clone()
 
-    organizations = [org.with_type_m(None) for org in MockOrganization.many(5)]
+    organizations = [org.with_category_m(None) for org in MockOrganization.many(5)]
     bouquets = MockTopic.many(len(organizations), organizations)
 
     mock_feed_and_assert(feed_config, existing_universe, upcoming_universe, bouquets)

@@ -79,7 +79,7 @@ class MockOrganization(MockDatagouvObject, Organization):
     name: str = field(init=False, default_factory=lambda: MockDatagouvObject._mock_name())
 
     # mock-only fields
-    type_m: str | None = field(  # shortcut avoids separate MockUniverseOrg
+    category_m: str | None = field(  # shortcut avoids separate MockUniverseOrg
         init=False, default=None
     )
     _objects: list["MockOwnedObject"] = field(init=False)
@@ -96,7 +96,7 @@ class MockOrganization(MockDatagouvObject, Organization):
         return [cls() for _ in range(n)]
 
     def __post_init__(self, mock_objects: list["MockOwnedObject"] | None = None):
-        self.type_m = self._CATEGORIES[self._id % len(self._CATEGORIES)]
+        self.category_m = self._CATEGORIES[self._id % len(self._CATEGORIES)]
         self._objects = mock_objects if mock_objects else []
 
     def __hash__(self) -> int:
@@ -115,9 +115,8 @@ class MockOrganization(MockDatagouvObject, Organization):
             else self._objects
         )
 
-    def with_type_m(self, type: str | None) -> Self:
-        self.type_m = type
-        print(self.as_json())
+    def with_category_m(self, category: str | None) -> Self:
+        self.category_m = category
         return self
 
     def add_objects_m(self, *mock_objects: "MockOwnedObject") -> Self:

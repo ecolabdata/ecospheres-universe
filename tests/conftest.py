@@ -29,7 +29,7 @@ def mock_organizations_file(
 ) -> list[JSONObject]:
     orgs = [
         {"id": org.id, "name": org.name, "slug": org.slug}
-        | ({"type": org.type_m} if include_type else {})
+        | ({"type": org.category_m} if include_type else {})
         for org in organizations
     ]
     return sorted(orgs, key=itemgetter("name"))
@@ -66,7 +66,7 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
                         "fields": {
                             "Type": Organization.object_name(),
                             "Identifiant": org.slug,
-                            "Categorie": org.type_m,
+                            "Categorie": org.category_m,
                         }
                     }
                     for org in upcoming_universe.organizations_m()
