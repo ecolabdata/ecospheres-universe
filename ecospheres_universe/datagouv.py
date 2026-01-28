@@ -5,7 +5,7 @@ import sys
 from abc import abstractmethod, ABC
 from dataclasses import dataclass
 from functools import total_ordering
-from typing import Any, Generator, TypeAlias
+from typing import get_args, Any, Generator, TypeAlias
 
 from ecospheres_universe.util import (
     JSONObject,
@@ -92,36 +92,6 @@ class OwnedObject(DatagouvObject, ABC):
         }
 
 
-# FIXME: use that if TYPING
-TopicObject: TypeAlias = "Dataset | Dataservice"
-
-
-@dataclass
-class TopicElement:
-    id: str
-    object_id: str
-
-
-@dataclass
-class Topic(OwnedObject):
-    name: str
-
-    @classmethod
-    def object_name(cls) -> str:
-        return Topic.__name__
-
-    @classmethod
-    def object_classes(cls) -> list[type[TopicObject]]:
-        # FIXME: list elements of Union type? avoid re-listing what's already declared in TopicObject TypeAlias
-        return [Dataset, Dataservice]
-
-    def as_json(self) -> JSONObject:
-        return {
-            **super().as_json(),
-            "name": self.name,
-        }
-
-
 @dataclass
 class RecordObject(OwnedObject):
     title: str
@@ -145,6 +115,34 @@ class Dataservice(RecordObject):
     @classmethod
     def object_name(cls) -> str:
         return Dataservice.__name__
+
+
+TopicObject: TypeAlias = Dataset | Dataservice
+
+
+@dataclass
+class TopicElement:
+    id: str
+    object_id: str
+
+
+@dataclass
+class Topic(OwnedObject):
+    name: str
+
+    @classmethod
+    def object_name(cls) -> str:
+        return Topic.__name__
+
+    @classmethod
+    def object_classes(cls) -> tuple[type[TopicObject]]:
+        return get_args(TopicObject)
+
+    def as_json(self) -> JSONObject:
+        return {
+            **super().as_json(),
+            "name": self.name,
+        }
 
 
 INACTIVE_OBJECT_MARKERS = [

@@ -155,7 +155,19 @@ class MockOwnedObject(MockDatagouvObject, OwnedObject, ABC):
         return self
 
 
-MockTopicObject: TypeAlias = "MockDataset | MockDataservice"
+@dataclass
+class MockDataset(MockOwnedObject, Dataset):
+    # mocked fields
+    title: str = field(init=False, default_factory=lambda: MockDatagouvObject._mock_name())
+
+
+@dataclass
+class MockDataservice(MockOwnedObject, Dataservice):
+    # mocked fields
+    title: str = field(init=False, default_factory=lambda: MockDatagouvObject._mock_name())
+
+
+MockTopicObject: TypeAlias = MockDataset | MockDataservice
 
 
 @dataclass
@@ -219,15 +231,3 @@ class MockTopic(MockOwnedObject, Topic):
         clone = copy(self)
         clone._elements = [e for e in self._elements]
         return clone
-
-
-@dataclass
-class MockDataset(MockOwnedObject, Dataset):
-    # mocked fields
-    title: str = field(init=False, default_factory=lambda: MockDatagouvObject._mock_name())
-
-
-@dataclass
-class MockDataservice(MockOwnedObject, Dataservice):
-    # mocked fields
-    title: str = field(init=False, default_factory=lambda: MockDatagouvObject._mock_name())
