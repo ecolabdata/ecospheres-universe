@@ -35,6 +35,7 @@ from ecospheres_universe.datagouv import (
     TopicElement,
     TopicObject,
 )
+from ecospheres_universe.feed_universe import UniverseOrg
 from ecospheres_universe.util import uniquify
 
 
@@ -71,17 +72,18 @@ class MockDatagouvObject(DatagouvObject, ABC):
         return f"<{self.id}>"
 
 
+# In theory we should have separate MockOrganization and MockUniverseOrg. But since we may not keep
+# MockUniverseOrg around much longer in this repo (drop it or generalize to org "extras"), it's an
+# acceptable shortcut at this point.
 @dataclass
-class MockOrganization(MockDatagouvObject, Organization):
+class MockOrganization(MockDatagouvObject, UniverseOrg):
     _CATEGORIES: ClassVar[list[str | None]] = ["category-A", None, "category-B", "category-C"]
 
     # mocked fields
     name: str = field(init=False, default_factory=lambda: MockDatagouvObject._mock_name())
+    type: str | None = field(init=False, default=None)
 
     # mock-only fields
-    category_m: str | None = field(  # shortcut avoids separate MockUniverseOrg
-        init=False, default=None
-    )
     _objects: list["MockOwnedObject"] = field(init=False)
 
     # init-only
@@ -96,7 +98,7 @@ class MockOrganization(MockDatagouvObject, Organization):
         return [cls() for _ in range(n)]
 
     def __post_init__(self, mock_objects: list["MockOwnedObject"] | None = None):
-        self.category_m = self._CATEGORIES[self._id % len(self._CATEGORIES)]
+        self.type = self._CATEGORIES[self._id % len(self._CATEGORIES)]
         self._objects = mock_objects if mock_objects else []
 
     def __hash__(self) -> int:
@@ -115,8 +117,8 @@ class MockOrganization(MockDatagouvObject, Organization):
             else self._objects
         )
 
-    def with_category_m(self, category: str | None) -> Self:
-        self.category_m = category
+    def with_type(self, type: str | None) -> Self:
+        self.type = type
         return self
 
     def add_objects_m(self, *mock_objects: "MockOwnedObject") -> Self:

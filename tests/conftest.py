@@ -24,15 +24,14 @@ def json_load_path(path: Path) -> JSONObject:
         return json.load(f)
 
 
-def mock_organizations_file(
-    organizations: Iterable[MockOrganization], include_type: bool = True
-) -> list[JSONObject]:
-    orgs = [
-        {"id": org.id, "name": org.name, "slug": org.slug}
-        | ({"type": org.category_m} if include_type else {})
-        for org in organizations
-    ]
-    return sorted(orgs, key=itemgetter("name"))
+def mock_organizations_file(organizations: Iterable[MockOrganization]) -> list[JSONObject]:
+    return sorted(
+        [
+            {"id": org.id, "name": org.name, "slug": org.slug, "type": org.type}
+            for org in organizations
+        ],
+        key=itemgetter("name"),
+    )
 
 
 @pytest.fixture
@@ -66,7 +65,7 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
                         "fields": {
                             "Type": Organization.object_name(),
                             "Identifiant": org.slug,
-                            "Categorie": org.category_m,
+                            "Categorie": org.type,
                         }
                     }
                     for org in upcoming_universe.organizations_m()
@@ -186,8 +185,6 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
 
         assert json_load_path(
             config.output_dir / "organizations-bouquets.json"
-        ) == mock_organizations_file(
-            uniquify(org for b in bouquets if (org := b.organization_m)), include_type=False
-        )
+        ) == mock_organizations_file(uniquify(org for b in bouquets if (org := b.organization_m)))
 
     return _run_mock_feed

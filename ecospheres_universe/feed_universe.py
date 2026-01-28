@@ -21,6 +21,7 @@ from ecospheres_universe.grist import GristApi, GristEntry
 from ecospheres_universe.util import (
     uniquify,
     verbose_print,  # noqa: F401
+    JSONObject,
 )
 
 
@@ -34,6 +35,12 @@ class UniverseOrg(Organization):
 
     def __hash__(self) -> int:
         return hash(self.id)
+
+    def as_json(self) -> JSONObject:
+        return {
+            **super().as_json(),
+            "type": self.type,
+        }
 
 
 def write_organizations_file(filepath: Path, orgs: list[UniverseOrg]):
