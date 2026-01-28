@@ -246,7 +246,7 @@ class DatagouvApi:
             url = f"{url}&include_private=yes"
             headers["X-API-KEY"] = self.token
         objs = self._get_objects(
-            url=url, headers=headers, fields=["id", "name", "organization{id,name,slug}"]
+            url=url, headers=headers, fields=["id", "name", "organization{id,name,slug}", "slug"]
         )
         return [
             Topic(

@@ -170,7 +170,7 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
                 header_matcher(
                     {
                         "X-API-KEY": config.datagouv.token,
-                        "X-Fields": "data{id,name,organization{id,name,slug}},next_page",
+                        "X-Fields": "data{id,name,organization{id,name,slug},slug},next_page",
                     }
                 ),
                 query_param_matcher({"tag": config.tag, "include_private": "yes"}),
