@@ -2,10 +2,10 @@ import inspect
 import requests
 import sys
 
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from dataclasses import dataclass
 from functools import total_ordering
-from typing import Any, Generator
+from typing import Any, Generator, TypeAlias
 
 from ecospheres_universe.util import (
     JSONObject,
@@ -21,18 +21,12 @@ from ecospheres_universe.util import (
 session = requests.Session()
 
 
-class DatagouvObject:
+@dataclass
+class DatagouvObject(ABC):
     """Abstract base class for datagouv objects."""
 
-    @classmethod
-    @abstractmethod
-    def object_name(cls) -> str:
-        """Name of the object class as declared in `udata.udata.core.*.models`."""
-        pass
-
-    @classmethod
-    def namespace(cls) -> str:
-        return f"{cls.object_name().lower()}s"
+    id: str
+    slug: str
 
     @staticmethod
     def class_from_name(name: str) -> type["DatagouvObject"]:
@@ -43,45 +37,64 @@ class DatagouvObject:
                 return clazz
         raise TypeError(f"{name} is not a DatagouvObject")
 
+    @classmethod
+    @abstractmethod
+    def object_name(cls) -> str:
+        """Name of the object class as declared in `udata.udata.core.*.models`."""
+        pass
+
+    @classmethod
+    def namespace(cls) -> str:
+        """API namespace for the object. Override if different from lowercased `object_name()`."""
+        return f"{cls.object_name().lower()}s"
+
+    def __hash__(self) -> int:
+        return hash(self.id)
+
+    # TODO: make that sorted
+    def as_json(self) -> JSONObject:
+        return {
+            "id": self.id,
+            "slug": self.slug,
+        }
+
 
 @total_ordering
 @dataclass
 class Organization(DatagouvObject):
-    id: str
     name: str
-    slug: str
 
     @classmethod
     def object_name(cls) -> str:
         return Organization.__name__
 
-    def __lt__(self, other):
+    def __lt__(self, other: "Organization") -> bool:
         self_name = normalize_string(self.name)
         other_name = normalize_string(other.name)
         return self_name < other_name or (self_name == other_name and self.slug < other.slug)
 
-
-class TopicObject(DatagouvObject):
-    """Abstract base class for datagouv objects that can be part of a topic."""
-
-    @classmethod
-    def element_class(cls) -> str:
-        return cls.object_name()
+    def as_json(self) -> JSONObject:
+        return {
+            **super().as_json(),
+            "name": self.name,
+        }
 
 
 @dataclass
-class Topic(DatagouvObject):
-    id: str
-    name: str
+class OwnedObject(DatagouvObject, ABC):
+    """Abstract base class for datagouv objects that can be owned by an organization."""
+
     organization: Organization | None
 
-    @classmethod
-    def object_name(cls) -> str:
-        return Topic.__name__
+    def as_json(self) -> JSONObject:
+        return {
+            **super().as_json(),
+            "organization": self.organization.as_json() if self.organization else None,
+        }
 
-    @classmethod
-    def object_classes(cls) -> list[type[TopicObject]]:
-        return TopicObject.__subclasses__()
+
+# FIXME: use that if TYPING
+TopicObject: TypeAlias = "Dataset | Dataservice"
 
 
 @dataclass
@@ -91,22 +104,45 @@ class TopicElement:
 
 
 @dataclass
-class Dataset(TopicObject, DatagouvObject):
-    id: str
+class Topic(OwnedObject):
     name: str
-    organization: Organization | None
 
+    @classmethod
+    def object_name(cls) -> str:
+        return Topic.__name__
+
+    @classmethod
+    def object_classes(cls) -> list[type[TopicObject]]:
+        # FIXME: list elements of Union type? avoid re-listing what's already declared in TopicObject TypeAlias
+        return [Dataset, Dataservice]
+
+    def as_json(self) -> JSONObject:
+        return {
+            **super().as_json(),
+            "name": self.name,
+        }
+
+
+@dataclass
+class RecordObject(OwnedObject):
+    title: str
+
+    def as_json(self) -> JSONObject:
+        return {
+            **super().as_json(),
+            "title": self.title,
+        }
+
+
+@dataclass
+class Dataset(RecordObject):
     @classmethod
     def object_name(cls) -> str:
         return Dataset.__name__
 
 
 @dataclass
-class Dataservice(TopicObject, DatagouvObject):
-    id: str
-    name: str
-    organization: Organization | None
-
+class Dataservice(RecordObject):
     @classmethod
     def object_name(cls) -> str:
         return Dataservice.__name__
@@ -164,7 +200,7 @@ class DatagouvApi:
     def get_topic_elements(
         self, topic_id_or_slug: str, object_class: type[TopicObject]
     ) -> list[TopicElement]:
-        url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/elements/?class={object_class.element_class()}&page_size=1000"
+        url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/elements/?class={object_class.object_name()}&page_size=1000"
         objs = self._get_objects(url=url, fields=["id", "element{id}"])
         return [TopicElement(id=o["id"], object_id=o["element"]["id"]) for o in objs]
 
@@ -180,7 +216,7 @@ class DatagouvApi:
         headers = {"Content-Type": "application/json", "X-API-KEY": self.token}
         batches = batched(object_ids, batch_size) if batch_size else [object_ids]
         for batch in batches:
-            data = [{"element": {"class": object_class.element_class(), "id": id}} for id in batch]
+            data = [{"element": {"class": object_class.object_name(), "id": id}} for id in batch]
             if not self.dry_run:
                 session.post(url, json=data, headers=headers).raise_for_status()
 
@@ -218,6 +254,7 @@ class DatagouvApi:
         return [
             Topic(
                 id=d["id"],
+                slug=d["slug"],
                 name=d["name"],
                 organization=Organization(id=o["id"], name=o["name"], slug=o["slug"])
                 if (o := d.get("organization"))

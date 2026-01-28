@@ -13,7 +13,7 @@ from responses.matchers import header_matcher, json_params_matcher, query_param_
 from ecospheres_universe.config import Config, DatagouvConfig, GristConfig
 from ecospheres_universe.datagouv import INACTIVE_OBJECT_MARKERS, Organization
 from ecospheres_universe.feed_universe import feed
-from ecospheres_universe.util import JSONObject
+from ecospheres_universe.util import JSONObject, uniquify
 
 
 from .datagouv_mocks import MockOrganization, MockTopic
@@ -24,10 +24,11 @@ def json_load_path(path: Path) -> JSONObject:
         return json.load(f)
 
 
+# TODO: type as Iterable[MockOrganization | Organization], and use org.type accordingly?
 def mock_organizations_file(organizations: Iterable[MockOrganization]) -> list[JSONObject]:
     return sorted(
         [
-            {"id": org.id, "name": org.name, "slug": org.slug, "type": org.category}
+            {"id": org.id, "name": org.name, "slug": org.slug, "type": org.type}
             for org in organizations
         ],
         key=itemgetter("name"),
@@ -65,7 +66,7 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
                         "fields": {
                             "Type": Organization.object_name(),
                             "Identifiant": org.slug,
-                            "Categorie": org.category,
+                            "Categorie": org.type,  # FIXME: was org.category but didn't raise an error?!
                         }
                     }
                     for org in upcoming_universe.organizations()
@@ -114,15 +115,13 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
                 url=f"{config.datagouv.url}/api/2/topics/{config.topic}/elements/",
                 match=[
                     header_matcher({"X-Fields": "data{id,element{id}},next_page"}),
-                    query_param_matcher(
-                        {"class": object_class.element_class()}, strict_match=False
-                    ),
+                    query_param_matcher({"class": object_class.object_name()}, strict_match=False),
                 ],
                 json={
                     "data": [
                         {
                             "id": e.id,
-                            "element": {"class": object_class.element_class(), "id": e.object.id},
+                            "element": {"class": object_class.object_name(), "id": e.object.id},
                         }
                         for e in existing_elements
                     ],
@@ -147,7 +146,7 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
                         ),
                         json_params_matcher(
                             [
-                                {"element": {"class": object_class.element_class(), "id": oid}}
+                                {"element": {"class": object_class.object_name(), "id": oid}}
                                 for oid in additions
                             ]
                         ),
@@ -187,6 +186,8 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
 
         assert json_load_path(
             config.output_dir / "organizations-bouquets.json"
-        ) == mock_organizations_file({b.organization for b in bouquets})
+        ) == mock_organizations_file(
+            uniquify(b.organization for b in bouquets)
+        )  # FIXME: convert org to mock org
 
     return _run_mock_feed

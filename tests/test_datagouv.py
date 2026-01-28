@@ -56,13 +56,3 @@ class TestOrganization:
         assert Organization("bar", "bar", "bar") < Organization("foo", "foo", "foo")
         assert Organization("foo", "foo", "foo") < Organization("foo", "foo 1", "foo-1")
         assert Organization("foo", "foo", "foo") < Organization("foo", "foo", "foo-1")
-
-
-class TestTopicObject:
-    def test_element_class(self):
-        for clazz in TOPIC_OBJECTS:
-            assert clazz.element_class() == clazz.__name__
-
-        # other DatagouvObject shouldn't have this method
-        for clazz in [c for c in DATAGOUV_OBJECTS if c not in TOPIC_OBJECTS]:
-            assert not hasattr(clazz, "element_class")

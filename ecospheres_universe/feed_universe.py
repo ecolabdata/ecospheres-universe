@@ -4,7 +4,7 @@ import os
 import sys
 import time
 
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from pathlib import Path
 from shutil import copyfile
 
@@ -30,8 +30,9 @@ REMOVALS_THRESHOLD = 1800
 
 @dataclass
 class UniverseOrg(Organization):
-    type: str | None = None  # TODO: rename to category !! impacts dashboard-backend
+    type: str | None  # TODO: rename to category !! impacts dashboard-backend
 
+    # FIXME: why is this needed here to avoid unhashable type?
     def __hash__(self) -> int:
         return hash(self.id)
 
@@ -40,7 +41,7 @@ def write_organizations_file(filepath: Path, orgs: list[UniverseOrg]):
     """Write organizations list to a JSON file in dist/"""
     print(f"Generating output file {filepath} with {len(orgs)} entries...")
     with filepath.open("w") as f:
-        json.dump([asdict(o) for o in orgs], f, indent=2, ensure_ascii=False)
+        json.dump([o.as_json() for o in orgs], f, indent=2, ensure_ascii=False)
 
 
 def get_upcoming_universe_perimeter(
