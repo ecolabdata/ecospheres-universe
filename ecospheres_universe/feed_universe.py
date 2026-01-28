@@ -32,7 +32,6 @@ REMOVALS_THRESHOLD = 1800
 class UniverseOrg(Organization):
     type: str | None  # TODO: rename to category !! impacts dashboard-backend
 
-    # FIXME: why is this needed here to avoid unhashable type?
     def __hash__(self) -> int:
         return hash(self.id)
 

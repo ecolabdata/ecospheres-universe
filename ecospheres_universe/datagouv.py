@@ -48,10 +48,6 @@ class DatagouvObject(ABC):
         """API namespace for the object. Override if different from lowercased `object_name()`."""
         return f"{cls.object_name().lower()}s"
 
-    def __hash__(self) -> int:
-        return hash(self.id)
-
-    # TODO: make that sorted
     def as_json(self) -> JSONObject:
         return {
             "id": self.id,
@@ -67,6 +63,9 @@ class Organization(DatagouvObject):
     @classmethod
     def object_name(cls) -> str:
         return Organization.__name__
+
+    def __hash__(self) -> int:
+        return hash(self.id)
 
     def __lt__(self, other: "Organization") -> bool:
         self_name = normalize_string(self.name)

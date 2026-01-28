@@ -24,15 +24,15 @@ def json_load_path(path: Path) -> JSONObject:
         return json.load(f)
 
 
-# TODO: type as Iterable[MockOrganization | Organization], and use org.type accordingly?
-def mock_organizations_file(organizations: Iterable[MockOrganization]) -> list[JSONObject]:
-    return sorted(
-        [
-            {"id": org.id, "name": org.name, "slug": org.slug, "type": org.type}
-            for org in organizations
-        ],
-        key=itemgetter("name"),
-    )
+def mock_organizations_file(
+    organizations: Iterable[MockOrganization], include_type: bool = True
+) -> list[JSONObject]:
+    orgs = [
+        {"id": org.id, "name": org.name, "slug": org.slug}
+        | ({"type": org.type_m} if include_type else {})
+        for org in organizations
+    ]
+    return sorted(orgs, key=itemgetter("name"))
 
 
 @pytest.fixture
@@ -66,16 +66,16 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
                         "fields": {
                             "Type": Organization.object_name(),
                             "Identifiant": org.slug,
-                            "Categorie": org.type,  # FIXME: was org.category but didn't raise an error?!
+                            "Categorie": org.type_m,
                         }
                     }
-                    for org in upcoming_universe.organizations()
+                    for org in upcoming_universe.organizations_m()
                 ]
             },
         )
 
         # datagouv.get_organization()
-        for org in upcoming_universe.organizations():
+        for org in upcoming_universe.organizations_m():
             _ = responses.get(
                 url=f"{config.datagouv.url}/api/1/organizations/{org.slug}/",
                 json={"id": org.id, "slug": org.slug, "name": org.name},
@@ -85,11 +85,11 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
         # TODO: support reset=True
 
         for object_class in MockTopic.object_classes():
-            upcoming_elements = upcoming_universe.elements(object_class)
-            existing_elements = existing_universe.elements(object_class)
+            upcoming_elements = upcoming_universe.elements_m(object_class)
+            existing_elements = existing_universe.elements_m(object_class)
 
             # datagouv.get_organization_objects_ids()
-            for org in upcoming_universe.organizations():
+            for org in upcoming_universe.organizations_m():
                 _ = responses.get(
                     url=f"{config.datagouv.url}/api/2/{object_class.namespace()}/search/",
                     match=[
@@ -102,9 +102,9 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
                     ],
                     json={
                         "data": [
-                            {"id": e.object.id}
+                            {"id": e.object_id}
                             for e in upcoming_elements
-                            if e.object.organization == org
+                            if e.object_m.organization == org
                         ],
                         "next_page": None,
                     },
@@ -121,7 +121,7 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
                     "data": [
                         {
                             "id": e.id,
-                            "element": {"class": object_class.object_name(), "id": e.object.id},
+                            "element": {"class": object_class.object_name(), "id": e.object_id},
                         }
                         for e in existing_elements
                     ],
@@ -129,12 +129,12 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
                 },
             )
 
-            existing_object_ids = {e.object.id for e in existing_elements}
-            upcoming_object_ids = {e.object.id for e in upcoming_elements}
+            existing_object_ids = {e.object_id for e in existing_elements}
+            upcoming_object_ids = {e.object_id for e in upcoming_elements}
 
             # datagouv.put_topic_elements()
             additions = sorted(
-                {e.object.id for e in upcoming_elements if e.object.id not in existing_object_ids}
+                {e.object_id for e in upcoming_elements if e.object_id not in existing_object_ids}
             )
             if additions:
                 # TODO: support batching
@@ -155,7 +155,7 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
 
             # datagouv.delete_topic_elements()
             removals = sorted(
-                {e.id for e in existing_elements if e.object.id not in upcoming_object_ids}
+                {e.id for e in existing_elements if e.object_id not in upcoming_object_ids}
             )
             for eid in removals:
                 _ = responses.delete(
@@ -182,12 +182,12 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
         for object_class in MockTopic.object_classes():
             assert json_load_path(
                 config.output_dir / f"organizations-{object_class.namespace()}.json"
-            ) == mock_organizations_file(upcoming_universe.organizations(object_class))
+            ) == mock_organizations_file(upcoming_universe.organizations_m(object_class))
 
         assert json_load_path(
             config.output_dir / "organizations-bouquets.json"
         ) == mock_organizations_file(
-            uniquify(b.organization for b in bouquets)
-        )  # FIXME: convert org to mock org
+            uniquify(org for b in bouquets if (org := b.organization_m)), include_type=False
+        )
 
     return _run_mock_feed
