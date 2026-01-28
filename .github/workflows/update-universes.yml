@@ -26,6 +26,8 @@ jobs:
     env:
       CONFIG_FILE: configs/${{ matrix.universe }}.yaml
       DIST_FILES: dist/${{ matrix.universe }}/organizations-*.json
+      # TODO: remove once front has moved to new dist files
+      DIST_FILES_COMPAT: dist/organizations-{{ matrix.universe }}-*.json
       LOG_FILE: logs/${{ matrix.universe }}.log
 
     steps:
@@ -54,7 +56,7 @@ jobs:
           git config --local user.name "GitHub Action"
           git add ${{ env.LOG_FILE }}
           git commit -m "workflow: update daily run log for ${{ matrix.universe }}"
-          git add ${{ env.DIST_FILES }}
+          git add ${{ env.DIST_FILES }} ${{ env.DIST_FILES_COMPAT }}
           git diff-index --cached --quiet HEAD || git commit -m "workflow: update organizations JSONs for ${{ matrix.universe }}"
 
       - name: Push changes
