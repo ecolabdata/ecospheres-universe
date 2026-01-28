@@ -11,7 +11,7 @@ from responses import RequestsMock
 from responses.matchers import header_matcher, json_params_matcher, query_param_matcher
 
 from ecospheres_universe.config import Config, DatagouvConfig, GristConfig
-from ecospheres_universe.datagouv import INACTIVE_OBJECT_MARKERS, Organization
+from ecospheres_universe.datagouv import INACTIVE_OBJECT_MARKERS, Organization, Topic
 from ecospheres_universe.feed_universe import feed
 from ecospheres_universe.util import JSONObject, uniquify
 
@@ -83,7 +83,7 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
         # datagouv.delete_all_topic_elements()
         # TODO: support reset=True
 
-        for object_class in MockTopic.object_classes():
+        for object_class in Topic.object_classes():
             upcoming_elements = upcoming_universe.elements_m(object_class)
             existing_elements = existing_universe.elements_m(object_class)
 
@@ -178,7 +178,7 @@ def mock_feed_and_assert(responses: RequestsMock) -> Callable:
         )
         feed(config)
 
-        for object_class in MockTopic.object_classes():
+        for object_class in Topic.object_classes():
             assert json_load_path(
                 config.output_dir / f"organizations-{object_class.namespace()}.json"
             ) == mock_organizations_file(upcoming_universe.organizations_m(object_class))
