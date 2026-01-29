@@ -27,7 +27,7 @@ jobs:
       CONFIG_FILE: configs/${{ matrix.universe }}.yaml
       DIST_FILES: dist/${{ matrix.universe }}/organizations-*.json
       # TODO: remove once front has moved to new dist files
-      DIST_FILES_COMPAT: dist/organizations-{{ matrix.universe }}-*.json
+      DIST_FILES_COMPAT: dist/organizations-${{ matrix.universe }}-*.json
       LOG_FILE: logs/${{ matrix.universe }}.log
 
     steps:
