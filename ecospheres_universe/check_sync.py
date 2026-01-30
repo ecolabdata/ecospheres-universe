@@ -6,7 +6,7 @@ from pathlib import Path
 from minicli import cli, run
 
 from ecospheres_universe.config import Config
-from ecospheres_universe.datagouv import DatagouvApi, ObjectType, Organization
+from ecospheres_universe.datagouv import DatagouvApi, Organization
 from ecospheres_universe.grist import GristApi
 
 
@@ -37,7 +37,7 @@ def check_sync(universe: Path, *extra_configs: Path):
     topic_id = datagouv.get_topic_id(conf.topic)
 
     orgs = set[Organization]()
-    grist_orgs = [e for e in grist.get_entries() if e.type is ObjectType.ORGANIZATION]
+    grist_orgs = [e for e in grist.get_entries() if e.object_class is Organization]
     for grist_org in grist_orgs:
         org = datagouv.get_organization(grist_org.identifier)
         if not org:

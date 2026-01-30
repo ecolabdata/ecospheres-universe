@@ -1,84 +1,93 @@
+"""
+Mocks for datagouv objects.
+
+All mock-only members are suffixed with _m, except for private and static members.
+
+When applicable, narrow-typed mocked members are accessible via their m-suffix equivalent.
+For instance:
+- MockTopic().organization returns an Organization instance like Topic().organization.
+- MockTopic().organization_m returns the underlying MockOrganization instance.
+
+Mock classes hide most of their fields from __init__ to avoid interferring with automatic
+initialization. Builder-like methods are provided when overriding fields is relevant.
+
+Mock$Class must precede $Class when declaring inheritance, or it'll break automatic
+initialization. So:
+- class Organization(MockDatagouvObject, Organization) => OK
+- class Organization(Organization, MockDatagouvObject) => KO
+"""
+
+import builtins
+
+from abc import ABC
 from copy import copy
+from dataclasses import dataclass, field, InitVar
 from itertools import cycle, islice
-from typing import final, override, Self
+from typing import cast, override, ClassVar, Self, TypeAlias
 
-from ecospheres_universe.datagouv import ElementClass, ObjectType
-from ecospheres_universe.util import JSONObject, uniquify
+from ecospheres_universe.datagouv import (
+    DatagouvObject,
+    Dataservice,
+    Dataset,
+    Organization,
+    OwnedObject,
+    Topic,
+    TopicElement,
+    TopicObject,
+)
+from ecospheres_universe.feed_universe import UniverseOrg
+from ecospheres_universe.util import uniquify
 
 
-class DatagouvObject:
-    _id_counter: int = 0
+@dataclass
+class MockDatagouvObject(DatagouvObject, ABC):
+    _ID_COUNTER: ClassVar[int] = 0
 
-    def __init__(self):
-        DatagouvObject._id_counter += 1
-        self._id: int = DatagouvObject._id_counter
+    # mocked fields
+    id: str = field(init=False, default_factory=lambda: MockDatagouvObject._mock_id())
+    slug: str = field(init=False, default_factory=lambda: MockDatagouvObject._mock_slug())
 
+    # mock-only fields
+    _id: int = field(init=False, default_factory=lambda: MockDatagouvObject._next_id())
+
+    @classmethod
+    def _next_id(cls) -> int:
+        cls._ID_COUNTER += 1
+        return cls._ID_COUNTER
+
+    @classmethod
+    def _mock_id(cls) -> str:
+        return f"{cls.__name__}-{cls._ID_COUNTER}"
+
+    @classmethod
+    def _mock_slug(cls) -> str:
+        return f"{cls.__name__.lower()}-{cls._ID_COUNTER}"
+
+    @classmethod
+    def _mock_name(cls) -> str:
+        return f"{cls.__name__} {cls._ID_COUNTER}"
+
+    @override
     def __repr__(self) -> str:
         return f"<{self.id}>"
 
-    @property
-    def id(self) -> str:
-        return f"{self.__class__.__name__.lower()}-{self._id}"
 
-    @property
-    def slug(self) -> str:
-        return f"{self.__class__.__name__.lower()}-slug-{self._id}"
+# In theory we should have separate MockOrganization and MockUniverseOrg. But since we may not keep
+# MockUniverseOrg around much longer in this repo (drop it or generalize to org "extras"), it's an
+# acceptable shortcut at this point.
+@dataclass
+class MockOrganization(MockDatagouvObject, UniverseOrg):
+    _CATEGORIES: ClassVar[list[str | None]] = ["category-A", None, "category-B", "category-C"]
 
-    @property
-    def name(self) -> str:
-        return f"{self.__class__.__name__} {self._id}"
+    # mocked fields
+    name: str = field(init=False, default_factory=lambda: MockDatagouvObject._mock_name())
+    type: str | None = field(init=False, default=None)
 
-    def as_json(self) -> JSONObject:
-        return {
-            "id": self.id,
-            "slug": self.slug,
-            "name": self.name,
-        }
+    # mock-only fields
+    _objects: list["MockOwnedObject"] = field(init=False)
 
-
-@final
-class Organization(DatagouvObject):
-    _CATEGORIES: list[str | None] = ["category-A", None, "category-B", "category-C"]
-
-    _objects: list["DatagouvRecord"]
-
-    def __init__(self, objects: list["DatagouvRecord"] | None = None):
-        super().__init__()
-        self._objects = objects if objects else []
-        self._category = Organization._CATEGORIES[self._id % len(Organization._CATEGORIES)]
-
-    def __repr__(self) -> str:
-        return f"<{self.id} {[o.id for o in self._objects]}>"
-
-    @property
-    def type(self) -> ObjectType:
-        return ObjectType.ORGANIZATION
-
-    @property
-    def category(self) -> str | None:
-        return self._category
-
-    def objects(self, object_class: ElementClass | None = None) -> list["DatagouvRecord"]:
-        return (
-            [o for o in self._objects if o.element_class is object_class]
-            if object_class
-            else self._objects
-        )
-
-    @override
-    def as_json(self) -> JSONObject:
-        return {
-            **super().as_json(),
-            "category": self._category,
-        }
-
-    def with_category(self, category: str | None) -> Self:
-        self._category = category
-        return self
-
-    def add_objects(self, *objects: "DatagouvRecord") -> Self:
-        self._objects += objects
-        return self
+    # init-only
+    mock_objects: InitVar[list["MockOwnedObject"] | None] = None
 
     @classmethod
     def one(cls) -> Self:
@@ -88,98 +97,138 @@ class Organization(DatagouvObject):
     def many(cls, n: int) -> list[Self]:
         return [cls() for _ in range(n)]
 
+    def __post_init__(self, mock_objects: list["MockOwnedObject"] | None = None):
+        self.type = self._CATEGORIES[self._id % len(self._CATEGORIES)]
+        self._objects = mock_objects if mock_objects else []
 
-class DatagouvRecord(DatagouvObject):
-    _organization: Organization
-
-    def __repr__(self) -> str:
-        return f"<{self.id} @{self._organization.id}>"
-
-    @property
-    def organization(self) -> Organization:
-        return self._organization
-
-    @property
-    def element_class(self) -> ElementClass:
-        # TODO: this can fail, should only exist when valid
-        return ElementClass[self.__class__.__name__]
+    def __hash__(self) -> int:
+        return hash(self.id)
 
     @override
-    def as_json(self) -> JSONObject:
-        return {
-            **super().as_json(),
-            "organization": self.organization.as_json(),
-        }
+    def __repr__(self) -> str:
+        return f"<{self.id} {[o.id for o in self._objects]}>"
 
-    def with_ownership(self, organization: Organization) -> Self:
-        self._organization = organization
-        organization.add_objects(self)
+    def objects_m(
+        self, object_class: builtins.type[OwnedObject] | None = None
+    ) -> list["MockOwnedObject"]:
+        return (
+            [o for o in self._objects if isinstance(o, object_class)]
+            if object_class
+            else self._objects
+        )
+
+    def with_type(self, type: str | None) -> Self:
+        self.type = type
         return self
 
-    @classmethod
-    def one(cls) -> Self:
-        return cls()
+    def add_objects_m(self, *mock_objects: "MockOwnedObject") -> Self:
+        self._objects += mock_objects
+        return self
+
+
+@dataclass
+class MockOwnedObject(MockDatagouvObject, OwnedObject, ABC):
+    # mocked fields
+    organization: Organization | None = field(init=False, default=None)
 
     @classmethod
-    def many(cls, n: int, organizations: list[Organization]) -> list[Self]:
-        return [cls().with_ownership(org) for org in islice(cycle(organizations), n)]
+    def one(cls, organization: MockOrganization | None = None) -> Self:
+        return cls().with_ownership_m(organization)
 
+    @classmethod
+    def many(cls, n: int, organizations: list[MockOrganization]) -> list[Self]:
+        return [cls().with_ownership_m(org) for org in islice(cycle(organizations), n)]
 
-@final
-class Dataset(DatagouvRecord):
-    pass
-
-
-@final
-class Dataservice(DatagouvRecord):
-    pass
-
-
-@final
-class Element(DatagouvObject):
-    _object: DatagouvRecord
-
-    def __init__(self, object: DatagouvRecord):
-        super().__init__()
-        self._object = object
-
+    @override
     def __repr__(self) -> str:
-        return f"<{self.id} [{self._object.id}]>"
+        return f"<{self.id} @{self.organization.id if self.organization else 'noone'}>"
 
     @property
-    def object(self) -> DatagouvRecord:
-        return self._object
+    def organization_m(self) -> MockOrganization | None:
+        """Narrow-typed accessor to the corresponding original property."""
+        # safe to cast since builders create MockOrganization
+        return cast(MockOrganization, self.organization)
+
+    def with_ownership_m(self, organization: MockOrganization | None) -> Self:
+        self.organization = organization
+        if organization:
+            organization.add_objects_m(self)
+        return self
 
 
-@final
-class Topic(DatagouvRecord):
-    _elements: list[Element]
+@dataclass
+class MockDataset(MockOwnedObject, Dataset):
+    # mocked fields
+    title: str = field(init=False, default_factory=lambda: MockDatagouvObject._mock_name())
 
-    def __init__(self, *elements: DatagouvRecord):
-        super().__init__()
-        self._elements = [Element(e) for e in elements] if elements else []
 
+@dataclass
+class MockDataservice(MockOwnedObject, Dataservice):
+    # mocked fields
+    title: str = field(init=False, default_factory=lambda: MockDatagouvObject._mock_name())
+
+
+MockTopicObject: TypeAlias = MockDataset | MockDataservice
+
+
+@dataclass
+class MockTopicElement(TopicElement):
+    # mocked fields
+    id: str = field(init=False)
+    object_id: str = field(init=False)
+
+    # mock-only fields
+    object_m: MockTopicObject
+
+    def __post_init__(self):
+        self.id = f"element-{self.object_m.id}"
+        self.object_id = self.object_m.id
+
+    @override
+    def __repr__(self) -> str:
+        return f"<{self.id} [{self.object_m.id}]>"
+
+
+@dataclass
+class MockTopic(MockOwnedObject, Topic):
+    # mocked fields
+    name: str = field(init=False, default_factory=lambda: MockDatagouvObject._mock_name())
+
+    # mock-only fields
+    _elements: list[MockTopicElement] = field(init=False)
+
+    # init-only
+    mock_elements: InitVar[list[MockTopicObject]] = []  # default unused, @dataclass constraint
+
+    def __post_init__(self, mock_elements: list[MockTopicObject]):
+        self._elements = [MockTopicElement(e) for e in mock_elements] if mock_elements else []
+
+    @override
     def __repr__(self) -> str:
         return f"<{self.id} {self._elements}>"
 
-    def elements(self, element_class: ElementClass | None = None) -> list[Element]:
+    def elements_m(self, object_class: type[TopicObject] | None = None) -> list[MockTopicElement]:
         elements = self._elements
-        if element_class:
-            elements = filter(lambda e: e.object.element_class is element_class, elements)
+        if object_class:
+            elements = filter(lambda e: type(e.object_m) is object_class, elements)
         return list(elements)
 
-    def organizations(self, element_class: ElementClass | None = None) -> list[Organization]:
-        return uniquify(e.object.organization for e in self.elements(element_class))
+    def organizations_m(
+        self, object_class: type[TopicObject] | None = None
+    ) -> list[MockOrganization]:
+        return uniquify(
+            org for e in self.elements_m(object_class) if (org := e.object_m.organization_m)
+        )
+
+    def add_elements_m(self, *mock_elements: MockTopicObject) -> Self:
+        self._elements += [MockTopicElement(e) for e in mock_elements]
+        return self
+
+    def remove_elements_m(self, *mock_elements: MockTopicObject) -> Self:
+        self._elements = [e for e in self._elements if e.object_m not in mock_elements]
+        return self
 
     def clone(self) -> Self:
         clone = copy(self)
         clone._elements = [e for e in self._elements]
         return clone
-
-    def add_elements(self, *elements: DatagouvRecord) -> Self:
-        self._elements += [Element(e) for e in elements]
-        return self
-
-    def remove_elements(self, *elements: DatagouvRecord) -> Self:
-        self._elements = [e for e in self._elements if e.object not in elements]
-        return self
