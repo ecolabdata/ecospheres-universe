@@ -78,6 +78,12 @@
     "type": "EPA"
   },
   {
+    "id": "54f461f8c751df0f88882844",
+    "name": "Institut français de recherche pour l'exploitation de la mer (IFREMER)",
+    "slug": "institut-francais-de-recherche-pour-lexploitation-de-la-mer",
+    "type": "EPIC"
+  },
+  {
     "id": "534fff80a3a7292c64a77e41",
     "name": "Institut national de l'information géographique et forestière",
     "slug": "institut-national-de-linformation-geographique-et-forestiere",
