@@ -4,6 +4,7 @@ import os
 import sys
 import time
 
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from shutil import copyfile
@@ -31,7 +32,7 @@ REMOVALS_THRESHOLD = 1800
 
 @dataclass
 class UniverseOrg(Organization):
-    type: str | None  # TODO: rename to category !! impacts dashboard-backend
+    type: str | None = None  # TODO: rename to category !! impacts dashboard-backend
 
     def __hash__(self) -> int:
         return hash(self.id)
@@ -52,14 +53,14 @@ def write_organizations_file(filepath: Path, orgs: list[UniverseOrg]):
 
 def get_upcoming_universe_perimeter(
     datagouv: DatagouvApi,
-    grist_entries: list[GristEntry],
+    grist_entries: Iterable[GristEntry],
     object_class: type[TopicObject],
     keep_empty: bool = False,
-) -> tuple[list[str], list[UniverseOrg]]:
+) -> tuple[Sequence[str], Sequence[UniverseOrg]]:
     universe_ids = set[str]()
     universe_orgs = set[UniverseOrg]()
 
-    def _update_perimeter(ids: list[str], orgs: list[Organization]):
+    def _update_perimeter(ids: Iterable[str], orgs: Iterable[Organization]):
         universe_ids.update(ids)
         universe_orgs.update(
             UniverseOrg(id=org.id, name=org.name, slug=org.slug, type=entry.category)
@@ -168,7 +169,7 @@ def feed(
 
             verbose_print(f"Fetching existing {object_class.namespace()}...")
             existing_elements = datagouv.get_topic_elements(conf.topic, object_class)
-            existing_object_ids = uniquify(e.object_id for e in existing_elements)
+            existing_object_ids = uniquify(e.object.id for e in existing_elements)
             print(
                 f"Found {len(existing_object_ids)} {object_class.namespace()} currently in the universe."
             )
@@ -184,7 +185,7 @@ def feed(
             datagouv.put_topic_elements(conf.topic, object_class, additions, ADDITIONS_BATCH_SIZE)
 
             print(f"- Deleting {len(removals)} {object_class.namespace()}...")
-            element_ids = [e.id for e in existing_elements if e.object_id in removals]
+            element_ids = [e.id for e in existing_elements if e.object.id in removals]
             datagouv.delete_topic_elements(conf.topic, element_ids)
 
             write_organizations_file(

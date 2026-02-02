@@ -1,82 +1,94 @@
-from typing import Callable
-
 from ecospheres_universe.config import Config
+from ecospheres_universe.feed_universe import feed
 
-from .datagouv_mocks import MockDataset, MockDataservice, MockOrganization, MockTopic
+from .conftest import mock_categories, mock_feed, assert_outputs
+from .datagouv_mock import DatagouvMock
+from .grist_mock import GristMock
+from .util import cycle_n
 
 
-def test_all_at_once(mock_feed_and_assert: Callable, feed_config: Config):
-    organizations = MockOrganization.many(5)
-    datasets = MockDataset.many(3, organizations)
-    dataservices = MockDataservice.many(2, list(reversed(organizations)))
+CATEGORIES = ["category-A", None, "category-B", "category-C"]
 
-    existing_universe = MockTopic.one().add_elements_m(datasets[0], datasets[1], dataservices[0])
-    upcoming_universe = (
-        existing_universe.clone()
-        .add_elements_m(datasets[2], dataservices[1])
-        .remove_elements_m(datasets[1])
+
+def test_all_at_once(config: Config, datagouv: DatagouvMock, grist: GristMock):
+    organizations = datagouv.mock_organizations(5)
+    categories = mock_categories(organizations, CATEGORIES)
+    datasets = datagouv.mock_datasets(3, organizations)
+    dataservices = datagouv.mock_dataservices(2, list(reversed(organizations)))
+
+    existing_universe = datagouv.mock_topic(objects=[datasets[0], datasets[1], dataservices[0]])
+    upcoming_universe = datagouv.clone_topic(
+        existing_universe, add=[datasets[2], dataservices[1]], remove=[datasets[1]]
     )
 
-    bouquets = MockTopic.many(5, [org.with_type(None) for org in MockOrganization.many(n=3)])
+    bouquets = [
+        datagouv.mock_topic(organization=org) for org in cycle_n(datagouv.mock_organizations(3), 5)
+    ]
 
-    mock_feed_and_assert(feed_config, existing_universe, upcoming_universe, bouquets)
+    mock_feed(datagouv, grist, existing_universe, upcoming_universe, bouquets, categories)
 
+    feed(config)
 
-def test_no_changes(mock_feed_and_assert: Callable, feed_config: Config):
-    organizations = MockOrganization.many(5)
-    datasets = MockDataset.many(3, organizations)
-    dataservices = MockDataservice.many(2, list(reversed(organizations)))
-
-    existing_universe = MockTopic.one().add_elements_m(*datasets, *dataservices)
-    upcoming_universe = existing_universe.clone()
-
-    mock_feed_and_assert(feed_config, existing_universe, upcoming_universe, bouquets=None)
+    assert_outputs(datagouv, upcoming_universe, bouquets, categories)
 
 
-def test_bootstrap_universe(mock_feed_and_assert: Callable, feed_config: Config):
-    organizations = MockOrganization.many(5)
-    datasets = MockDataset.many(3, organizations)
-    dataservices = MockDataservice.many(2, list(reversed(organizations)))
+def test_no_changes(config: Config, datagouv: DatagouvMock, grist: GristMock):
+    organizations = datagouv.mock_organizations(5)
+    categories = mock_categories(organizations, CATEGORIES)
+    datasets = datagouv.mock_datasets(3, organizations)
+    dataservices = datagouv.mock_dataservices(2, list(reversed(organizations)))
 
-    existing_universe = MockTopic.one()
-    upcoming_universe = existing_universe.clone().add_elements_m(*datasets, *dataservices)
+    existing_universe = datagouv.mock_topic(objects=[*datasets, *dataservices])
+    upcoming_universe = datagouv.clone_topic(existing_universe)
 
-    mock_feed_and_assert(feed_config, existing_universe, upcoming_universe, bouquets=None)
+    mock_feed(datagouv, grist, existing_universe, upcoming_universe, categories=categories)
 
+    feed(config)
 
-def test_remove_everything(mock_feed_and_assert: Callable, feed_config: Config):
-    organizations = MockOrganization.many(5)
-    datasets = MockDataset.many(3, organizations)
-    dataservices = MockDataservice.many(2, list(reversed(organizations)))
-
-    existing_universe = MockTopic.one().add_elements_m(*datasets, *dataservices)
-    upcoming_universe = existing_universe.clone().remove_elements_m(*datasets, *dataservices)
-
-    mock_feed_and_assert(feed_config, existing_universe, upcoming_universe, bouquets=None)
+    assert_outputs(datagouv, upcoming_universe, categories=categories)
 
 
-def test_duplicate_element(mock_feed_and_assert: Callable, feed_config: Config):
-    organizations = MockOrganization.many(5)
-    datasets = MockDataset.many(3, organizations)
+def test_bootstrap_universe(config: Config, datagouv: DatagouvMock, grist: GristMock):
+    organizations = datagouv.mock_organizations(5)
+    categories = mock_categories(organizations, CATEGORIES)
+    datasets = datagouv.mock_datasets(3, organizations)
+    dataservices = datagouv.mock_dataservices(2, list(reversed(organizations)))
 
-    existing_universe = MockTopic.one().add_elements_m(
-        datasets[0], datasets[1], datasets[0]
-    )  # duplicate datasets[0]
-    upcoming_universe = (
-        existing_universe.clone()
-        # ensure we only have a single occurrence of datasets[0]
-        .remove_elements_m(datasets[0])
-        .add_elements_m(datasets[0])
-    )
+    existing_universe = datagouv.mock_topic()
+    upcoming_universe = datagouv.clone_topic(existing_universe, add=[*datasets, *dataservices])
 
-    mock_feed_and_assert(feed_config, existing_universe, upcoming_universe, bouquets=None)
+    mock_feed(datagouv, grist, existing_universe, upcoming_universe, categories=categories)
+
+    feed(config)
+
+    assert_outputs(datagouv, upcoming_universe, categories=categories)
 
 
-def test_bouquets_orgs(mock_feed_and_assert: Callable, feed_config: Config):
-    existing_universe = MockTopic.one()
-    upcoming_universe = existing_universe.clone()
+def test_remove_everything(config: Config, datagouv: DatagouvMock, grist: GristMock):
+    organizations = datagouv.mock_organizations(5)
+    categories = mock_categories(organizations, CATEGORIES)
+    datasets = datagouv.mock_datasets(3, organizations)
+    dataservices = datagouv.mock_dataservices(2, list(reversed(organizations)))
 
-    organizations = [org.with_type(None) for org in MockOrganization.many(5)]
-    bouquets = MockTopic.many(len(organizations), organizations)
+    existing_universe = datagouv.mock_topic([*datasets, *dataservices])
+    upcoming_universe = datagouv.clone_topic(existing_universe, remove=[*datasets, *dataservices])
 
-    mock_feed_and_assert(feed_config, existing_universe, upcoming_universe, bouquets)
+    mock_feed(datagouv, grist, existing_universe, upcoming_universe, categories=categories)
+
+    feed(config)
+
+    assert_outputs(datagouv, upcoming_universe, categories=categories)
+
+
+def test_bouquets_orgs(config: Config, datagouv: DatagouvMock, grist: GristMock):
+    existing_universe = datagouv.mock_topic()
+    upcoming_universe = datagouv.clone_topic(existing_universe)
+
+    organizations = datagouv.mock_organizations(5)
+    bouquets = [datagouv.mock_topic(organization=org) for org in organizations]
+
+    mock_feed(datagouv, grist, existing_universe, upcoming_universe, bouquets)
+
+    feed(config)
+
+    assert_outputs(datagouv, upcoming_universe, bouquets)

@@ -2,19 +2,13 @@ import functools
 import time
 import unicodedata
 
-from collections.abc import Generator
+from collections.abc import Iterable, Mapping, Sequence
 from types import FunctionType
-from typing import Any, Callable, Iterable, Mapping
+from typing import Any, Callable
 
 
 # weak mapping to avoid having to cast nested json
 JSONObject = Mapping[str, Any]
-
-
-def batched[T](sequence: list[T], n: int = 1) -> Generator[list[T]]:
-    length = len(sequence)
-    for ndx in range(0, length, n):
-        yield sequence[ndx : min(ndx + n, length)]
 
 
 def elapsed_and_count[T, **P](func: Callable[P, T]) -> Callable[P, T]:
@@ -56,9 +50,9 @@ def normalize_string(string: str) -> str:
     return unicodedata.normalize("NFKD", string).encode("ascii", "ignore").decode("ascii").lower()
 
 
-def uniquify[T](sequence: Iterable[T]) -> list[T]:
-    """Return list of unique elements from `sequence`, preserving original order"""
-    return list(dict.fromkeys(sequence))
+def uniquify[T](iterable: Iterable[T]) -> Sequence[T]:
+    """Return list of unique elements from `iterable`, preserving original order"""
+    return list(dict.fromkeys(iterable))
 
 
 # noop unless args.verbose is set
