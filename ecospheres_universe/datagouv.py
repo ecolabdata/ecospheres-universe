@@ -2,12 +2,11 @@ import inspect
 import requests
 import sys
 
-from abc import ABC
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
 from functools import total_ordering
 from itertools import batched
-from typing import get_args, Any, TypeAlias
+from typing import get_args, Any, Protocol, TypeAlias
 
 from ecospheres_universe.util import (
     JSONObject,
@@ -23,11 +22,10 @@ session = requests.Session()
 
 
 @dataclass
-class DatagouvObject(ABC):
+class DatagouvObject:
     """Base class for datagouv objects."""
 
     id: str
-    slug: str | None = None
 
     @staticmethod
     def class_from_name(name: str) -> type["DatagouvObject"]:
@@ -46,6 +44,13 @@ class DatagouvObject(ABC):
         """
         return cls.__name__
 
+
+class Addressable(Protocol):
+    slug: str | None = None
+
+    @classmethod
+    def object_name(cls) -> str: ...
+
     @classmethod
     def namespace(cls) -> str:
         """
@@ -54,16 +59,11 @@ class DatagouvObject(ABC):
         """
         return f"{cls.object_name().lower()}s"
 
-    def as_json(self) -> JSONObject:
-        return {
-            "id": self.id,
-            "slug": self.slug,
-        }
-
 
 @total_ordering
 @dataclass
-class Organization(DatagouvObject):
+class Organization(DatagouvObject, Addressable):
+    slug: str | None = None
     name: str | None = None
 
     def __hash__(self) -> int:
@@ -79,45 +79,27 @@ class Organization(DatagouvObject):
         other_name = normalize_string(other.name)
         return self_name < other_name or (self_name == other_name and self.slug < other.slug)
 
-    def as_json(self) -> JSONObject:
-        return {
-            **super().as_json(),
-            "name": self.name,
-        }
 
-
-@dataclass
-class OwnedObject(DatagouvObject, ABC):
-    """Base class for datagouv objects that can be owned by an organization."""
-
+class Owned(Protocol):
     organization: Organization | None = None
 
-    def as_json(self) -> JSONObject:
-        return {
-            **super().as_json(),
-            "organization": self.organization.as_json() if self.organization else None,
-        }
+
+class AddressableOwned(Addressable, Owned, Protocol):
+    pass
 
 
 @dataclass
-class RecordObject(OwnedObject):
+class Dataset(DatagouvObject, Addressable, Owned):
+    slug: str | None = None
     title: str | None = None
-
-    def as_json(self) -> JSONObject:
-        return {
-            **super().as_json(),
-            "title": self.title,
-        }
+    organization: Organization | None = None
 
 
 @dataclass
-class Dataset(RecordObject):
-    pass
-
-
-@dataclass
-class Dataservice(RecordObject):
-    pass
+class Dataservice(DatagouvObject, Addressable, Owned):
+    slug: str | None = None
+    title: str | None = None
+    organization: Organization | None = None
 
 
 TopicObject: TypeAlias = Dataset | Dataservice
@@ -130,8 +112,10 @@ class TopicElement:
 
 
 @dataclass
-class Topic(OwnedObject):
+class Topic(DatagouvObject, Addressable, Owned):
+    slug: str | None = None
     name: str | None = None
+    organization: Organization | None = None
     _elements: list[TopicElement] = field(default_factory=list)
 
     @classmethod
@@ -147,19 +131,13 @@ class Topic(OwnedObject):
     def objects(self, object_class: type[TopicObject] | None = None) -> Sequence[TopicObject]:
         return [elem.object for elem in self.elements(object_class)]
 
-    def as_json(self) -> JSONObject:
-        return {
-            **super().as_json(),
-            "name": self.name,
-        }
-
 
 INACTIVE_OBJECT_MARKERS = [
     "archived",  # dataset
     "archived_at",  # dataservice
-    "deleted",  # dataset
+    "deleted",  # dataset, organization
     "deleted_at",  # dataservice
-    "private",  # dataset,dataservice
+    "private",  # dataset, dataservice
     "extras{geop:dataset_id}",  # dataset
 ]
 
@@ -184,11 +162,11 @@ class DatagouvApi:
 
     @elapsed_and_count
     def get_organization_object_ids(
-        self, org_id: str, object_class: type[DatagouvObject]
+        self, org_id: str, object_class: type[AddressableOwned]
     ) -> Sequence[str]:
         url = f"{self.base_url}/api/2/{object_class.namespace()}/search/?organization={org_id}&page_size=1000"
-        objs = self._get_objects(url=url, fields=INACTIVE_OBJECT_MARKERS)
-        return uniquify(o["id"] for o in objs if DatagouvApi._is_active(o))
+        objs = self._get_objects(url=url)
+        return uniquify(o["id"] for o in objs)
 
     def get_topic_id(self, topic_id_or_slug: str) -> str:
         url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/"
@@ -270,18 +248,29 @@ class DatagouvApi:
         ]
 
     def _get_objects(
-        self, url: str, headers: dict[str, Any] | None = None, fields: Iterable[str] | None = None
+        self,
+        url: str,
+        headers: dict[str, Any] | None = None,
+        fields: Iterable[str] | None = None,
+        active: bool = True,
     ) -> Iterable[JSONObject]:
+        _headers = dict(headers or {})  # local copy
+        if fields or active:
+            _fields = uniquify(
+                ["id"]
+                + (list(fields) if fields else [])
+                + (INACTIVE_OBJECT_MARKERS if active else [])
+            )
+            _headers["X-Fields"] = f"data{{{','.join(_fields)}}},next_page"
         try:
-            headers = dict(headers or {})  # local copy
-            if fields:
-                f = uniquify(["id", *fields])
-                headers["X-Fields"] = f"data{{{','.join(f)}}},next_page"
             while True:
-                r = session.get(url, headers=headers)
+                r = session.get(url, headers=_headers)
                 r.raise_for_status()
                 data = r.json()
-                yield from data["data"]
+                for obj in data["data"]:
+                    if active and any(obj.get(m) for m in INACTIVE_OBJECT_MARKERS):
+                        continue
+                    yield obj
                 url = data.get("next_page")
                 if not url:
                     return
@@ -289,7 +278,3 @@ class DatagouvApi:
             if self.fail_on_errors:
                 raise
             verbose_print(e)
-
-    @staticmethod
-    def _is_active(object: JSONObject) -> bool:
-        return not any(object.get(m) for m in INACTIVE_OBJECT_MARKERS)

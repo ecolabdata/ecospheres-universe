@@ -1,5 +1,6 @@
 from collections.abc import Iterable, Sequence
 from copy import copy
+from dataclasses import asdict
 
 from responses import RequestsMock
 from responses.matchers import header_matcher, json_params_matcher, query_param_matcher
@@ -10,7 +11,7 @@ from ecospheres_universe.datagouv import (
     Dataservice,
     Dataset,
     Organization,
-    OwnedObject,
+    Owned,
     Topic,
     TopicElement,
     TopicObject,
@@ -31,7 +32,7 @@ class DatagouvMock:
         return self._mockIdCounter
 
     @staticmethod
-    def get_organizations[T: OwnedObject](objects: Iterable[T]) -> Sequence[Organization]:
+    def get_organizations[T: Owned](objects: Iterable[T]) -> Sequence[Organization]:
         return list(uniquify(org for o in objects if (org := o.organization)))
 
     def mock_dataset(self, organization: Organization | None = None) -> Dataset:
@@ -83,7 +84,6 @@ class DatagouvMock:
             id=f"topic-{id}",
             slug=f"topic-{id}",
             name=f"Topic {id}",
-            organization=None,
         )
         if objects:
             topic._elements = [self.mock_element(o) for o in objects]
@@ -141,7 +141,11 @@ class DatagouvMock:
         _ = self.responses.get(
             url=f"{self.config.datagouv.url}/api/2/topics/{self.config.topic}/elements/",
             match=[
-                header_matcher({"X-Fields": "data{id,element{id}},next_page"}),
+                header_matcher(
+                    {
+                        "X-Fields": f"data{{id,element{{id}},{','.join(INACTIVE_OBJECT_MARKERS)}}},next_page"
+                    }
+                ),
                 query_param_matcher({"class": object_class.object_name()}, strict_match=False),
             ],
             json={
@@ -189,10 +193,10 @@ class DatagouvMock:
                 header_matcher(
                     {
                         "X-API-KEY": self.config.datagouv.token,
-                        "X-Fields": "data{id,name,organization{id,name,slug},slug},next_page",
+                        "X-Fields": f"data{{id,name,organization{{id,name,slug}},slug,{','.join(INACTIVE_OBJECT_MARKERS)}}},next_page",
                     }
                 ),
                 query_param_matcher({"tag": self.config.tag, "include_private": "yes"}),
             ],
-            json={"data": [b.as_json() for b in bouquets], "next_page": None},
+            json={"data": [asdict(b) for b in bouquets], "next_page": None},
         )

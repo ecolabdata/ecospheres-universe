@@ -5,7 +5,6 @@ import sys
 import time
 
 from collections.abc import Iterable, Sequence
-from dataclasses import dataclass
 from pathlib import Path
 from shutil import copyfile
 
@@ -22,7 +21,6 @@ from ecospheres_universe.grist import GristApi, GristEntry
 from ecospheres_universe.util import (
     uniquify,
     verbose_print,  # noqa: F401
-    JSONObject,
 )
 
 
@@ -30,25 +28,12 @@ ADDITIONS_BATCH_SIZE = 1000
 REMOVALS_THRESHOLD = 1800
 
 
-@dataclass
-class UniverseOrg(Organization):
-    type: str | None = None  # TODO: rename to category !! impacts dashboard-backend
-
-    def __hash__(self) -> int:
-        return hash(self.id)
-
-    def as_json(self) -> JSONObject:
-        return {
-            **super().as_json(),
-            "type": self.type,
-        }
-
-
-def write_organizations_file(filepath: Path, orgs: list[UniverseOrg]):
+def write_organizations_file(filepath: Path, organizations: list[Organization]):
     """Write organizations list to a JSON file in dist/"""
-    print(f"Generating output file {filepath} with {len(orgs)} entries...")
+    print(f"Generating output file {filepath} with {len(organizations)} entries...")
+    orgs = [{"id": o.id, "name": o.name, "slug": o.slug} for o in organizations]
     with filepath.open("w") as f:
-        json.dump([o.as_json() for o in orgs], f, indent=2, ensure_ascii=False)
+        json.dump(orgs, f, indent=2, ensure_ascii=False)
 
 
 def get_upcoming_universe_perimeter(
@@ -56,27 +41,25 @@ def get_upcoming_universe_perimeter(
     grist_entries: Iterable[GristEntry],
     object_class: type[TopicObject],
     keep_empty: bool = False,
-) -> tuple[Sequence[str], Sequence[UniverseOrg]]:
+) -> tuple[Sequence[str], Sequence[Organization]]:
     universe_ids = set[str]()
-    universe_orgs = set[UniverseOrg]()
-
-    def _update_perimeter(ids: Iterable[str], orgs: Iterable[Organization]):
-        universe_ids.update(ids)
-        universe_orgs.update(
-            UniverseOrg(id=org.id, name=org.name, slug=org.slug, type=entry.category)
-            for org in orgs
-        )
+    universe_orgs = set[Organization]()
 
     for entry in grist_entries:
+        verbose_print(
+            f"Fetching {object_class.namespace()} for {entry.object_class.object_name()} {entry.identifier}..."
+        )
         if entry.object_class is Organization:
             org = datagouv.get_organization(entry.identifier)
             if not org:
-                print(f"Unknown organization {entry.identifier}", file=sys.stderr)
+                print(
+                    f"Unknown {entry.object_class.object_name} {entry.identifier}", file=sys.stderr
+                )
                 continue
-            verbose_print(f"Fetching {object_class.namespace()} for organization {org.id}...")
             ids = datagouv.get_organization_object_ids(org.id, object_class)
-            orgs = [org] if ids or keep_empty else []
-            _update_perimeter(ids, orgs)
+            universe_ids |= set(ids)
+            if ids or keep_empty:
+                universe_orgs.add(org)
         else:
             continue
 
@@ -204,11 +187,7 @@ def feed(
         verbose_print("Fetching additional organizations from bouquets...")
         bouquets = datagouv.get_bouquets(conf.tag)
         print(f"Found {len(bouquets)} bouquets with the universe tag.")
-        bouquet_orgs = uniquify(
-            UniverseOrg(id=o.id, name=o.name, slug=o.slug, type=None)
-            for b in bouquets
-            if (o := b.organization)
-        )
+        bouquet_orgs = uniquify(org for b in bouquets if (org := b.organization))
         write_organizations_file(
             conf.output_dir / "organizations-bouquets.json",
             sorted(bouquet_orgs),

@@ -1,7 +1,6 @@
 import json
 
-from collections.abc import Iterable, Mapping
-from itertools import cycle
+from collections.abc import Iterable
 from operator import itemgetter
 from pathlib import Path
 from responses import RequestsMock
@@ -22,21 +21,9 @@ def json_load_path(path: Path) -> JSONObject:
         return json.load(f)
 
 
-def mock_categories(
-    organizations: Iterable[Organization], categories: Iterable[str | None]
-) -> Mapping[str, str]:
-    return {org.id: cat for org, cat in zip(organizations, cycle(categories)) if cat}
-
-
-def mock_organizations_file(
-    organizations: Iterable[Organization], categories: Mapping[str, str] | None = None
-) -> Iterable[JSONObject]:
-    categories = categories or {}
+def mock_organizations_file(organizations: Iterable[Organization]) -> Iterable[JSONObject]:
     return sorted(
-        [
-            {"id": org.id, "name": org.name, "slug": org.slug, "type": categories.get(org.id)}
-            for org in organizations
-        ],
+        [{"id": org.id, "name": org.name, "slug": org.slug} for org in organizations],
         key=itemgetter("name"),
     )
 
@@ -68,10 +55,9 @@ def mock_feed(
     existing_universe: Topic,
     upcoming_universe: Topic,
     bouquets: Iterable[Topic] | None = None,
-    categories: Mapping[str, str] | None = None,
 ):
     # grist.get_entries()
-    grist.mock_get_entries(upcoming_universe, categories)
+    grist.mock_get_entries(upcoming_universe)
 
     # datagouv.get_organization()
     datagouv.mock_get_organization(upcoming_universe)
@@ -113,13 +99,12 @@ def assert_outputs(
     datagouv: DatagouvMock,
     upcoming_universe: Topic,
     bouquets: Iterable[Topic] | None = None,
-    categories: Mapping[str, str] | None = None,
 ) -> None:
     for object_class in Topic.object_classes():
         orgs = datagouv.get_organizations(upcoming_universe.objects(object_class))
         assert json_load_path(
             datagouv.config.output_dir / f"organizations-{object_class.namespace()}.json"
-        ) == mock_organizations_file(orgs, categories)
+        ) == mock_organizations_file(orgs)
 
     orgs = uniquify(org for b in (bouquets or []) if (org := b.organization))
     assert json_load_path(

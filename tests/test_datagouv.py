@@ -57,21 +57,7 @@ class TestOrganization:
         assert Organization("foo", "foo", "foo") < Organization("foo", "foo 1", "foo-1")
         assert Organization("foo", "foo", "foo") < Organization("foo", "foo", "foo-1")
 
-    def test_as_json(self):
-        org = Organization(id="foo", slug="bar", name="baz")
-        assert org.as_json() == {"id": "foo", "slug": "bar", "name": "baz"}
-
 
 class TestTopic:
     def test_object_classes(self):
         assert set(Topic.object_classes()) == set(TOPIC_OBJECTS)
-
-    def test_as_json(self):
-        org = Organization("qux", "qux", "qux")
-        topic = Topic(id="foo", slug="bar", name="baz", organization=org)
-        assert topic.as_json() == {
-            "id": "foo",
-            "slug": "bar",
-            "name": "baz",
-            "organization": org.as_json(),
-        }
