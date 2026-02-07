@@ -66,8 +66,8 @@ def mock_feed(
     # TODO: support reset=True
 
     for object_class in Topic.object_classes():
-        upcoming_elements = upcoming_universe.elements(object_class)
-        existing_elements = existing_universe.elements(object_class)
+        upcoming_elements = upcoming_universe.elements_of(object_class)
+        existing_elements = existing_universe.elements_of(object_class)
 
         # datagouv.get_organization_objects_ids()
         datagouv.mock_get_organization_object_ids(upcoming_universe, object_class)
@@ -101,7 +101,7 @@ def assert_outputs(
     bouquets: Iterable[Topic] | None = None,
 ) -> None:
     for object_class in Topic.object_classes():
-        orgs = datagouv.get_organizations(upcoming_universe.objects(object_class))
+        orgs = datagouv.get_organizations(upcoming_universe.objects_of(object_class))
         assert json_load_path(
             datagouv.config.output_dir / f"organizations-{object_class.namespace()}.json"
         ) == mock_organizations_file(orgs)

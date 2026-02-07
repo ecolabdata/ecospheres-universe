@@ -116,20 +116,21 @@ class Topic(DatagouvObject, Addressable, Owned):
     slug: str | None = None
     name: str | None = None
     organization: Organization | None = None
-    _elements: list[TopicElement] = field(default_factory=list)
+    elements: list[TopicElement] = field(default_factory=list)
 
     @classmethod
     def object_classes(cls) -> tuple[type[TopicObject]]:
         return get_args(TopicObject)
 
-    def elements(self, object_class: type[TopicObject] | None = None) -> Sequence[TopicElement]:
-        elems = self._elements
-        if object_class:
-            elems = filter(lambda elem: type(elem.object) is object_class, elems)
-        return list(elems)
+    @property
+    def objects(self) -> Sequence[TopicObject]:
+        return [elem.object for elem in self.elements]
 
-    def objects(self, object_class: type[TopicObject] | None = None) -> Sequence[TopicObject]:
-        return [elem.object for elem in self.elements(object_class)]
+    def elements_of(self, object_class: type[TopicObject]) -> Sequence[TopicElement]:
+        return [elem for elem in self.elements if type(elem.object) is object_class]
+
+    def objects_of(self, object_class: type[TopicObject]) -> Sequence[TopicObject]:
+        return [elem.object for elem in self.elements_of(object_class)]
 
 
 INACTIVE_OBJECT_MARKERS = [

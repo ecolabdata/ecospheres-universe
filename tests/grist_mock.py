@@ -13,7 +13,7 @@ class GristMock:
         self.config = config
 
     def mock_get_entries(self, universe: Topic) -> None:
-        orgs = DatagouvMock.get_organizations(universe.objects())
+        orgs = DatagouvMock.get_organizations(universe.objects)
         _ = self.responses.get(
             url=f"{self.config.grist.url}/tables/{self.config.grist.table}/records",
             match=[query_param_matcher({"limit": 0})],

@@ -109,7 +109,7 @@ class DatagouvMock:
         return t
 
     def mock_get_organization(self, universe: Topic) -> None:
-        orgs = self.get_organizations(universe.objects())
+        orgs = self.get_organizations(universe.objects)
         for org in orgs:
             _ = self.responses.get(
                 url=f"{self.config.datagouv.url}/api/1/organizations/{org.slug}/",
@@ -119,8 +119,8 @@ class DatagouvMock:
     def mock_get_organization_object_ids(
         self, universe: Topic, object_class: type[TopicObject]
     ) -> None:
-        orgs = self.get_organizations(universe.objects())
-        elements = universe.elements(object_class)
+        orgs = self.get_organizations(universe.objects)
+        elements = universe.elements_of(object_class)
         for org in orgs:
             _ = self.responses.get(
                 url=f"{self.config.datagouv.url}/api/2/{object_class.namespace()}/search/",
@@ -137,7 +137,7 @@ class DatagouvMock:
             )
 
     def mock_topic_elements(self, universe: Topic, object_class: type[TopicObject]) -> None:
-        elements = universe.elements(object_class)
+        elements = universe.elements_of(object_class)
         _ = self.responses.get(
             url=f"{self.config.datagouv.url}/api/2/topics/{self.config.topic}/elements/",
             match=[
