@@ -1,13 +1,16 @@
+import inspect
 import requests
+import sys
 
-from dataclasses import dataclass
-from enum import auto, Enum, StrEnum
+from abc import ABC
+from collections.abc import Iterable, Sequence
+from dataclasses import dataclass, field
 from functools import total_ordering
-from typing import Any, Generator
+from itertools import batched
+from typing import get_args, Any, TypeAlias
 
 from ecospheres_universe.util import (
     JSONObject,
-    batched,
     elapsed,
     elapsed_and_count,
     normalize_string,
@@ -19,39 +22,136 @@ from ecospheres_universe.util import (
 session = requests.Session()
 
 
-class ObjectType(StrEnum):
-    ORGANIZATION = auto()
+@dataclass
+class DatagouvObject(ABC):
+    """Base class for datagouv objects."""
 
-
-class ElementClass(Enum):
-    Dataset = "datasets"
-    Dataservice = "dataservices"
-
-
-@dataclass(frozen=True)
-class Element:
     id: str
-    object_id: str
+    slug: str | None = None
+
+    @staticmethod
+    def class_from_name(name: str) -> type["DatagouvObject"]:
+        for clazz_name, clazz in inspect.getmembers(
+            sys.modules[__name__], predicate=inspect.isclass
+        ):
+            if clazz_name.lower() == name.lower() and issubclass(clazz, DatagouvObject):
+                return clazz
+        raise TypeError(f"{name} is not a DatagouvObject")
+
+    @classmethod
+    def object_name(cls) -> str:
+        """
+        Name of the object class as declared in `udata.udata.core.*.models`.
+        Override if different from `cls.__name__`.
+        """
+        return cls.__name__
+
+    @classmethod
+    def namespace(cls) -> str:
+        """
+        API namespace for the object.
+        Override if different from plural lowercased `object_name()`.
+        """
+        return f"{cls.object_name().lower()}s"
+
+    def as_json(self) -> JSONObject:
+        return {
+            "id": self.id,
+            "slug": self.slug,
+        }
 
 
 @total_ordering
-@dataclass(frozen=True)
-class Organization:
-    id: str
-    name: str
-    slug: str
+@dataclass
+class Organization(DatagouvObject):
+    name: str | None = None
 
-    def __lt__(self, other):
+    def __hash__(self) -> int:
+        return hash(self.id)
+
+    def __lt__(self, other: "Organization") -> bool:
+        # TODO: replace assert guards with refresh() when we move to datagouv-client
+        assert self.name is not None
+        assert other.name is not None
+        assert self.slug is not None
+        assert other.slug is not None
         self_name = normalize_string(self.name)
         other_name = normalize_string(other.name)
         return self_name < other_name or (self_name == other_name and self.slug < other.slug)
 
+    def as_json(self) -> JSONObject:
+        return {
+            **super().as_json(),
+            "name": self.name,
+        }
 
-@dataclass(frozen=True)
-class Topic:
+
+@dataclass
+class OwnedObject(DatagouvObject, ABC):
+    """Base class for datagouv objects that can be owned by an organization."""
+
+    organization: Organization | None = None
+
+    def as_json(self) -> JSONObject:
+        return {
+            **super().as_json(),
+            "organization": self.organization.as_json() if self.organization else None,
+        }
+
+
+@dataclass
+class RecordObject(OwnedObject):
+    title: str | None = None
+
+    def as_json(self) -> JSONObject:
+        return {
+            **super().as_json(),
+            "title": self.title,
+        }
+
+
+@dataclass
+class Dataset(RecordObject):
+    pass
+
+
+@dataclass
+class Dataservice(RecordObject):
+    pass
+
+
+TopicObject: TypeAlias = Dataset | Dataservice
+
+
+@dataclass
+class TopicElement:
     id: str
-    name: str
-    organization: Organization | None
+    object: TopicObject
+
+
+@dataclass
+class Topic(OwnedObject):
+    name: str | None = None
+    _elements: list[TopicElement] = field(default_factory=list)
+
+    @classmethod
+    def object_classes(cls) -> tuple[type[TopicObject]]:
+        return get_args(TopicObject)
+
+    def elements(self, object_class: type[TopicObject] | None = None) -> Sequence[TopicElement]:
+        elems = self._elements
+        if object_class:
+            elems = filter(lambda elem: type(elem.object) is object_class, elems)
+        return list(elems)
+
+    def objects(self, object_class: type[TopicObject] | None = None) -> Sequence[TopicObject]:
+        return [elem.object for elem in self.elements(object_class)]
+
+    def as_json(self) -> JSONObject:
+        return {
+            **super().as_json(),
+            "name": self.name,
+        }
 
 
 INACTIVE_OBJECT_MARKERS = [
@@ -83,8 +183,10 @@ class DatagouvApi:
         return Organization(id=data["id"], name=data["name"], slug=data["slug"])
 
     @elapsed_and_count
-    def get_organization_object_ids(self, org_id: str, element_class: ElementClass) -> list[str]:
-        url = f"{self.base_url}/api/2/{element_class.value}/search/?organization={org_id}&page_size=1000"
+    def get_organization_object_ids(
+        self, org_id: str, object_class: type[DatagouvObject]
+    ) -> Sequence[str]:
+        url = f"{self.base_url}/api/2/{object_class.namespace()}/search/?organization={org_id}&page_size=1000"
         objs = self._get_objects(url=url, fields=INACTIVE_OBJECT_MARKERS)
         return uniquify(o["id"] for o in objs if DatagouvApi._is_active(o))
 
@@ -102,30 +204,30 @@ class DatagouvApi:
 
     @elapsed_and_count
     def get_topic_elements(
-        self, topic_id_or_slug: str, element_class: ElementClass
-    ) -> list[Element]:
-        url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/elements/?class={element_class.name}&page_size=1000"
+        self, topic_id_or_slug: str, object_class: type[TopicObject]
+    ) -> Sequence[TopicElement]:
+        url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/elements/?class={object_class.object_name()}&page_size=1000"
         objs = self._get_objects(url=url, fields=["id", "element{id}"])
-        return [Element(id=o["id"], object_id=o["element"]["id"]) for o in objs]
+        return [TopicElement(id=o["id"], object=object_class(o["element"]["id"])) for o in objs]
 
     @elapsed_and_count
     def put_topic_elements(
         self,
         topic_id_or_slug: str,
-        element_class: ElementClass,
-        object_ids: list[str],
+        object_class: type[TopicObject],
+        object_ids: Iterable[str],
         batch_size: int = 0,
     ) -> None:
         url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/elements/"
         headers = {"Content-Type": "application/json", "X-API-KEY": self.token}
         batches = batched(object_ids, batch_size) if batch_size else [object_ids]
         for batch in batches:
-            data = [{"element": {"class": element_class.name, "id": id}} for id in batch]
+            data = [{"element": {"class": object_class.object_name(), "id": id}} for id in batch]
             if not self.dry_run:
                 session.post(url, json=data, headers=headers).raise_for_status()
 
     @elapsed
-    def delete_topic_elements(self, topic_id_or_slug: str, element_ids: list[str]) -> None:
+    def delete_topic_elements(self, topic_id_or_slug: str, element_ids: Iterable[str]) -> None:
         for element_id in element_ids:
             try:
                 url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/elements/{element_id}/"
@@ -145,7 +247,7 @@ class DatagouvApi:
             session.delete(url, headers=headers).raise_for_status()
 
     @elapsed_and_count
-    def get_bouquets(self, universe_tag: str, include_private: bool = True) -> list[Topic]:
+    def get_bouquets(self, universe_tag: str, include_private: bool = True) -> Sequence[Topic]:
         """Fetch all bouquets (topics) tagged with the universe tag"""
         url = f"{self.base_url}/api/2/topics/?tag={universe_tag}"
         headers = {}
@@ -153,11 +255,12 @@ class DatagouvApi:
             url = f"{url}&include_private=yes"
             headers["X-API-KEY"] = self.token
         objs = self._get_objects(
-            url=url, headers=headers, fields=["id", "name", "organization{id,name,slug}"]
+            url=url, headers=headers, fields=["id", "name", "organization{id,name,slug}", "slug"]
         )
         return [
             Topic(
                 id=d["id"],
+                slug=d["slug"],
                 name=d["name"],
                 organization=Organization(id=o["id"], name=o["name"], slug=o["slug"])
                 if (o := d.get("organization"))
@@ -167,8 +270,8 @@ class DatagouvApi:
         ]
 
     def _get_objects(
-        self, url: str, headers: dict[str, Any] | None = None, fields: list[str] | None = None
-    ) -> Generator[JSONObject]:
+        self, url: str, headers: dict[str, Any] | None = None, fields: Iterable[str] | None = None
+    ) -> Iterable[JSONObject]:
         try:
             headers = dict(headers or {})  # local copy
             if fields:
