@@ -106,9 +106,9 @@ TopicObject: TypeAlias = Dataset | Dataservice
 
 
 @dataclass
-class TopicElement:
+class TopicElement[T: TopicObject]:
     id: str
-    object: TopicObject
+    object: T
 
 
 @dataclass
@@ -126,10 +126,10 @@ class Topic(DatagouvObject, Addressable, Owned):
     def objects(self) -> Sequence[TopicObject]:
         return [elem.object for elem in self.elements]
 
-    def elements_of(self, object_class: type[TopicObject]) -> Sequence[TopicElement]:
+    def elements_of[T: TopicObject](self, object_class: type[T]) -> Sequence[TopicElement[T]]:
         return [elem for elem in self.elements if type(elem.object) is object_class]
 
-    def objects_of(self, object_class: type[TopicObject]) -> Sequence[TopicObject]:
+    def objects_of[T: TopicObject](self, object_class: type[T]) -> Sequence[T]:
         return [elem.object for elem in self.elements_of(object_class)]
 
 
