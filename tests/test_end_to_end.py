@@ -13,7 +13,7 @@ def test_all_at_once(config: Config, datagouv: DatagouvMock, grist: GristMock):
     datasets = [datagouv.dataset(organization=org) for org in organizations[:3]]
     dataservices = [datagouv.dataservice(organization=org) for org in organizations[3:]]
 
-    grist_universe = [GristEntry(Organization, org.id) for org in organizations]
+    grist_universe = [GristEntry(Organization, org.id, f"cat-{org.id}") for org in organizations]
 
     existing_universe = datagouv.universe(datasets[:2] + dataservices[:1])
     upcoming_universe = datagouv.universe_from(grist_universe)
@@ -26,7 +26,7 @@ def test_all_at_once(config: Config, datagouv: DatagouvMock, grist: GristMock):
 
     feed(config)
 
-    assert_outputs(datagouv, upcoming_universe, bouquets)
+    assert_outputs(config.output_dir, grist_universe, upcoming_universe, bouquets)
 
 
 def test_no_changes(config: Config, datagouv: DatagouvMock, grist: GristMock):
@@ -44,13 +44,13 @@ def test_no_changes(config: Config, datagouv: DatagouvMock, grist: GristMock):
 
     feed(config)
 
-    assert_outputs(datagouv, upcoming_universe)
+    assert_outputs(config.output_dir, grist_universe, upcoming_universe)
 
 
 def test_bootstrap_universe(config: Config, datagouv: DatagouvMock, grist: GristMock):
     organizations = [datagouv.organization() for _ in range(5)]
-    datasets = [datagouv.dataset(organization=org) for org in organizations[:3]]
-    dataservices = [datagouv.dataservice(organization=org) for org in organizations[3:]]
+    _ = [datagouv.dataset(organization=org) for org in organizations[:3]]
+    _ = [datagouv.dataservice(organization=org) for org in organizations[3:]]
 
     grist_universe = [GristEntry(Organization, org.id) for org in organizations]
 
@@ -62,7 +62,7 @@ def test_bootstrap_universe(config: Config, datagouv: DatagouvMock, grist: Grist
 
     feed(config)
 
-    assert_outputs(datagouv, upcoming_universe)
+    assert_outputs(config.output_dir, grist_universe, upcoming_universe)
 
 
 def test_remove_everything(config: Config, datagouv: DatagouvMock, grist: GristMock):
@@ -80,7 +80,7 @@ def test_remove_everything(config: Config, datagouv: DatagouvMock, grist: GristM
 
     feed(config)
 
-    assert_outputs(datagouv, upcoming_universe)
+    assert_outputs(config.output_dir, grist_universe, upcoming_universe)
 
 
 def test_bouquets_orgs(config: Config, datagouv: DatagouvMock, grist: GristMock):
@@ -96,4 +96,4 @@ def test_bouquets_orgs(config: Config, datagouv: DatagouvMock, grist: GristMock)
 
     feed(config)
 
-    assert_outputs(datagouv, upcoming_universe, bouquets)
+    assert_outputs(config.output_dir, grist_universe, upcoming_universe, bouquets)

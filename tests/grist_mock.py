@@ -1,16 +1,8 @@
-from dataclasses import dataclass
-
 from responses import RequestsMock
 from responses.matchers import query_param_matcher
 
 from ecospheres_universe.config import Config
-from ecospheres_universe.datagouv import DatagouvObject
-
-
-@dataclass
-class GristEntry:
-    type: type[DatagouvObject]
-    identifier: str
+from ecospheres_universe.grist import GristEntry
 
 
 class GristMock:
@@ -22,12 +14,19 @@ class GristMock:
         self.config = config
 
     def mock(self, universe: list[GristEntry]) -> None:
+        # grist.get_entries()
         _ = self.responses.get(
             url=f"{self.config.grist.url}/tables/{self.config.grist.table}/records",
             match=[query_param_matcher({"limit": 0})],
             json={
                 "records": [
-                    {"fields": {"Type": entry.type.object_name(), "Identifiant": entry.identifier}}
+                    {
+                        "fields": {
+                            "Type": entry.object_class.object_name(),
+                            "Identifiant": entry.identifier,
+                            "Categorie": entry.category,
+                        }
+                    }
                     for entry in universe
                 ]
             },

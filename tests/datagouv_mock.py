@@ -16,9 +16,8 @@ from ecospheres_universe.datagouv import (
     TopicElement,
     TopicObject,
 )
+from ecospheres_universe.grist import GristEntry
 from ecospheres_universe.util import uniquify
-
-from .grist_mock import GristEntry
 
 
 @dataclass

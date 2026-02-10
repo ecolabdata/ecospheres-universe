@@ -5,6 +5,7 @@ import sys
 import time
 
 from collections.abc import Iterable, Sequence
+from dataclasses import dataclass
 from pathlib import Path
 from shutil import copyfile
 
@@ -28,10 +29,27 @@ ADDITIONS_BATCH_SIZE = 1000
 REMOVALS_THRESHOLD = 1800
 
 
+# LATER: drop along with GristEntry.category
+@dataclass
+class CategorizedOrganization(Organization):
+    category: str | None = None
+
+    def __hash__(self) -> int:
+        return hash(self.id)
+
+
 def write_organizations_file(filepath: Path, organizations: list[Organization]):
     """Write organizations list to a JSON file in dist/"""
     print(f"Generating output file {filepath} with {len(organizations)} entries...")
-    orgs = [{"id": o.id, "name": o.name, "slug": o.slug} for o in organizations]
+    orgs = [
+        {
+            "id": org.id,
+            "name": org.name,
+            "slug": org.slug,
+            "type": org.category if isinstance(org, CategorizedOrganization) else None,
+        }
+        for org in organizations
+    ]
     with filepath.open("w") as f:
         json.dump(orgs, f, indent=2, ensure_ascii=False)
 
@@ -59,7 +77,11 @@ def get_upcoming_universe_perimeter(
             ids = datagouv.get_organization_object_ids(org.id, object_class)
             universe_ids |= set(ids)
             if ids or keep_empty:
-                universe_orgs.add(org)
+                universe_orgs.add(
+                    CategorizedOrganization(
+                        id=org.id, slug=org.slug, name=org.name, category=entry.category
+                    )
+                )
         else:
             continue
 

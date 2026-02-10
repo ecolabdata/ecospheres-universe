@@ -9,6 +9,7 @@ import pytest
 
 from ecospheres_universe.config import Config, DatagouvConfig, GristConfig
 from ecospheres_universe.datagouv import Organization, Topic
+from ecospheres_universe.grist import GristEntry
 from ecospheres_universe.util import JSONObject, uniquify
 
 
@@ -21,28 +22,40 @@ def json_load_path(path: Path) -> JSONObject:
         return json.load(f)
 
 
-def mock_organizations_file(organizations: Iterable[Organization]) -> Iterable[JSONObject]:
+def mock_organizations_file(
+    organizations: Iterable[Organization], categories: dict[str, str | None] | None = None
+) -> Iterable[JSONObject]:
+    categories = categories or {}
     return sorted(
-        [{"id": org.id, "name": org.name, "slug": org.slug} for org in organizations],
+        [
+            {"id": org.id, "name": org.name, "slug": org.slug, "type": categories.get(org.id)}
+            for org in organizations
+        ],
         key=itemgetter("name"),
     )
 
 
 def assert_outputs(
-    datagouv: DatagouvMock,
+    output_dir: Path,
+    grist_universe: list[GristEntry],
     upcoming_universe: Topic,
     bouquets: Iterable[Topic] | None = None,
 ) -> None:
+    categories = {
+        entry.identifier: entry.category
+        for entry in grist_universe
+        if entry.object_class is Organization
+    }
     for object_class in Topic.object_classes():
-        orgs = datagouv.organizations(upcoming_universe.objects_of(object_class))
+        orgs = DatagouvMock.organizations(upcoming_universe.objects_of(object_class))
         assert json_load_path(
-            datagouv.config.output_dir / f"organizations-{object_class.namespace()}.json"
-        ) == mock_organizations_file(orgs)
+            output_dir / f"organizations-{object_class.namespace()}.json"
+        ) == mock_organizations_file(orgs, categories)
 
     orgs = uniquify(org for b in (bouquets or []) if (org := b.organization))
-    assert json_load_path(
-        datagouv.config.output_dir / "organizations-bouquets.json"
-    ) == mock_organizations_file(orgs)
+    assert json_load_path(output_dir / "organizations-bouquets.json") == mock_organizations_file(
+        orgs
+    )
 
 
 @pytest.fixture
