@@ -8,24 +8,12 @@ from responses import RequestsMock
 import pytest
 
 from ecospheres_universe.config import Config, DatagouvConfig, GristConfig
-from ecospheres_universe.datagouv import DatagouvObject, Organization, Topic
+from ecospheres_universe.datagouv import Organization, Topic
 from ecospheres_universe.util import JSONObject, uniquify
 
 
 from .datagouv_mock import DatagouvMock
 from .grist_mock import GristMock
-
-
-def json_load_path(path: Path) -> JSONObject:
-    with open(path, "r") as f:
-        return json.load(f)
-
-
-def mock_organizations_file(organizations: Iterable[Organization]) -> Iterable[JSONObject]:
-    return sorted(
-        [{"id": org.id, "name": org.name, "slug": org.slug} for org in organizations],
-        key=itemgetter("name"),
-    )
 
 
 @pytest.fixture
@@ -49,51 +37,16 @@ def grist(responses: RequestsMock, config: Config) -> GristMock:
     return GristMock(responses, config)
 
 
-def mock_feed(
-    datagouv: DatagouvMock,
-    grist: GristMock,
-    grist_universe: list[tuple[DatagouvObject, str]],
-    existing_universe: Topic,
-    upcoming_universe: Topic,
-    bouquets: Iterable[Topic] | None = None,
-):
-    # grist.get_entries()
-    grist.mock_get_entries(grist_universe)  # entries
+def json_load_path(path: Path) -> JSONObject:
+    with open(path, "r") as f:
+        return json.load(f)
 
-    # datagouv.get_organization()
-    datagouv.mock_get_organization(upcoming_universe)
 
-    # datagouv.delete_all_topic_elements()
-    # TODO: support reset=True
-
-    for object_class in Topic.object_classes():
-        upcoming_elements = upcoming_universe.elements_of(object_class)
-        existing_elements = existing_universe.elements_of(object_class)
-
-        # datagouv.get_organization_objects_ids()
-        datagouv.mock_get_organization_object_ids(upcoming_universe, object_class)
-
-        # datagouv.get_topic_elements()
-        datagouv.mock_topic_elements(existing_universe, object_class)
-
-        existing_object_ids = {e.object.id for e in existing_elements}
-        upcoming_object_ids = {e.object.id for e in upcoming_elements}
-
-        # datagouv.put_topic_elements()
-        additions = sorted(
-            {e.object.id for e in upcoming_elements if e.object.id not in existing_object_ids}
-        )
-        if additions:
-            datagouv.mock_put_topic_elements(additions, object_class)
-
-        # datagouv.delete_topic_elements()
-        removals = sorted(
-            {e.id for e in existing_elements if e.object.id not in upcoming_object_ids}
-        )
-        datagouv.mock_delete_topic_elements(removals)
-
-    # datagouv.get_bouquets()
-    datagouv.mock_get_bouquets(bouquets or [])
+def mock_organizations_file(organizations: Iterable[Organization]) -> Iterable[JSONObject]:
+    return sorted(
+        [{"id": org.id, "name": org.name, "slug": org.slug} for org in organizations],
+        key=itemgetter("name"),
+    )
 
 
 def assert_outputs(
@@ -102,16 +55,7 @@ def assert_outputs(
     bouquets: Iterable[Topic] | None = None,
 ) -> None:
     for object_class in Topic.object_classes():
-        # FIXME: helper
-        # orgs = datagouv.get_organizations(upcoming_universe.objects_of(object_class))
-        orgs = uniquify(
-            [
-                org
-                for mockobj in datagouv.objects.values()
-                for obj in mockobj.children
-                if (org := obj.organization) and type(obj) == object_class
-            ]
-        )
+        orgs = datagouv.organizations(upcoming_universe.objects_of(object_class))
         assert json_load_path(
             datagouv.config.output_dir / f"organizations-{object_class.namespace()}.json"
         ) == mock_organizations_file(orgs)

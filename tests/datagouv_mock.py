@@ -1,6 +1,5 @@
 from collections.abc import Iterable
-from dataclasses import asdict, dataclass, field
-from typing import cast
+from dataclasses import asdict, dataclass
 
 from responses import RequestsMock
 from responses.matchers import header_matcher, json_params_matcher, query_param_matcher
@@ -21,101 +20,136 @@ from ecospheres_universe.util import uniquify
 
 
 @dataclass
-class MockObject:
+class Proxy:
     object: DatagouvObject
-    children: list[TopicObject] = field(default_factory=list)
+    children: list[TopicObject] | None = None
+
+    def objects(self) -> Iterable[DatagouvObject]:
+        return self.children if self.children is not None else [self.object]
 
 
 class DatagouvMock:
     responses: RequestsMock
     config: Config
-    objects: dict[str, MockObject]  # careful about name collisions?
+    _id_counter: int
+    _objects: dict[str, Proxy]
 
     def __init__(self, responses: RequestsMock, config: Config):
         self.responses = responses
         self.config = config
-        self.objects = {}
+        self._id_counter = 0
+        self._objects = {}
 
-    def dataservice(self, id: str) -> Dataservice | None:
-        if obj := self.objects.get(id):
-            return cast(Dataservice, obj.object)
+    def _next_id(self) -> int:
+        self._id_counter += 1
+        return self._id_counter
 
-    def dataservices(self, *ids: str) -> list[Dataservice]:
-        return [dataservice for id in ids if (dataservice := self.dataservice(id))]
+    @staticmethod
+    def organizations[T: Owned](objects: Iterable[T]) -> Iterable[Organization]:
+        return uniquify(org for obj in objects if (org := obj.organization))
 
+    # TODO: add object_class?
+    def objects(self, *ids: str) -> Iterable[TopicObject]:
+        for id in ids:
+            yield from self._objects[id].objects()
+
+    # TODO: rename to dataservice() ?
     def make_dataservice(
         self,
-        id: str,
-        organization: str | None = None,
-        tags: list[str] | None = None,
-        topics: list[str] | None = None,
+        organization: Organization | None = None,
     ) -> Dataservice:
-        org = self.organization(organization) if organization else None
-        dataservice = Dataservice(id=id, slug=id, title=id, organization=org)  # TODO: pretty name
-        self.objects[id] = MockObject(dataservice, [dataservice])  # FIXME: children...
+        id = self._next_id()
+        dataservice = Dataservice(
+            id=f"dataservice-{id}",
+            slug=f"dataservice-{id}",
+            title=f"Dataservice {id}",
+            organization=organization,
+        )
+        self._objects[dataservice.id] = Proxy(dataservice)
         if organization:
-            self.objects[organization].children.append(dataservice)
+            # FIXME: typing
+            self._objects[organization.id].children.append(dataservice)
         return dataservice
-
-    def dataset(self, id: str) -> Dataset | None:
-        if obj := self.objects.get(id):
-            return cast(Dataset, obj.object)
-
-    def datasets(self, *ids: str) -> list[Dataset]:
-        return [dataset for id in ids if (dataset := self.dataset(id))]
 
     def make_dataset(
         self,
-        id: str,
-        organization: str | None = None,
-        tags: list[str] | None = None,
-        topics: list[str] | None = None,
+        organization: Organization | None = None,
+        # tags: list[Tag] | None = None,
+        # topics: list[Topic] | None = None,
     ) -> Dataset:
-        org = self.organization(organization) if organization else None
-        dataset = Dataset(id=id, slug=id, title=id, organization=org)  # TODO: pretty name
-        self.objects[id] = MockObject(dataset, [dataset])  # FIXME: children
+        id = self._next_id()
+        dataset = Dataset(
+            id=f"dataset-{id}",
+            slug=f"dataset-{id}",
+            title=f"Dataset {id}",
+            organization=organization,
+        )
+        self._objects[dataset.id] = Proxy(dataset)
         if organization:
-            self.objects[organization].children.append(dataset)
+            self._objects[organization.id].children.append(dataset)
         return dataset
 
-    def organization(self, id: str) -> Organization | None:
-        if obj := self.objects.get(id):
-            return cast(Organization, obj.object)
-
-    def organizations(self, *ids: str) -> list[Organization]:
-        return [organization for id in ids if (organization := self.organization(id))]
-
-    def organization_objects(self, id: str) -> list[Owned]:
-        return [cast(Owned, obj) for obj in self.objects[id].children]
-
-    def make_organization(self, id: str) -> Organization:
-        # TODO: check if already exists?
-        org = Organization(id=id, slug=id, name=id)  # TODO: pretty name
-        self.objects[id] = MockObject(org)
+    def make_organization(self) -> Organization:
+        id = self._next_id()
+        org = Organization(
+            id=f"organization-{id}", slug=f"organization-{id}", name=f"Organization {id}"
+        )
+        self._objects[org.id] = Proxy(org, [])
         return org
 
-    def topic(self, id: str) -> Topic | None:
-        if obj := self.objects.get(id):
-            return cast(Topic, obj.object)
-
-    def topics(self, *ids: str) -> list[Topic]:
-        return [topic for id in ids if (topic := self.topic(id))]
-
-    def topic_objects(self, id: str) -> list[TopicObject]:
-        return self.objects[id].children
-
-    def make_topic(self, id: str, organization: str | None = None) -> Topic:
-        org = self.organization(organization) if organization else None
-        topic = Topic(id=id, slug=id, name=id, organization=org)  # TODO: pretty name
+    def make_topic(self, organization: Organization | None = None) -> Topic:
+        id = self._next_id()
+        topic = Topic(
+            id=f"topic-{id}", slug=f"topic-{id}", name=f"Topic {id}", organization=organization
+        )
+        self._objects[topic.id] = Proxy(topic, [])
         return topic
 
-    def make_universe(self, id: str, objects: list[TopicObject]) -> Topic:
-        return Topic(
-            id=id,
-            slug=id,
-            name=id,  # TODO: pretty name
-            elements=[TopicElement(f"element-{obj.id}", obj) for obj in objects],
-        )
+    def make_universe(self, *objects: TopicObject) -> Topic:
+        topic = self.make_topic()
+        topic.elements = [TopicElement(f"element-{obj.id}", obj) for obj in objects]
+        return topic
+
+    def mock(
+        self,
+        existing_universe: Topic,
+        upcoming_universe: Topic,
+        bouquets: Iterable[Topic] | None = None,
+    ) -> None:
+        # datagouv.get_organization()
+        self.mock_get_organization(upcoming_universe)
+
+        # datagouv.delete_all_topic_elements()
+        # TODO: support reset=True
+
+        for object_class in Topic.object_classes():
+            upcoming_elements = upcoming_universe.elements_of(object_class)
+            existing_elements = existing_universe.elements_of(object_class)
+
+            # datagouv.get_organization_objects_ids()
+            self.mock_get_organization_object_ids(upcoming_universe, object_class)
+
+            # datagouv.get_topic_elements()
+            self.mock_topic_elements(existing_universe, object_class)
+
+            existing_object_ids = {e.object.id for e in existing_elements}
+            upcoming_object_ids = {e.object.id for e in upcoming_elements}
+
+            # datagouv.put_topic_elements()
+            additions = sorted(
+                {e.object.id for e in upcoming_elements if e.object.id not in existing_object_ids}
+            )
+            if additions:
+                self.mock_put_topic_elements(additions, object_class)
+
+            # datagouv.delete_topic_elements()
+            removals = sorted(
+                {e.id for e in existing_elements if e.object.id not in upcoming_object_ids}
+            )
+            self.mock_delete_topic_elements(removals)
+
+        # datagouv.get_bouquets()
+        self.mock_get_bouquets(bouquets or [])
 
     def mock_get_organization(self, universe: Topic) -> None:
         orgs = uniquify(org for obj in universe.objects if (org := obj.organization))
