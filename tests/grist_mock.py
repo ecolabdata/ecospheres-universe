@@ -14,14 +14,14 @@ class GristEntry:
 
 
 class GristMock:
+    responses: RequestsMock
+    config: Config
+
     def __init__(self, responses: RequestsMock, config: Config):
         self.responses = responses
         self.config = config
 
     def mock(self, universe: list[GristEntry]) -> None:
-        self.mock_get_entries(universe)
-
-    def mock_get_entries(self, universe: list[GristEntry]) -> None:
         _ = self.responses.get(
             url=f"{self.config.grist.url}/tables/{self.config.grist.table}/records",
             match=[query_param_matcher({"limit": 0})],
