@@ -18,6 +18,8 @@ from ecospheres_universe.datagouv import (
 )
 from ecospheres_universe.util import uniquify
 
+from .grist_mock import GristEntry
+
 
 @dataclass
 class Proxy:
@@ -45,16 +47,14 @@ class DatagouvMock:
         return self._id_counter
 
     @staticmethod
-    def organizations[T: Owned](objects: Iterable[T]) -> Iterable[Organization]:
+    def organizations(objects: Iterable[Owned]) -> Iterable[Organization]:
         return uniquify(org for obj in objects if (org := obj.organization))
 
-    # TODO: add object_class?
-    def objects(self, *ids: str) -> Iterable[TopicObject]:
+    def objects(self, ids: Iterable[str]) -> Iterable[TopicObject]:
         for id in ids:
             yield from self._objects[id].objects()
 
-    # TODO: rename to dataservice() ?
-    def make_dataservice(
+    def dataservice(
         self,
         organization: Organization | None = None,
     ) -> Dataservice:
@@ -71,11 +71,9 @@ class DatagouvMock:
             self._objects[organization.id].children.append(dataservice)
         return dataservice
 
-    def make_dataset(
+    def dataset(
         self,
         organization: Organization | None = None,
-        # tags: list[Tag] | None = None,
-        # topics: list[Topic] | None = None,
     ) -> Dataset:
         id = self._next_id()
         dataset = Dataset(
@@ -89,7 +87,7 @@ class DatagouvMock:
             self._objects[organization.id].children.append(dataset)
         return dataset
 
-    def make_organization(self) -> Organization:
+    def organization(self) -> Organization:
         id = self._next_id()
         org = Organization(
             id=f"organization-{id}", slug=f"organization-{id}", name=f"Organization {id}"
@@ -97,7 +95,7 @@ class DatagouvMock:
         self._objects[org.id] = Proxy(org, [])
         return org
 
-    def make_topic(self, organization: Organization | None = None) -> Topic:
+    def topic(self, organization: Organization | None = None) -> Topic:
         id = self._next_id()
         topic = Topic(
             id=f"topic-{id}", slug=f"topic-{id}", name=f"Topic {id}", organization=organization
@@ -105,10 +103,16 @@ class DatagouvMock:
         self._objects[topic.id] = Proxy(topic, [])
         return topic
 
-    def make_universe(self, *objects: TopicObject) -> Topic:
-        topic = self.make_topic()
-        topic.elements = [TopicElement(f"element-{obj.id}", obj) for obj in objects]
+    def universe(self, objects: Iterable[TopicObject] | None = None) -> Topic:
+        topic = self.topic()
+        if objects:
+            topic.elements = [TopicElement(f"element-{obj.id}", obj) for obj in objects]
         return topic
+
+    def universe_from(self, grist_universe: Iterable[GristEntry]) -> Topic:
+        ids = [entry.identifier for entry in grist_universe]
+        objects = self.objects(ids)
+        return self.universe(objects)
 
     def mock(
         self,
@@ -130,7 +134,7 @@ class DatagouvMock:
             self.mock_get_organization_object_ids(upcoming_universe, object_class)
 
             # datagouv.get_topic_elements()
-            self.mock_topic_elements(existing_universe, object_class)
+            self.mock_get_topic_elements(existing_universe, object_class)
 
             existing_object_ids = {e.object.id for e in existing_elements}
             upcoming_object_ids = {e.object.id for e in upcoming_elements}
@@ -162,10 +166,9 @@ class DatagouvMock:
     def mock_get_organization_object_ids(
         self, universe: Topic, object_class: type[TopicObject]
     ) -> None:
-        # warning: orgs must be over ALL orgs, not just those matching type
-        # requests have to be mocked even if they don't return anything
+        # Warning: orgs list must be computed over *all* orgs, not just those matching object_class,
+        # because requests have to be mocked even if they don't return anything
         orgs = uniquify(org for obj in universe.objects if (org := obj.organization))
-        # TODO: better: group by org => orgs = group keys + "data" = group values
         objects = universe.objects_of(object_class)
         for org in orgs:
             _ = self.responses.get(
@@ -182,7 +185,7 @@ class DatagouvMock:
                 },
             )
 
-    def mock_topic_elements(self, universe: Topic, object_class: type[TopicObject]) -> None:
+    def mock_get_topic_elements(self, universe: Topic, object_class: type[TopicObject]) -> None:
         elements = universe.elements_of(object_class)
         _ = self.responses.get(
             url=f"{self.config.datagouv.url}/api/2/topics/{self.config.topic}/elements/",
