@@ -16,27 +16,6 @@ from .datagouv_mock import DatagouvMock
 from .grist_mock import GristMock
 
 
-@pytest.fixture
-def config(tmp_path: Path) -> Config:
-    return Config(
-        topic="test-topic",
-        tag="test-tag",
-        datagouv=DatagouvConfig(url="https://www.example.com/datagouv", token="datagouv-token"),
-        grist=GristConfig(url="https://www.example.com/grist", table="test", token="grist-token"),
-        output_dir=tmp_path,
-    )
-
-
-@pytest.fixture
-def datagouv(responses: RequestsMock, config: Config) -> DatagouvMock:
-    return DatagouvMock(responses, config)
-
-
-@pytest.fixture
-def grist(responses: RequestsMock, config: Config) -> GristMock:
-    return GristMock(responses, config)
-
-
 def json_load_path(path: Path) -> JSONObject:
     with open(path, "r") as f:
         return json.load(f)
@@ -64,3 +43,24 @@ def assert_outputs(
     assert json_load_path(
         datagouv.config.output_dir / "organizations-bouquets.json"
     ) == mock_organizations_file(orgs)
+
+
+@pytest.fixture
+def config(tmp_path: Path) -> Config:
+    return Config(
+        topic="test-topic",
+        tag="test-tag",
+        datagouv=DatagouvConfig(url="https://www.example.com/datagouv", token="datagouv-token"),
+        grist=GristConfig(url="https://www.example.com/grist", table="test", token="grist-token"),
+        output_dir=tmp_path,
+    )
+
+
+@pytest.fixture
+def datagouv(responses: RequestsMock, config: Config) -> DatagouvMock:
+    return DatagouvMock(responses, config)
+
+
+@pytest.fixture
+def grist(responses: RequestsMock, config: Config) -> GristMock:
+    return GristMock(responses, config)
