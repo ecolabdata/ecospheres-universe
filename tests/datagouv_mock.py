@@ -48,11 +48,11 @@ class DatagouvMock:
 
     def objects_for(self, ids: Iterable[str]) -> Iterable[TopicObject]:
         for id in ids:
-            object = self._objects[id]
-            if isinstance(object, Proxy):
-                yield from object.children
-            else:
-                yield object
+            if object := self._objects.get(id):
+                if isinstance(object, Proxy):
+                    yield from object.children
+                else:
+                    yield object
 
     def dataservice(
         self,
@@ -103,18 +103,20 @@ class DatagouvMock:
         topic = Topic(
             id=f"topic-{id}", slug=f"topic-{id}", name=f"Topic {id}", organization=organization
         )
+        # Topic doesn't need a proxy since it stores its own elements, but using one for symmetry,
+        # to avoid dealing with another variant in _objects
         self._objects[topic.id] = Proxy(topic, [])
         return topic
 
     def universe(self, objects: Iterable[TopicObject] | None = None) -> Topic:
+        # Ignoring universe.organization since it's not used in tests so far
         topic = self.topic()
         if objects:
             topic.elements = [TopicElement(f"element-{obj.id}", obj) for obj in objects]
         return topic
 
     def universe_from(self, grist_universe: Iterable[GristEntry]) -> Topic:
-        ids = [entry.identifier for entry in grist_universe]
-        objects = self.objects_for(ids)
+        objects = self.objects_for([entry.identifier for entry in grist_universe])
         return self.universe(objects)
 
     def mock(
