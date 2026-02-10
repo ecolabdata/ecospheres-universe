@@ -1,5 +1,5 @@
 from collections.abc import Iterable
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 
 from responses import RequestsMock
 from responses.matchers import header_matcher, json_params_matcher, query_param_matcher
@@ -23,17 +23,14 @@ from ecospheres_universe.util import uniquify
 @dataclass
 class Proxy:
     object: DatagouvObject
-    children: list[TopicObject] | None = None
-
-    def objects(self) -> Iterable[DatagouvObject]:
-        return self.children if self.children is not None else [self.object]
+    children: list[TopicObject] = field(default_factory=list)
 
 
 class DatagouvMock:
     responses: RequestsMock
     config: Config
     _id_counter: int
-    _objects: dict[str, Proxy]
+    _objects: dict[str, Dataset | Dataservice | Proxy]
 
     def __init__(self, responses: RequestsMock, config: Config):
         self.responses = responses
@@ -51,7 +48,11 @@ class DatagouvMock:
 
     def objects(self, ids: Iterable[str]) -> Iterable[TopicObject]:
         for id in ids:
-            yield from self._objects[id].objects()
+            object = self._objects[id]
+            if isinstance(object, Proxy):
+                yield from object.children
+            else:
+                yield object
 
     def dataservice(
         self,
@@ -64,10 +65,11 @@ class DatagouvMock:
             title=f"Dataservice {id}",
             organization=organization,
         )
-        self._objects[dataservice.id] = Proxy(dataservice)
+        self._objects[dataservice.id] = dataservice
         if organization:
-            # FIXME: typing
-            self._objects[organization.id].children.append(dataservice)
+            proxy = self._objects[organization.id]
+            assert isinstance(proxy, Proxy)
+            proxy.children.append(dataservice)
         return dataservice
 
     def dataset(
@@ -81,9 +83,11 @@ class DatagouvMock:
             title=f"Dataset {id}",
             organization=organization,
         )
-        self._objects[dataset.id] = Proxy(dataset)
+        self._objects[dataset.id] = dataset
         if organization:
-            self._objects[organization.id].children.append(dataset)
+            proxy = self._objects[organization.id]
+            assert isinstance(proxy, Proxy)
+            proxy.children.append(dataset)
         return dataset
 
     def organization(self) -> Organization:
