@@ -8,7 +8,7 @@ from responses import RequestsMock
 import pytest
 
 from ecospheres_universe.config import Config, DatagouvConfig, GristConfig
-from ecospheres_universe.datagouv import Organization, Topic
+from ecospheres_universe.datagouv import DatagouvObject, Organization, Topic
 from ecospheres_universe.util import JSONObject, uniquify
 
 
@@ -52,12 +52,13 @@ def grist(responses: RequestsMock, config: Config) -> GristMock:
 def mock_feed(
     datagouv: DatagouvMock,
     grist: GristMock,
+    grist_universe: list[tuple[DatagouvObject, str]],
     existing_universe: Topic,
     upcoming_universe: Topic,
     bouquets: Iterable[Topic] | None = None,
 ):
     # grist.get_entries()
-    grist.mock_get_entries(upcoming_universe)
+    grist.mock_get_entries(grist_universe)  # entries
 
     # datagouv.get_organization()
     datagouv.mock_get_organization(upcoming_universe)
@@ -101,7 +102,16 @@ def assert_outputs(
     bouquets: Iterable[Topic] | None = None,
 ) -> None:
     for object_class in Topic.object_classes():
-        orgs = datagouv.get_organizations(upcoming_universe.objects_of(object_class))
+        # FIXME: helper
+        # orgs = datagouv.get_organizations(upcoming_universe.objects_of(object_class))
+        orgs = uniquify(
+            [
+                org
+                for mockobj in datagouv.objects.values()
+                for obj in mockobj.children
+                if (org := obj.organization) and type(obj) == object_class
+            ]
+        )
         assert json_load_path(
             datagouv.config.output_dir / f"organizations-{object_class.namespace()}.json"
         ) == mock_organizations_file(orgs)
