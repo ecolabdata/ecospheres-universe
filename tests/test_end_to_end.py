@@ -107,7 +107,71 @@ def test_bouquets_orgs(config: Config, datagouv: DatagouvMock, grist: GristMock)
 
 def test_unknown_entry(config: Config, datagouv: DatagouvMock, grist: GristMock):
     existing_universe = []
-    grist_universe = [grist.raw_entry(identifier="unknown", object_class=Organization)]
+    grist_universe = [grist.raw_entry("unknown", Organization)]
+
+    grist.mock(grist_universe)
+    datagouv.mock(existing_universe, grist_universe)
+
+    feed(config)
+
+    assert_outputs(datagouv, grist_universe)
+
+
+def test_datasets_dataservices_entries(config: Config, datagouv: DatagouvMock, grist: GristMock):
+    organizations = [datagouv.organization() for _ in range(4)]
+    datasets = [datagouv.dataset(organization=org) for org in organizations[:2]]
+    dataservices = [datagouv.dataservice(organization=org) for org in organizations[2:]]
+
+    existing_universe = datasets + dataservices
+    grist_universe = [grist.entry(datasets[0]), grist.entry(dataservices[0])]
+
+    grist.mock(grist_universe)
+    datagouv.mock(existing_universe, grist_universe)
+
+    feed(config)
+
+    assert_outputs(datagouv, grist_universe)
+
+
+def test_topic_entries(config: Config, datagouv: DatagouvMock, grist: GristMock):
+    organizations = [datagouv.organization() for _ in range(5)]
+    topics = [datagouv.topic(organization=organizations[i]) for i in range(3)]
+    datasets = [
+        datagouv.dataset(organization=organizations[0], topics=topics[0:1]),
+        datagouv.dataset(organization=organizations[1], topics=topics[1:2]),
+        datagouv.dataset(organization=organizations[2], topics=[topics[2]]),
+    ]
+    dataservices = [
+        datagouv.dataservice(organization=organizations[3], topics=[topics[0]]),
+        datagouv.dataservice(organization=organizations[4], topics=[topics[2]]),
+    ]
+
+    existing_universe = datasets + dataservices
+    grist_universe = [grist.entry(topics[0]), grist.entry(topics[1])]
+
+    grist.mock(grist_universe)
+    datagouv.mock(existing_universe, grist_universe)
+
+    feed(config)
+
+    assert_outputs(datagouv, grist_universe)
+
+
+def test_tag_entries(config: Config, datagouv: DatagouvMock, grist: GristMock):
+    organizations = [datagouv.organization() for _ in range(5)]
+    tags = [datagouv.tag(organization=organizations[i]) for i in range(3)]
+    datasets = [
+        datagouv.dataset(organization=organizations[0], tags=tags[0:1]),
+        datagouv.dataset(organization=organizations[1], tags=tags[1:2]),
+        datagouv.dataset(organization=organizations[2], tags=[tags[2]]),
+    ]
+    dataservices = [
+        datagouv.dataservice(organization=organizations[3], tags=[tags[0]]),
+        datagouv.dataservice(organization=organizations[4], tags=[tags[2]]),
+    ]
+
+    existing_universe = datasets + dataservices
+    grist_universe = [grist.entry(tags[0]), grist.entry(tags[1])]
 
     grist.mock(grist_universe)
     datagouv.mock(existing_universe, grist_universe)
