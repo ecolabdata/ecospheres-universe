@@ -13,20 +13,18 @@ def test_all_at_once(config: Config, datagouv: DatagouvMock, grist: GristMock):
     datasets = [datagouv.dataset(organization=org) for org in organizations[:3]]
     dataservices = [datagouv.dataservice(organization=org) for org in organizations[3:]]
 
+    existing_universe = datasets[:2] + dataservices[:1]
     grist_universe = [GristEntry(Organization, org.id, f"cat-{org.id}") for org in organizations]
-
-    existing_universe = datagouv.universe(datasets[:2] + dataservices[:1])
-    upcoming_universe = datagouv.universe_from(grist_universe)
 
     bouquet_orgs = [datagouv.organization() for _ in range(3)]
     bouquets = [datagouv.topic(organization=org) for org in cycle_n(bouquet_orgs, 5)]
 
     grist.mock(grist_universe)
-    datagouv.mock(existing_universe, upcoming_universe, bouquets)
+    datagouv.mock(existing_universe, grist_universe, bouquets)
 
     feed(config)
 
-    assert_outputs(config.output_dir, grist_universe, upcoming_universe, bouquets)
+    assert_outputs(datagouv, grist_universe, bouquets)
 
 
 def test_no_changes(config: Config, datagouv: DatagouvMock, grist: GristMock):
@@ -34,17 +32,15 @@ def test_no_changes(config: Config, datagouv: DatagouvMock, grist: GristMock):
     datasets = [datagouv.dataset(organization=org) for org in organizations[:3]]
     dataservices = [datagouv.dataservice(organization=org) for org in organizations[3:]]
 
+    existing_universe = datasets + dataservices
     grist_universe = [GristEntry(Organization, org.id) for org in organizations]
 
-    existing_universe = datagouv.universe(datasets + dataservices)
-    upcoming_universe = datagouv.universe_from(grist_universe)
-
     grist.mock(grist_universe)
-    datagouv.mock(existing_universe, upcoming_universe)
+    datagouv.mock(existing_universe, grist_universe)
 
     feed(config)
 
-    assert_outputs(config.output_dir, grist_universe, upcoming_universe)
+    assert_outputs(datagouv, grist_universe)
 
 
 def test_bootstrap_universe(config: Config, datagouv: DatagouvMock, grist: GristMock):
@@ -52,17 +48,15 @@ def test_bootstrap_universe(config: Config, datagouv: DatagouvMock, grist: Grist
     _ = [datagouv.dataset(organization=org) for org in organizations[:3]]
     _ = [datagouv.dataservice(organization=org) for org in organizations[3:]]
 
+    existing_universe = []
     grist_universe = [GristEntry(Organization, org.id) for org in organizations]
 
-    existing_universe = datagouv.universe()
-    upcoming_universe = datagouv.universe_from(grist_universe)
-
     grist.mock(grist_universe)
-    datagouv.mock(existing_universe, upcoming_universe)
+    datagouv.mock(existing_universe, grist_universe)
 
     feed(config)
 
-    assert_outputs(config.output_dir, grist_universe, upcoming_universe)
+    assert_outputs(datagouv, grist_universe)
 
 
 def test_remove_everything(config: Config, datagouv: DatagouvMock, grist: GristMock):
@@ -70,30 +64,27 @@ def test_remove_everything(config: Config, datagouv: DatagouvMock, grist: GristM
     datasets = [datagouv.dataset(organization=org) for org in organizations[:3]]
     dataservices = [datagouv.dataservice(organization=org) for org in organizations[3:]]
 
+    existing_universe = datasets + dataservices
     grist_universe = []
 
-    existing_universe = datagouv.universe(datasets + dataservices)
-    upcoming_universe = datagouv.universe_from(grist_universe)
-
     grist.mock(grist_universe)
-    datagouv.mock(existing_universe, upcoming_universe)
+    datagouv.mock(existing_universe, grist_universe)
 
     feed(config)
 
-    assert_outputs(config.output_dir, grist_universe, upcoming_universe)
+    assert_outputs(datagouv, grist_universe)
 
 
 def test_bouquets_orgs(config: Config, datagouv: DatagouvMock, grist: GristMock):
+    existing_universe = []
     grist_universe = []
-    existing_universe = datagouv.universe()
-    upcoming_universe = datagouv.universe_from(grist_universe)
 
     organizations = [datagouv.organization() for _ in range(5)]
     bouquets = [datagouv.topic(organization=org) for org in organizations]
 
     grist.mock(grist_universe)
-    datagouv.mock(existing_universe, upcoming_universe, bouquets)
+    datagouv.mock(existing_universe, grist_universe, bouquets)
 
     feed(config)
 
-    assert_outputs(config.output_dir, grist_universe, upcoming_universe, bouquets)
+    assert_outputs(datagouv, grist_universe, bouquets)

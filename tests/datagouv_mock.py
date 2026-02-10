@@ -43,10 +43,10 @@ class DatagouvMock:
         return self._id_counter
 
     @staticmethod
-    def organizations(objects: Iterable[Owned]) -> Iterable[Organization]:
+    def organizations_for(objects: Iterable[Owned]) -> Iterable[Organization]:
         return uniquify(org for obj in objects if (org := obj.organization))
 
-    def objects(self, ids: Iterable[str]) -> Iterable[TopicObject]:
+    def objects_for(self, ids: Iterable[str]) -> Iterable[TopicObject]:
         for id in ids:
             object = self._objects[id]
             if isinstance(object, Proxy):
@@ -114,30 +114,33 @@ class DatagouvMock:
 
     def universe_from(self, grist_universe: Iterable[GristEntry]) -> Topic:
         ids = [entry.identifier for entry in grist_universe]
-        objects = self.objects(ids)
+        objects = self.objects_for(ids)
         return self.universe(objects)
 
     def mock(
         self,
-        existing_universe: Topic,
-        upcoming_universe: Topic,
+        existing_universe: list[TopicObject],
+        grist_universe: list[GristEntry],
         bouquets: Iterable[Topic] | None = None,
     ) -> None:
+        existing = self.universe(existing_universe)
+        upcoming = self.universe_from(grist_universe)
+
         # datagouv.get_organization()
-        self.mock_get_organization(upcoming_universe)
+        self.mock_get_organization(upcoming)
 
         # datagouv.delete_all_topic_elements()
         # TODO: support reset=True
 
         for object_class in Topic.object_classes():
-            upcoming_elements = upcoming_universe.elements_of(object_class)
-            existing_elements = existing_universe.elements_of(object_class)
+            upcoming_elements = upcoming.elements_of(object_class)
+            existing_elements = existing.elements_of(object_class)
 
             # datagouv.get_organization_objects_ids()
-            self.mock_get_organization_object_ids(upcoming_universe, object_class)
+            self.mock_get_organization_object_ids(upcoming, object_class)
 
             # datagouv.get_topic_elements()
-            self.mock_get_topic_elements(existing_universe, object_class)
+            self.mock_get_topic_elements(existing, object_class)
 
             existing_object_ids = {e.object.id for e in existing_elements}
             upcoming_object_ids = {e.object.id for e in upcoming_elements}

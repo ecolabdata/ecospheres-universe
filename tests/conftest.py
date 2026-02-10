@@ -36,26 +36,27 @@ def mock_organizations_file(
 
 
 def assert_outputs(
-    output_dir: Path,
+    datagouv: DatagouvMock,
     grist_universe: list[GristEntry],
-    upcoming_universe: Topic,
     bouquets: Iterable[Topic] | None = None,
 ) -> None:
+    universe = datagouv.universe_from(grist_universe)
     categories = {
         entry.identifier: entry.category
         for entry in grist_universe
         if entry.object_class is Organization
     }
     for object_class in Topic.object_classes():
-        orgs = DatagouvMock.organizations(upcoming_universe.objects_of(object_class))
+        objects = universe.objects_of(object_class)
+        orgs = datagouv.organizations_for(objects)
         assert json_load_path(
-            output_dir / f"organizations-{object_class.namespace()}.json"
+            datagouv.config.output_dir / f"organizations-{object_class.namespace()}.json"
         ) == mock_organizations_file(orgs, categories)
 
     orgs = uniquify(org for b in (bouquets or []) if (org := b.organization))
-    assert json_load_path(output_dir / "organizations-bouquets.json") == mock_organizations_file(
-        orgs
-    )
+    assert json_load_path(
+        datagouv.config.output_dir / "organizations-bouquets.json"
+    ) == mock_organizations_file(orgs)
 
 
 @pytest.fixture
