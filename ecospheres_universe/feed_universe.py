@@ -62,8 +62,16 @@ def get_upcoming_universe_perimeter(
     object_class: type[TopicObject],
     keep_empty: bool = False,
 ) -> tuple[Sequence[str], Sequence[Organization]]:
-    universe_ids = set[str]()
-    universe_orgs = set[Organization]()
+    inclusions = dict[str, Organization | None]()
+    exclusions = set[str]()
+
+    def _include(objects: dict[str, Organization | None]):
+        nonlocal inclusions
+        inclusions |= objects
+
+    def _exclude(objects: set[str]):
+        nonlocal exclusions
+        exclusions |= objects
 
     for entry in grist_entries:
         verbose_print(
@@ -77,9 +85,10 @@ def get_upcoming_universe_perimeter(
                     f"Unknown {entry.object_class.model_name()} {entry.identifier}", file=sys.stderr
                 )
                 continue
-            universe_ids.add(obj.id)
-            if org := obj.organization:
-                universe_orgs.add(org)
+            if entry.exclude:
+                _exclude({obj.id})
+            else:
+                _include({obj.id: obj.organization})
 
         elif entry.object_class is Organization:
             org = datagouv.get_organization(entry.identifier)
@@ -89,28 +98,40 @@ def get_upcoming_universe_perimeter(
                 )
                 continue
             ids = datagouv.get_organization_object_ids(org.id, object_class)
-            universe_ids |= set(ids)
-            if ids or keep_empty:
-                universe_orgs.add(
-                    CategorizedOrganization(
-                        id=org.id, slug=org.slug, name=org.name, category=entry.category
-                    )
+            if entry.exclude:
+                _exclude(set(ids))
+            else:
+                org = CategorizedOrganization(
+                    id=org.id, slug=org.slug, name=org.name, category=entry.category
                 )
+                _include({id: org for id in ids})
 
         elif entry.object_class is Tag:
             objs = datagouv.get_tagged_objects(entry.identifier, object_class)
-            universe_ids |= {obj.id for obj in objs}
-            universe_orgs |= {org for obj in objs if (org := obj.organization)}
+            if entry.exclude:
+                _exclude({obj.id for obj in objs})
+            else:
+                _include({obj.id: obj.organization for obj in objs})
 
         elif entry.object_class is Topic:
             objs = datagouv.get_topic_objects(entry.identifier, object_class)
-            universe_ids |= {obj.id for obj in objs}
-            universe_orgs |= {org for obj in objs if (org := obj.organization)}
+            if entry.exclude:
+                _exclude({obj.id for obj in objs})
+            else:
+                _include({obj.id: obj.organization for obj in objs})
 
         else:
             continue
 
-    return list(universe_ids), list(universe_orgs)
+    # FIXME: keep keep_empty?
+    if keep_empty:
+        organizations = {org for org in inclusions.values() if org is not None}
+        _ = [inclusions.pop(id, None) for id in exclusions]
+    else:
+        _ = [inclusions.pop(id, None) for id in exclusions]
+        organizations = {org for org in inclusions.values() if org is not None}
+
+    return list(inclusions.keys()), list(organizations)
 
 
 @cli

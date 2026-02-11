@@ -2,15 +2,22 @@ import requests
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from enum import auto, StrEnum
 
 from ecospheres_universe.datagouv import DatagouvObject
 from ecospheres_universe.util import uniquify
 
 
+class GristAction(StrEnum):
+    INCLURE = auto()
+    EXCLURE = auto()
+
+
 @dataclass(frozen=True)
 class GristEntry[T: DatagouvObject]:
-    object_class: type[T]
     identifier: str
+    object_class: type[T]
+    exclude: bool = False
     category: str | None = None  # LATER: drop (backcompat ecologie for now)
 
 
@@ -27,11 +34,13 @@ class GristApi:
             params={"limit": 0},
         )
         r.raise_for_status()
-        return uniquify(
-            GristEntry(
-                object_class=DatagouvObject.class_from_name(rec["fields"]["Type"]),
-                identifier=rec["fields"]["Identifiant"],
-                category=rec["fields"].get("Categorie"),
-            )
-            for rec in r.json()["records"]
-        )
+        records = r.json()["records"]
+        return uniquify(self._make_entry(rec["fields"]) for rec in records)
+
+    @staticmethod
+    def _make_entry(record: dict[str, str]) -> GristEntry:
+        identifier = record["Identifiant"]
+        object_class = DatagouvObject.class_from_name(record["Type"])
+        exclude = GristAction(record["Action"]) is GristAction.EXCLURE
+        category = record.get("Categorie")
+        return GristEntry(identifier, object_class, exclude, category)
