@@ -48,7 +48,7 @@ def assert_outputs(
     }
     for object_class in Topic.object_classes():
         objects = universe.objects_of(object_class)
-        orgs = datagouv.organizations_for(objects)
+        orgs = datagouv.owning_organizations(*objects)
         assert json_load_path(
             datagouv.config.output_dir / f"organizations-{object_class.namespace()}.json"
         ) == mock_organizations_file(orgs, categories)

@@ -2,6 +2,7 @@ from responses import RequestsMock
 from responses.matchers import query_param_matcher
 
 from ecospheres_universe.config import Config
+from ecospheres_universe.datagouv import DatagouvObject
 from ecospheres_universe.grist import GristEntry
 
 
@@ -12,6 +13,14 @@ class GristMock:
     def __init__(self, responses: RequestsMock, config: Config):
         self.responses = responses
         self.config = config
+
+    def entry(self, object: DatagouvObject, category: str | None = None) -> GristEntry:
+        return GristEntry(type(object), object.id, category)
+
+    def raw_entry(
+        self, identifier: str, object_class: type[DatagouvObject], category: str | None = None
+    ) -> GristEntry:
+        return GristEntry(object_class, identifier, category)
 
     def mock(self, universe: list[GristEntry]) -> None:
         # grist.get_entries()

@@ -8,8 +8,8 @@ from ecospheres_universe.util import uniquify
 
 
 @dataclass(frozen=True)
-class GristEntry:
-    object_class: type[DatagouvObject]
+class GristEntry[T: DatagouvObject]:
+    object_class: type[T]
     identifier: str
     category: str | None = None  # LATER: drop (backcompat ecologie for now)
 
