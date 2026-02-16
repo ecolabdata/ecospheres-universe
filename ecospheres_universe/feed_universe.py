@@ -30,12 +30,11 @@ REMOVALS_THRESHOLD = 1800
 
 
 # LATER: drop along with GristEntry.category
-@dataclass
+@dataclass(frozen=True)
 class CategorizedOrganization(Organization):
     category: str | None = None
-
-    def __hash__(self) -> int:
-        return hash(self.id)
+    __eq__ = Organization.__eq__
+    __hash__ = Organization.__hash__
 
 
 def write_organizations_file(filepath: Path, organizations: list[Organization]):

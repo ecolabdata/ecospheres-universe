@@ -21,7 +21,7 @@ from ecospheres_universe.util import (
 session = requests.Session()
 
 
-@dataclass
+@dataclass(frozen=True)
 class DatagouvObject:
     """Base class for datagouv objects."""
 
@@ -29,6 +29,7 @@ class DatagouvObject:
 
     @staticmethod
     def class_from_name(name: str) -> type["DatagouvObject"]:
+        # Warning: Subclasses should be declared in current file. Otherwise, change lookup scope.
         for clazz_name, clazz in inspect.getmembers(
             sys.modules[__name__], predicate=inspect.isclass
         ):
@@ -61,13 +62,10 @@ class Addressable(Protocol):
 
 
 @total_ordering
-@dataclass
+@dataclass(frozen=True)
 class Organization(DatagouvObject, Addressable):
     slug: str | None = None
     name: str | None = None
-
-    def __hash__(self) -> int:
-        return hash(self.id)
 
     def __lt__(self, other: "Organization") -> bool:
         # TODO: replace assert guards with refresh() when we move to datagouv-client
@@ -88,14 +86,14 @@ class AddressableOwned(Addressable, Owned, Protocol):
     pass
 
 
-@dataclass
+@dataclass(frozen=True)
 class Dataset(DatagouvObject, Addressable, Owned):
     slug: str | None = None
     title: str | None = None
     organization: Organization | None = None
 
 
-@dataclass
+@dataclass(frozen=True)
 class Dataservice(DatagouvObject, Addressable, Owned):
     slug: str | None = None
     title: str | None = None
@@ -111,7 +109,7 @@ class TopicElement[T: TopicObject]:
     object: T
 
 
-@dataclass
+@dataclass(frozen=True)
 class Topic(DatagouvObject, Addressable, Owned):
     slug: str | None = None
     name: str | None = None

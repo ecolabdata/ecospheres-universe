@@ -101,7 +101,7 @@ class DatagouvMock:
         # Ignoring universe.organization since it's not used in tests so far
         topic = self.topic()
         if objects:
-            topic.elements = [TopicElement(f"element-{obj.id}", obj) for obj in objects]
+            topic.elements.extend(TopicElement(f"element-{obj.id}", obj) for obj in objects)
         return topic
 
     def universe_from(self, grist_universe: Iterable[GristEntry]) -> Topic:
