@@ -21,9 +21,13 @@ from ecospheres_universe.grist import GristEntry
 from ecospheres_universe.util import uniquify
 
 
-@dataclass
+@dataclass(frozen=True)
 class Proxy[T: DatagouvObject]:
     object: T
+
+
+@dataclass(frozen=True)
+class ListProxy[T: DatagouvObject](Proxy[T]):
     children: list[TopicObject] = field(default_factory=list)
 
 
@@ -31,7 +35,7 @@ class DatagouvMock:
     responses: RequestsMock
     config: Config
     _id_counter: int
-    _objects: dict[str, Dataset | Dataservice | Proxy]
+    _objects: dict[str, Proxy]
 
     def __init__(self, responses: RequestsMock, config: Config):
         self.responses = responses
@@ -54,10 +58,10 @@ class DatagouvMock:
             title=f"Dataservice {id}",
             organization=organization,
         )
-        self._objects[dataservice.id] = dataservice
+        self._objects[dataservice.id] = Proxy(dataservice)
         if organization:
             proxy = self._objects[organization.id]
-            assert isinstance(proxy, Proxy)
+            assert isinstance(proxy, ListProxy)
             proxy.children.append(dataservice)
         return dataservice
 
@@ -72,10 +76,10 @@ class DatagouvMock:
             title=f"Dataset {id}",
             organization=organization,
         )
-        self._objects[dataset.id] = dataset
+        self._objects[dataset.id] = Proxy(dataset)
         if organization:
             proxy = self._objects[organization.id]
-            assert isinstance(proxy, Proxy)
+            assert isinstance(proxy, ListProxy)
             proxy.children.append(dataset)
         return dataset
 
@@ -84,7 +88,7 @@ class DatagouvMock:
         org = Organization(
             id=f"organization-{id}", slug=f"organization-{id}", name=f"Organization {id}"
         )
-        self._objects[org.id] = Proxy(org, [])
+        self._objects[org.id] = ListProxy(org, [])
         return org
 
     def topic(self, organization: Organization | None = None) -> Topic:
@@ -92,9 +96,9 @@ class DatagouvMock:
         topic = Topic(
             id=f"topic-{id}", slug=f"topic-{id}", name=f"Topic {id}", organization=organization
         )
-        # Topic doesn't need a proxy since it stores its own elements, but using one for symmetry,
+        # Topic doesn't need a ListProxy since it stores its own elements, but using one for symmetry,
         # to avoid dealing with another variant in _objects
-        self._objects[topic.id] = Proxy(topic, [])
+        self._objects[topic.id] = ListProxy(topic, [])
         return topic
 
     def universe(self, objects: Iterable[TopicObject] | None = None) -> Topic:
@@ -250,11 +254,8 @@ class DatagouvMock:
         return self._id_counter
 
     def _get_object[T: DatagouvObject](self, id: str, _: type[T]) -> T | None:
-        if object := self._objects.get(id):
-            if isinstance(object, Proxy):
-                return cast(T, object.object)
-            else:
-                return cast(T, object)
+        if proxy := self._objects.get(id):
+            return proxy.object
 
     def _leaf_objects(self, *ids: str) -> Sequence[TopicObject]:
         return list(self._leaf_objects_inner(*ids))
@@ -265,8 +266,8 @@ class DatagouvMock:
 
     def _leaf_objects_inner(self, *ids: str) -> Iterable[TopicObject]:
         for id in ids:
-            if object := self._objects.get(id):
-                if isinstance(object, Proxy):
-                    yield from object.children
+            if proxy := self._objects.get(id):
+                if isinstance(proxy, ListProxy):
+                    yield from proxy.children
                 else:
-                    yield object
+                    yield proxy.object
