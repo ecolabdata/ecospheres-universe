@@ -90,7 +90,7 @@ class DatagouvMock:
         self._register_list_proxy(organization)
         return organization
 
-    def tag(self, organization: Organization | None = None) -> Tag:
+    def tag(self) -> Tag:
         id = self._next_id()
         tag = Tag(id=f"tag-{id}")
         self._register_list_proxy(tag)
@@ -180,7 +180,7 @@ class DatagouvMock:
         _ = self.responses.get(
             url=url,
             json={
-                **self._as_dict(obj, ["id", "name", "slug"]),
+                **self._as_dict(obj, ["id", "name", "slug"], missing={}),
                 "organization": self._as_dict(obj.organization, ["id", "name", "slug"]),
             },
         )
@@ -329,7 +329,7 @@ class DatagouvMock:
             json={
                 "data": [
                     {
-                        **self._as_dict(bouquet, ["id", "name", "slug"]),
+                        **self._as_dict(bouquet, ["id", "name", "slug"], missing={}),
                         "organization": self._as_dict(bouquet.organization, ["id", "name", "slug"]),
                     }
                     for bouquet in bouquets
@@ -387,9 +387,11 @@ class DatagouvMock:
                     yield proxy.object
 
     @staticmethod
-    def _as_dict(object: DatagouvObject | None, fields: Iterable[str] | None = None) -> JSONObject:
+    def _as_dict[T: JSONObject | None](
+        object: DatagouvObject | None, fields: Iterable[str] | None = None, missing: T = None
+    ) -> JSONObject | T:
         if not object:
-            return {}
+            return missing
         d = asdict(object)
         if fields:
             return {k: v for k, v in d.items() if k in fields}
