@@ -75,6 +75,21 @@ def test_remove_everything(config: Config, datagouv: DatagouvMock, grist: GristM
     assert_outputs(datagouv, grist_universe)
 
 
+def test_duplicate_element(config: Config, datagouv: DatagouvMock, grist: GristMock):
+    organizations = [datagouv.organization() for _ in range(2)]
+    datasets = [datagouv.dataset(organization=org) for org in organizations[:2]]
+
+    existing_universe = [datasets[0], datasets[1], datasets[0]]  # duplicate datasets[0]
+    grist_universe = [grist.entry(org) for org in organizations]
+
+    grist.mock(grist_universe)
+    datagouv.mock(existing_universe, grist_universe)
+
+    feed(config)
+
+    assert_outputs(datagouv, grist_universe)
+
+
 def test_bouquets_orgs(config: Config, datagouv: DatagouvMock, grist: GristMock):
     existing_universe = []
     grist_universe = []

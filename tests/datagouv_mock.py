@@ -108,9 +108,9 @@ class DatagouvMock:
         objects = self._leaf_objects(*(entry.identifier for entry in grist_universe))
         return self.universe(objects)
 
-    def mock(
+    def mock[T: TopicObject](
         self,
-        existing_universe: list[TopicObject],
+        existing_universe: list[T],
         grist_universe: list[GristEntry],
         bouquets: Iterable[Topic] | None = None,
     ) -> None:
