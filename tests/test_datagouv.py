@@ -23,19 +23,19 @@ TOPIC_OBJECTS = (
 
 
 class TestDatagouvObject:
-    def test_object_name(self):
+    def test_model_name(self):
         for clazz in DATAGOUV_OBJECTS:
-            assert clazz.object_name() == clazz.__name__
+            assert clazz.model_name() == clazz.__name__
 
     def test_namespace(self):
         for clazz in DATAGOUV_OBJECTS:
-            assert clazz.namespace() == clazz.object_name().lower() + "s"
+            assert clazz.namespace() == clazz.model_name().lower() + "s"
 
     def test_class_from_name(self):
         for clazz in DATAGOUV_OBJECTS:
-            assert DatagouvObject.class_from_name(clazz.object_name()) == clazz
-            assert DatagouvObject.class_from_name(clazz.object_name().lower()) == clazz
-            assert DatagouvObject.class_from_name(clazz.object_name().upper()) == clazz
+            assert DatagouvObject.class_from_name(clazz.model_name()) == clazz
+            assert DatagouvObject.class_from_name(clazz.model_name().lower()) == clazz
+            assert DatagouvObject.class_from_name(clazz.model_name().upper()) == clazz
 
         # class doesn't exist
         with pytest.raises(TypeError):

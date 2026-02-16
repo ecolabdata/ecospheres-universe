@@ -31,7 +31,7 @@ class GristMock:
                 "records": [
                     {
                         "fields": {
-                            "Type": entry.object_class.object_name(),
+                            "Type": entry.object_class.model_name(),
                             "Identifiant": entry.identifier,
                             "Categorie": entry.category,
                         }

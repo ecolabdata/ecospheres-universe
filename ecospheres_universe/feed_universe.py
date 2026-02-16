@@ -65,13 +65,13 @@ def get_upcoming_universe_perimeter(
 
     for entry in grist_entries:
         verbose_print(
-            f"Fetching {object_class.namespace()} for {entry.object_class.object_name()} {entry.identifier}..."
+            f"Fetching {object_class.namespace()} for {entry.object_class.model_name()} {entry.identifier}..."
         )
         if entry.object_class is Organization:
             org = datagouv.get_organization(entry.identifier)
             if not org:
                 print(
-                    f"Unknown {entry.object_class.object_name} {entry.identifier}", file=sys.stderr
+                    f"Unknown {entry.object_class.model_name()} {entry.identifier}", file=sys.stderr
                 )
                 continue
             ids = datagouv.get_organization_object_ids(org.id, object_class)

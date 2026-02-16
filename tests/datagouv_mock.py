@@ -190,13 +190,13 @@ class DatagouvMock:
                         "X-Fields": f"data{{id,element{{id}},{','.join(INACTIVE_OBJECT_MARKERS)}}},next_page"
                     }
                 ),
-                query_param_matcher({"class": object_class.object_name()}, strict_match=False),
+                query_param_matcher({"class": object_class.model_name()}, strict_match=False),
             ],
             json={
                 "data": [
                     {
                         "id": elem.id,
-                        "element": {"class": object_class.object_name(), "id": elem.object.id},
+                        "element": {"class": object_class.model_name(), "id": elem.object.id},
                     }
                     for elem in elements
                 ],
@@ -216,7 +216,7 @@ class DatagouvMock:
                 ),
                 json_params_matcher(
                     [
-                        {"element": {"class": object_class.object_name(), "id": oid}}
+                        {"element": {"class": object_class.model_name(), "id": oid}}
                         for oid in additions
                     ]
                 ),

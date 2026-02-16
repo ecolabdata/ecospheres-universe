@@ -37,9 +37,9 @@ class DatagouvObject:
         raise TypeError(f"{name} is not a DatagouvObject")
 
     @classmethod
-    def object_name(cls) -> str:
+    def model_name(cls) -> str:
         """
-        Name of the object class as declared in `udata.udata.core.*.models`.
+        Name of the model class as declared in `udata.udata.core.*.models`.
         Override if different from `cls.__name__`.
         """
         return cls.__name__
@@ -49,15 +49,15 @@ class Addressable(Protocol):
     slug: str | None = None
 
     @classmethod
-    def object_name(cls) -> str: ...
+    def model_name(cls) -> str: ...
 
     @classmethod
     def namespace(cls) -> str:
         """
-        API namespace for the object.
-        Override if different from plural lowercased `object_name()`.
+        API namespace for the model.
+        Override if different from plural lowercased `model_name()`.
         """
-        return f"{cls.object_name().lower()}s"
+        return f"{cls.model_name().lower()}s"
 
 
 @total_ordering
@@ -185,7 +185,7 @@ class DatagouvApi:
     def get_topic_elements(
         self, topic_id_or_slug: str, object_class: type[TopicObject]
     ) -> Sequence[TopicElement]:
-        url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/elements/?class={object_class.object_name()}&page_size=1000"
+        url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/elements/?class={object_class.model_name()}&page_size=1000"
         objs = self._get_objects(url=url, fields=["id", "element{id}"])
         return [TopicElement(id=o["id"], object=object_class(o["element"]["id"])) for o in objs]
 
@@ -201,7 +201,7 @@ class DatagouvApi:
         headers = {"Content-Type": "application/json", "X-API-KEY": self.token}
         batches = batched(object_ids, batch_size) if batch_size else [object_ids]
         for batch in batches:
-            data = [{"element": {"class": object_class.object_name(), "id": id}} for id in batch]
+            data = [{"element": {"class": object_class.model_name(), "id": id}} for id in batch]
             if not self.dry_run:
                 session.post(url, json=data, headers=headers).raise_for_status()
 
