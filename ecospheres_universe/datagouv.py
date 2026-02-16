@@ -87,14 +87,14 @@ class AddressableOwned(Addressable, Owned, Protocol):
 
 
 @dataclass(frozen=True)
-class Dataset(DatagouvObject, Addressable, Owned):
+class Dataset(DatagouvObject, AddressableOwned):
     slug: str | None = None
     title: str | None = None
     organization: Organization | None = None
 
 
 @dataclass(frozen=True)
-class Dataservice(DatagouvObject, Addressable, Owned):
+class Dataservice(DatagouvObject, AddressableOwned):
     slug: str | None = None
     title: str | None = None
     organization: Organization | None = None
@@ -110,7 +110,7 @@ class TopicElement[T: TopicObject]:
 
 
 @dataclass(frozen=True)
-class Topic(DatagouvObject, Addressable, Owned):
+class Topic(DatagouvObject, AddressableOwned):
     slug: str | None = None
     name: str | None = None
     organization: Organization | None = None
