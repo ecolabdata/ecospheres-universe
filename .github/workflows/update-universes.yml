@@ -75,10 +75,10 @@ jobs:
           git pull --rebase origin ${{ github.ref_name }}
           git push
           # -- end remove --
-          cd ${{ env.WORKTREE }}
+          pushd ${{ env.WORKTREE }}
           git add .
           git commit --no-verify -m "workflow: update daily run for ${{ matrix.universe }}"
           git pull --rebase origin ${{ env.ARTIFACTS_BRANCH }}
           git push
-          cd -
+          popd
           git worktree remove ${{ env.WORKTREE }}
