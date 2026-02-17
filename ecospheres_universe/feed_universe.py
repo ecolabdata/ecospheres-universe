@@ -113,6 +113,9 @@ def feed_universe(
 
     conf = Config.from_files(universe, *extra_configs)
 
+    conf.datagouv.token = os.getenv("DATAGOUV_API_KEY", conf.datagouv.token)
+    conf.grist.token = os.getenv("GRIST_API_KEY", conf.grist.token)
+
     feed(
         conf=conf,
         keep_empty=keep_empty,
@@ -135,7 +138,7 @@ def feed(
 
     datagouv = DatagouvApi(
         base_url=conf.datagouv.url,
-        token=os.getenv("DATAGOUV_API_KEY", conf.datagouv.token),
+        token=conf.datagouv.token,
         fail_on_errors=fail_on_errors,
         dry_run=dry_run,
     )
@@ -143,7 +146,7 @@ def feed(
     grist = GristApi(
         base_url=conf.grist.url,
         table=conf.grist.table,
-        token=os.getenv("GRIST_API_KEY", conf.grist.token),
+        token=conf.grist.token,
     )
 
     print(f"Starting at {datetime.datetime.now():%c}.")
