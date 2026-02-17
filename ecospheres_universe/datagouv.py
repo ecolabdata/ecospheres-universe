@@ -182,11 +182,10 @@ class DatagouvApi:
     def get_organization_object_ids(
         self, org_id: str, object_class: type[AddressableOwned]
     ) -> Sequence[str]:
-        url = f"{self.base_url}/api/2/{object_class.namespace()}/search/?organization={org_id}&page_size=1000"
+        url = f"{self.base_url}/api/2/{object_class.namespace()}/search/?organization={org_id}"
         objs = self._get_objects(url=url)
         return uniquify(o["id"] for o in objs)
 
-    # TODO: @elapsed_and_count whenever decorator typing works for bounded generics
     def get_tag_objects[T: AddressableTagged](
         self, tag_id: str, object_class: type[T]
     ) -> Sequence[T]:
@@ -210,15 +209,14 @@ class DatagouvApi:
     def get_topic_elements(
         self, topic_id_or_slug: str, object_class: type[TopicObject]
     ) -> Sequence[TopicElement]:
-        url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/elements/?class={object_class.model_name()}&page_size=1000"
+        url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/elements/?class={object_class.model_name()}"
         objs = self._get_objects(url=url, fields=["id", "element{id}"])
         return [TopicElement(id=o["id"], object=object_class(o["element"]["id"])) for o in objs]
 
-    # TODO: @elapsed_and_count whenever decorator typing works for bounded generics
     def get_topic_objects[T: TopicObject](
         self, topic_id: str, object_class: type[T]
     ) -> Sequence[T]:
-        url = f"{self.base_url}/api/2/{object_class.namespace()}/?topic={topic_id}&page_size=1000"
+        url = f"{self.base_url}/api/2/{object_class.namespace()}/?topic={topic_id}"
         objs = self._get_objects(url=url, fields=["id", "organization{id,name,slug}"])
         return [dacite.from_dict(object_class, o) for o in objs]
 

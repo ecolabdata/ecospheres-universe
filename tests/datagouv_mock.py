@@ -133,14 +133,17 @@ class DatagouvMock:
             upcoming_elements = upcoming.elements_of(object_class)
             existing_elements = existing.elements_of(object_class)
 
+            # datagouv.get_upcoming_universe_perimeter()
             for entry in grist_universe:
                 self.mock_get_upcoming_universe_perimeter(entry, object_class)
 
+            # datagouv.get_topic_elements()
             self.mock_get_topic_elements(existing_elements, object_class)
 
             existing_object_ids = {elem.object.id for elem in existing_elements}
             upcoming_object_ids = {elem.object.id for elem in upcoming_elements}
 
+            # datagouv.put_topic_elements()
             if additions := sorted(
                 {
                     elem.object.id
@@ -150,11 +153,13 @@ class DatagouvMock:
             ):
                 self.mock_put_topic_elements(additions, object_class)
 
+            # datagouv.delete_topic_elements()
             if removals := sorted(
                 {elem.id for elem in existing_elements if elem.object.id not in upcoming_object_ids}
             ):
                 self.mock_delete_topic_elements(removals)
 
+        # datagouv.get_bouquets()
         self.mock_get_bouquets(bouquets or [])
 
     def mock_get_upcoming_universe_perimeter(
@@ -359,7 +364,6 @@ class DatagouvMock:
             assert isinstance(proxy, ListProxy)
             proxy.children.append(object)
         for topic in topics or []:
-            # FIXME: do we want to also add object to topic.elements?
             proxy = self._objects[topic.id]
             assert isinstance(proxy, ListProxy)
             proxy.children.append(object)

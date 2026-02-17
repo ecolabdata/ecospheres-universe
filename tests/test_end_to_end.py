@@ -22,7 +22,7 @@ def test_all_at_once(config: Config, datagouv: DatagouvMock, grist: GristMock):
         datagouv.dataset(organization=organizations[0], topics=topics[0:1]),  # through topics[1]
         datagouv.dataset(
             organization=organizations[4], tags=[tags[0]], topics=topics[1:2]
-        ),  # trough tags[0]+topics[1]
+        ),  # through tags[0]+topics[1]
         datagouv.dataset(organization=organizations[5], topics=[topics[2]]),  # no match
     ]
     dataservices = [
