@@ -4,14 +4,20 @@ import os
 import sys
 import time
 
-from dataclasses import asdict, dataclass
+from collections.abc import Iterable, Sequence
+from dataclasses import dataclass
 from pathlib import Path
 from shutil import copyfile
 
 from minicli import cli, run
 
 from ecospheres_universe.config import Config
-from ecospheres_universe.datagouv import DatagouvApi, ElementClass, ObjectType, Organization
+from ecospheres_universe.datagouv import (
+    DatagouvApi,
+    Organization,
+    Topic,
+    TopicObject,
+)
 from ecospheres_universe.grist import GristApi, GristEntry
 from ecospheres_universe.util import (
     uniquify,
@@ -23,46 +29,62 @@ ADDITIONS_BATCH_SIZE = 1000
 REMOVALS_THRESHOLD = 1800
 
 
+# LATER: drop along with GristEntry.category
 @dataclass(frozen=True)
-class UniverseOrg(Organization):
-    type: str | None = None  # TODO: rename to category !! impacts dashboard-backend
+class CategorizedOrganization(Organization):
+    category: str | None = None
+    __eq__ = Organization.__eq__
+    __hash__ = Organization.__hash__
 
 
-def write_organizations_file(filepath: Path, orgs: list[UniverseOrg]):
+def write_organizations_file(filepath: Path, organizations: list[Organization]):
     """Write organizations list to a JSON file in dist/"""
-    print(f"Generating output file {filepath} with {len(orgs)} entries...")
+    print(f"Generating output file {filepath} with {len(organizations)} entries...")
+    orgs = [
+        {
+            "id": org.id,
+            "name": org.name,
+            "slug": org.slug,
+            "type": org.category if isinstance(org, CategorizedOrganization) else None,
+        }
+        for org in organizations
+    ]
     with filepath.open("w") as f:
-        json.dump([asdict(o) for o in orgs], f, indent=2, ensure_ascii=False)
+        json.dump(orgs, f, indent=2, ensure_ascii=False)
 
 
 def get_upcoming_universe_perimeter(
     datagouv: DatagouvApi,
-    grist_entries: list[GristEntry],
-    element_class: ElementClass,
+    grist_entries: Iterable[GristEntry],
+    object_class: type[TopicObject],
     keep_empty: bool = False,
-) -> tuple[list[str], list[UniverseOrg]]:
-    object_ids = set[str]()
-    orgs = set[UniverseOrg]()
-
-    def _update_perimeter(ids: list[str], org: Organization | None):
-        object_ids.update(ids)
-        if org and (keep_empty or ids):
-            orgs.add(UniverseOrg(id=org.id, name=org.name, slug=org.slug, type=entry.category))
+) -> tuple[Sequence[str], Sequence[Organization]]:
+    universe_ids = set[str]()
+    universe_orgs = set[Organization]()
 
     for entry in grist_entries:
-        match entry.type:
-            case ObjectType.ORGANIZATION:
-                org = datagouv.get_organization(entry.identifier)
-                if not org:
-                    print(f"Unknown organization {entry.identifier}", file=sys.stderr)
-                    continue
-                verbose_print(f"Fetching {element_class.value} for organization {org.id}...")
-                ids = datagouv.get_organization_object_ids(org.id, element_class)
-                _update_perimeter(ids, org)
-            case _:
+        verbose_print(
+            f"Fetching {object_class.namespace()} for {entry.object_class.model_name()} {entry.identifier}..."
+        )
+        if entry.object_class is Organization:
+            org = datagouv.get_organization(entry.identifier)
+            if not org:
+                print(
+                    f"Unknown {entry.object_class.model_name()} {entry.identifier}", file=sys.stderr
+                )
                 continue
+            ids = datagouv.get_organization_object_ids(org.id, object_class)
+            universe_ids |= set(ids)
+            if ids or keep_empty:
+                universe_orgs.add(
+                    CategorizedOrganization(
+                        id=org.id, slug=org.slug, name=org.name, category=entry.category
+                    )
+                )
+        else:
+            continue
 
-    return list(object_ids), list(orgs)
+    return list(universe_ids), list(universe_orgs)
 
 
 @cli
@@ -140,20 +162,20 @@ def feed(
             print("Removing ALL elements from topic...")
             datagouv.delete_all_topic_elements(conf.topic)
 
-        for element_class in ElementClass:
-            verbose_print(f"Fetching upcoming {element_class.value}...")
+        for object_class in Topic.object_classes():
+            verbose_print(f"Fetching upcoming {object_class.namespace()}...")
             upcoming_object_ids, upcoming_orgs = get_upcoming_universe_perimeter(
-                datagouv, grist_entries, element_class, keep_empty
+                datagouv, grist_entries, object_class, keep_empty
             )
             print(
-                f"Found {len(upcoming_object_ids)} {element_class.value} matching the upcoming universe."
+                f"Found {len(upcoming_object_ids)} {object_class.namespace()} matching the upcoming universe."
             )
 
-            verbose_print(f"Fetching existing {element_class.value}...")
-            existing_elements = datagouv.get_topic_elements(conf.topic, element_class)
-            existing_object_ids = uniquify(e.object_id for e in existing_elements)
+            verbose_print(f"Fetching existing {object_class.namespace()}...")
+            existing_elements = datagouv.get_topic_elements(conf.topic, object_class)
+            existing_object_ids = uniquify(e.object.id for e in existing_elements)
             print(
-                f"Found {len(existing_object_ids)} {element_class.value} currently in the universe."
+                f"Found {len(existing_object_ids)} {object_class.namespace()} currently in the universe."
             )
 
             verbose_print("Computing topic updates...")
@@ -163,22 +185,22 @@ def feed(
                 raise Exception(f"Too many removals ({n} > {REMOVALS_THRESHOLD}), aborting.")
 
             print("Updating topic:")
-            print(f"- Adding {len(additions)} {element_class.value}...")
-            datagouv.put_topic_elements(conf.topic, element_class, additions, ADDITIONS_BATCH_SIZE)
+            print(f"- Adding {len(additions)} {object_class.namespace()}...")
+            datagouv.put_topic_elements(conf.topic, object_class, additions, ADDITIONS_BATCH_SIZE)
 
-            print(f"- Deleting {len(removals)} {element_class.value}...")
-            element_ids = [e.id for e in existing_elements if e.object_id in removals]
+            print(f"- Deleting {len(removals)} {object_class.namespace()}...")
+            element_ids = [e.id for e in existing_elements if e.object.id in removals]
             datagouv.delete_topic_elements(conf.topic, element_ids)
 
             write_organizations_file(
-                conf.output_dir / f"organizations-{element_class.value}.json",
+                conf.output_dir / f"organizations-{object_class.namespace()}.json",
                 sorted(upcoming_orgs),
             )
             # FIXME: remove when front uses the new file path
             # retrocompatibility
             copyfile(
-                conf.output_dir / f"organizations-{element_class.value}.json",
-                f"dist/organizations-{element_class.value}-{env}.json",
+                conf.output_dir / f"organizations-{object_class.namespace()}.json",
+                f"dist/organizations-{object_class.namespace()}-{env}.json",
             )
 
         # TODO: custom ecologie => make that an option?
@@ -186,11 +208,7 @@ def feed(
         verbose_print("Fetching additional organizations from bouquets...")
         bouquets = datagouv.get_bouquets(conf.tag)
         print(f"Found {len(bouquets)} bouquets with the universe tag.")
-        bouquet_orgs = uniquify(
-            UniverseOrg(id=o.id, name=o.name, slug=o.slug, type=None)
-            for b in bouquets
-            if (o := b.organization)
-        )
+        bouquet_orgs = uniquify(org for b in bouquets if (org := b.organization))
         write_organizations_file(
             conf.output_dir / "organizations-bouquets.json",
             sorted(bouquet_orgs),

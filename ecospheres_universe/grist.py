@@ -1,15 +1,17 @@
 import requests
 
-from typing import NamedTuple
+from collections.abc import Sequence
+from dataclasses import dataclass
 
-from ecospheres_universe.datagouv import ObjectType
+from ecospheres_universe.datagouv import DatagouvObject
 from ecospheres_universe.util import uniquify
 
 
-class GristEntry(NamedTuple):
-    type: ObjectType
+@dataclass(frozen=True)
+class GristEntry[T: DatagouvObject]:
+    object_class: type[T]
     identifier: str
-    category: str | None  # LATER: drop (backcompat ecologie for now)
+    category: str | None = None  # LATER: drop (backcompat ecologie for now)
 
 
 class GristApi:
@@ -18,7 +20,7 @@ class GristApi:
         self.table = table
         self.token = token
 
-    def get_entries(self) -> list[GristEntry]:
+    def get_entries(self) -> Sequence[GristEntry]:
         r = requests.get(
             f"{self.base_url}/tables/{self.table}/records",
             headers={"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"},
@@ -27,7 +29,7 @@ class GristApi:
         r.raise_for_status()
         return uniquify(
             GristEntry(
-                type=ObjectType(rec["fields"]["Type"]),
+                object_class=DatagouvObject.class_from_name(rec["fields"]["Type"]),
                 identifier=rec["fields"]["Identifiant"],
                 category=rec["fields"].get("Categorie"),
             )
