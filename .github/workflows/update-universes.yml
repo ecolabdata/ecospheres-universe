@@ -25,10 +25,14 @@ jobs:
     environment: ${{ matrix.universe }}
     env:
       CONFIG_FILE: configs/${{ matrix.universe }}.yaml
+      ARTIFACTS_BRANCH: artifacts
+      # FIXME: remove when front uses the new artifacts branch
+      # -- start remove --
       DIST_FILES: dist/${{ matrix.universe }}/organizations-*.json
       # TODO: remove once front has moved to new dist files
       DIST_FILES_COMPAT: dist/organizations-*-{demo,prod}.json
       LOG_FILE: logs/${{ matrix.universe }}.log
+      # -- end remove --
 
     steps:
       - uses: actions/checkout@v4
@@ -41,6 +45,11 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
+      - name: Ensure expected dirs exists
+        run: |
+          mkdir -p dist/${{ matrix.universe }}
+          mkdir -p logs
+
       - name: Update ${{ matrix.universe }} universe
         env:
           DATAGOUV_API_KEY: ${{ secrets.DATAGOUV_API_KEY  }}
@@ -51,17 +60,25 @@ jobs:
           exit ${PIPESTATUS[0]}
 
       - name: Commit artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WORKTREE: ${{ runner.temp }}/worktree
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add ${{ env.LOG_FILE }}
-          git commit -m "workflow: update daily run log for ${{ matrix.universe }}"
-          git add ${{ env.DIST_FILES }} ${{ env.DIST_FILES_COMPAT }}
-          git diff-index --cached --quiet HEAD || git commit -m "workflow: update organizations JSONs for ${{ matrix.universe }}"
-
-      - name: Push changes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
+          git worktree add ${{ env.WORKTREE }} ${{ env.ARTIFACTS_BRANCH }}
+          cp -a dist logs ${{ env.WORKTREE }}
+          # FIXME: remove when front uses the new artifacts branch
+          # -- start remove --
+          git add ${{ env.DIST_FILES }} ${{ env.DIST_FILES_COMPAT }} ${{ env.LOG_FILE }}
+          git commit --no-verify -m "workflow: update daily run for ${{ matrix.universe }}"
           git pull --rebase origin ${{ github.ref_name }}
           git push
+          # -- end remove --
+          cd ${{ env.WORKTREE }}
+          git add .
+          git commit --no-verify -m "workflow: update daily run for ${{ matrix.universe }}"
+          git pull --rebase origin ${{ env.ARTIFACTS_BRANCH }}
+          git push
+          cd -
+          git worktree remove ${{ env.WORKTREE }}
