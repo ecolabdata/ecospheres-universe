@@ -13,12 +13,13 @@ from ecospheres_universe.datagouv import (
     Dataset,
     Organization,
     Owned,
+    Tag,
     Topic,
     TopicElement,
     TopicObject,
 )
 from ecospheres_universe.grist import GristEntry
-from ecospheres_universe.util import uniquify
+from ecospheres_universe.util import JSONObject, uniquify
 
 
 @dataclass(frozen=True)
@@ -35,6 +36,8 @@ class DatagouvMock:
     responses: RequestsMock
     config: Config
     _id_counter: int
+    # _objects is the register of all mocked objects, keyed by object id.
+    # proxies keep track of the actual object, and children of those objects when applicable.
     _objects: dict[str, Proxy]
 
     def __init__(self, responses: RequestsMock, config: Config):
@@ -50,6 +53,8 @@ class DatagouvMock:
     def dataservice(
         self,
         organization: Organization | None = None,
+        tags: list[Tag] | None = None,
+        topics: list[Topic] | None = None,
     ) -> Dataservice:
         id = self._next_id()
         dataservice = Dataservice(
@@ -57,17 +62,16 @@ class DatagouvMock:
             slug=f"dataservice-{id}",
             title=f"Dataservice {id}",
             organization=organization,
+            tags=[tag.id for tag in tags or []],
         )
-        self._objects[dataservice.id] = Proxy(dataservice)
-        if organization:
-            proxy = self._objects[organization.id]
-            assert isinstance(proxy, ListProxy)
-            proxy.children.append(dataservice)
+        self._register_proxy(dataservice, organization, tags, topics)
         return dataservice
 
     def dataset(
         self,
         organization: Organization | None = None,
+        tags: list[Tag] | None = None,
+        topics: list[Topic] | None = None,
     ) -> Dataset:
         id = self._next_id()
         dataset = Dataset(
@@ -75,21 +79,24 @@ class DatagouvMock:
             slug=f"dataset-{id}",
             title=f"Dataset {id}",
             organization=organization,
+            tags=[tag.id for tag in tags or []],
         )
-        self._objects[dataset.id] = Proxy(dataset)
-        if organization:
-            proxy = self._objects[organization.id]
-            assert isinstance(proxy, ListProxy)
-            proxy.children.append(dataset)
+        self._register_proxy(dataset, organization, tags, topics)
         return dataset
 
     def organization(self) -> Organization:
         id = self._next_id()
-        org = Organization(
+        organization = Organization(
             id=f"organization-{id}", slug=f"organization-{id}", name=f"Organization {id}"
         )
-        self._objects[org.id] = ListProxy(org, [])
-        return org
+        self._register_list_proxy(organization)
+        return organization
+
+    def tag(self) -> Tag:
+        id = self._next_id()
+        tag = Tag(id=f"tag-{id}")
+        self._register_list_proxy(tag)
+        return tag
 
     def topic(self, organization: Organization | None = None) -> Topic:
         id = self._next_id()
@@ -98,7 +105,7 @@ class DatagouvMock:
         )
         # Topic doesn't need a ListProxy since it stores its own elements, but using one for symmetry,
         # to avoid dealing with another variant in _objects
-        self._objects[topic.id] = ListProxy(topic, [])
+        self._register_list_proxy(topic)
         return topic
 
     def universe(self, objects: Iterable[TopicObject] | None = None) -> Topic:
@@ -128,34 +135,62 @@ class DatagouvMock:
             upcoming_elements = upcoming.elements_of(object_class)
             existing_elements = existing.elements_of(object_class)
 
+            # datagouv.get_upcoming_universe_perimeter()
             for entry in grist_universe:
-                # datagouv.get_upcoming_universe_perimeter()
-                if entry.object_class is Organization:
-                    self.mock_get_upcoming_universe_perimeter_organization(
-                        entry.identifier, object_class
-                    )
+                self.mock_get_upcoming_universe_perimeter(entry, object_class)
 
             # datagouv.get_topic_elements()
             self.mock_get_topic_elements(existing_elements, object_class)
 
-            existing_object_ids = {e.object.id for e in existing_elements}
-            upcoming_object_ids = {e.object.id for e in upcoming_elements}
+            existing_object_ids = {elem.object.id for elem in existing_elements}
+            upcoming_object_ids = {elem.object.id for elem in upcoming_elements}
 
             # datagouv.put_topic_elements()
-            additions = sorted(
-                {e.object.id for e in upcoming_elements if e.object.id not in existing_object_ids}
-            )
-            if additions:
+            if additions := sorted(
+                {
+                    elem.object.id
+                    for elem in upcoming_elements
+                    if elem.object.id not in existing_object_ids
+                }
+            ):
                 self.mock_put_topic_elements(additions, object_class)
 
             # datagouv.delete_topic_elements()
-            removals = sorted(
-                {e.id for e in existing_elements if e.object.id not in upcoming_object_ids}
-            )
-            self.mock_delete_topic_elements(removals)
+            if removals := sorted(
+                {elem.id for elem in existing_elements if elem.object.id not in upcoming_object_ids}
+            ):
+                self.mock_delete_topic_elements(removals)
 
         # datagouv.get_bouquets()
         self.mock_get_bouquets(bouquets or [])
+
+    def mock_get_upcoming_universe_perimeter(
+        self, entry: GristEntry, object_class: type[TopicObject]
+    ) -> None:
+        if entry.object_class in (Dataset, Dataservice) and entry.object_class == object_class:
+            self.mock_get_upcoming_universe_perimeter_object(entry.identifier, object_class)
+        elif entry.object_class is Organization:
+            self.mock_get_upcoming_universe_perimeter_organization(entry.identifier, object_class)
+        elif entry.object_class is Tag:
+            self.mock_get_upcoming_universe_perimeter_tag(entry.identifier, object_class)
+        elif entry.object_class is Topic:
+            self.mock_get_upcoming_universe_perimeter_topic(entry.identifier, object_class)
+
+    def mock_get_upcoming_universe_perimeter_object(
+        self, id: str, object_class: type[TopicObject]
+    ) -> None:
+        url = f"{self.config.datagouv.url}/api/1/{object_class.namespace()}/{id}/"
+        obj = self._get_object(id, object_class)
+        if not obj:
+            _ = self.responses.get(url=url, status=404)
+            return
+        _ = self.responses.get(
+            url=url,
+            json={
+                **self._as_dict(obj, ["id", "name", "slug"], missing={}),
+                "organization": self._as_dict(obj.organization, ["id", "name", "slug"]),
+            },
+        )
 
     def mock_get_upcoming_universe_perimeter_organization(
         self, id: str, object_class: type[TopicObject]
@@ -166,7 +201,7 @@ class DatagouvMock:
             _ = self.responses.get(url=url, status=404)
             return
 
-        _ = self.responses.get(url=url, json={"id": org.id, "slug": org.slug, "name": org.name})
+        _ = self.responses.get(url=url, json=self._as_dict(org, ["id", "name", "slug"]))
 
         objects = self._leaf_objects_of(org.id, object_class=object_class)
         _ = self.responses.get(
@@ -179,6 +214,58 @@ class DatagouvMock:
             ],
             json={
                 "data": [{"id": obj.id} for obj in objects],
+                "next_page": None,
+            },
+        )
+
+    def mock_get_upcoming_universe_perimeter_tag(
+        self, id: str, object_class: type[TopicObject]
+    ) -> None:
+        objects = self._leaf_objects_of(id, object_class=object_class)
+        _ = self.responses.get(
+            url=f"{self.config.datagouv.url}/api/1/{object_class.namespace()}/",
+            match=[
+                header_matcher(
+                    {
+                        "X-Fields": f"data{{id,organization{{id,name,slug}},{','.join(INACTIVE_OBJECT_MARKERS)}}},next_page"
+                    }
+                ),
+                query_param_matcher({"tag": id}, strict_match=False),
+            ],
+            json={
+                "data": [
+                    {
+                        "id": obj.id,
+                        "organization": self._as_dict(obj.organization, ["id", "name", "slug"]),
+                    }
+                    for obj in objects
+                ],
+                "next_page": None,
+            },
+        )
+
+    def mock_get_upcoming_universe_perimeter_topic(
+        self, id: str, object_class: type[TopicObject]
+    ) -> None:
+        objects = self._leaf_objects_of(id, object_class=object_class)
+        _ = self.responses.get(
+            url=f"{self.config.datagouv.url}/api/2/{object_class.namespace()}/",
+            match=[
+                header_matcher(
+                    {
+                        "X-Fields": f"data{{id,organization{{id,name,slug}},{','.join(INACTIVE_OBJECT_MARKERS)}}},next_page"
+                    }
+                ),
+                query_param_matcher({"topic": id}, strict_match=False),
+            ],
+            json={
+                "data": [
+                    {
+                        "id": obj.id,
+                        "organization": self._as_dict(obj.organization, ["id", "name", "slug"]),
+                    }
+                    for obj in objects
+                ],
                 "next_page": None,
             },
         )
@@ -241,17 +328,54 @@ class DatagouvMock:
                 header_matcher(
                     {
                         "X-API-KEY": self.config.datagouv.token,
-                        "X-Fields": f"data{{id,name,organization{{id,name,slug}},slug,{','.join(INACTIVE_OBJECT_MARKERS)}}},next_page",
+                        "X-Fields": f"data{{id,name,slug,organization{{id,name,slug}},{','.join(INACTIVE_OBJECT_MARKERS)}}},next_page",
                     }
                 ),
                 query_param_matcher({"tag": self.config.tag, "include_private": "yes"}),
             ],
-            json={"data": [asdict(b) for b in bouquets], "next_page": None},
+            json={
+                "data": [
+                    {
+                        **self._as_dict(bouquet, ["id", "name", "slug"], missing={}),
+                        "organization": self._as_dict(bouquet.organization, ["id", "name", "slug"]),
+                    }
+                    for bouquet in bouquets
+                ],
+                "next_page": None,
+            },
         )
 
     def _next_id(self) -> int:
         self._id_counter += 1
         return self._id_counter
+
+    def _register_proxy(
+        self,
+        object: TopicObject,
+        organization: Organization | None = None,
+        tags: list[Tag] | None = None,
+        topics: list[Topic] | None = None,
+    ) -> None:
+        """
+        Add object to the _objects register, and register it as child of its declared organization,
+        tags and topics.
+        """
+        self._objects[object.id] = Proxy(object)
+        if organization:
+            proxy = self._objects[organization.id]
+            assert isinstance(proxy, ListProxy)
+            proxy.children.append(object)
+        for tag in tags or []:
+            proxy = self._objects[tag.id]
+            assert isinstance(proxy, ListProxy)
+            proxy.children.append(object)
+        for topic in topics or []:
+            proxy = self._objects[topic.id]
+            assert isinstance(proxy, ListProxy)
+            proxy.children.append(object)
+
+    def _register_list_proxy(self, object: DatagouvObject) -> None:
+        self._objects[object.id] = ListProxy(object, [])
 
     def _get_object[T: DatagouvObject](self, id: str, _: type[T]) -> T | None:
         if proxy := self._objects.get(id):
@@ -271,3 +395,15 @@ class DatagouvMock:
                     yield from proxy.children
                 else:
                     yield proxy.object
+
+    @staticmethod
+    def _as_dict[T: JSONObject | None](
+        object: DatagouvObject | None, fields: Iterable[str] | None = None, missing: T = None
+    ) -> JSONObject | T:
+        if not object:
+            return missing
+        d = asdict(object)
+        if fields:
+            return {k: v for k, v in d.items() if k in fields}
+        else:
+            return d

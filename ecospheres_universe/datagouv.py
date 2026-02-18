@@ -8,6 +8,8 @@ from functools import total_ordering
 from itertools import batched
 from typing import get_args, Any, Protocol, TypeAlias
 
+import dacite
+
 from ecospheres_universe.util import (
     JSONObject,
     elapsed,
@@ -87,17 +89,32 @@ class AddressableOwned(Addressable, Owned, Protocol):
 
 
 @dataclass(frozen=True)
-class Dataset(DatagouvObject, AddressableOwned):
-    slug: str | None = None
-    title: str | None = None
-    organization: Organization | None = None
+class Tag(DatagouvObject):
+    pass
+
+
+class Tagged(Protocol):
+    tags: list[str]
+
+
+class AddressableTagged(Addressable, Tagged, Protocol):
+    pass
 
 
 @dataclass(frozen=True)
-class Dataservice(DatagouvObject, AddressableOwned):
+class Dataset(DatagouvObject, AddressableOwned, AddressableTagged):
     slug: str | None = None
     title: str | None = None
     organization: Organization | None = None
+    tags: list[str] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class Dataservice(DatagouvObject, AddressableOwned, AddressableTagged):
+    slug: str | None = None
+    title: str | None = None
+    organization: Organization | None = None
+    tags: list[str] = field(default_factory=list)
 
 
 TopicObject: TypeAlias = Dataset | Dataservice
@@ -151,21 +168,30 @@ class DatagouvApi:
         self.dry_run = dry_run
         print(f"API for {self.base_url} ready.")
 
-    def get_organization(self, org_id_or_slug: str) -> Organization | None:
-        url = f"{self.base_url}/api/1/organizations/{org_id_or_slug}/"
+    def get_object[T: Addressable](self, id_or_slug: str, object_class: type[T]) -> T | None:
+        url = f"{self.base_url}/api/1/{object_class.namespace()}/{id_or_slug}/"
         r = session.get(url)
         if not r.ok:
             return None
-        data = r.json()
-        return Organization(id=data["id"], name=data["name"], slug=data["slug"])
+        return dacite.from_dict(object_class, r.json())
+
+    def get_organization(self, id_or_slug: str) -> Organization | None:
+        return self.get_object(id_or_slug, Organization)
 
     @elapsed_and_count
     def get_organization_object_ids(
         self, org_id: str, object_class: type[AddressableOwned]
     ) -> Sequence[str]:
-        url = f"{self.base_url}/api/2/{object_class.namespace()}/search/?organization={org_id}&page_size=1000"
+        url = f"{self.base_url}/api/2/{object_class.namespace()}/search/?organization={org_id}"
         objs = self._get_objects(url=url)
         return uniquify(o["id"] for o in objs)
+
+    def get_tagged_objects[T: AddressableTagged](
+        self, tag_id: str, object_class: type[T]
+    ) -> Sequence[T]:
+        url = f"{self.base_url}/api/1/{object_class.namespace()}/?tag={tag_id}"
+        objs = self._get_objects(url=url, fields=["id", "organization{id,name,slug}"])
+        return [dacite.from_dict(object_class, o) for o in objs]
 
     def get_topic_id(self, topic_id_or_slug: str) -> str:
         url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/"
@@ -183,9 +209,16 @@ class DatagouvApi:
     def get_topic_elements(
         self, topic_id_or_slug: str, object_class: type[TopicObject]
     ) -> Sequence[TopicElement]:
-        url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/elements/?class={object_class.model_name()}&page_size=1000"
+        url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/elements/?class={object_class.model_name()}"
         objs = self._get_objects(url=url, fields=["id", "element{id}"])
         return [TopicElement(id=o["id"], object=object_class(o["element"]["id"])) for o in objs]
+
+    def get_topic_objects[T: TopicObject](
+        self, topic_id: str, object_class: type[T]
+    ) -> Sequence[T]:
+        url = f"{self.base_url}/api/2/{object_class.namespace()}/?topic={topic_id}"
+        objs = self._get_objects(url=url, fields=["id", "organization{id,name,slug}"])
+        return [dacite.from_dict(object_class, o) for o in objs]
 
     @elapsed_and_count
     def put_topic_elements(
@@ -232,7 +265,7 @@ class DatagouvApi:
             url = f"{url}&include_private=yes"
             headers["X-API-KEY"] = self.token
         objs = self._get_objects(
-            url=url, headers=headers, fields=["id", "name", "organization{id,name,slug}", "slug"]
+            url=url, headers=headers, fields=["id", "name", "slug", "organization{id,name,slug}"]
         )
         return [
             Topic(

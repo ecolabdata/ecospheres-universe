@@ -14,7 +14,10 @@ from minicli import cli, run
 from ecospheres_universe.config import Config
 from ecospheres_universe.datagouv import (
     DatagouvApi,
+    Dataservice,
+    Dataset,
     Organization,
+    Tag,
     Topic,
     TopicObject,
 )
@@ -66,7 +69,19 @@ def get_upcoming_universe_perimeter(
         verbose_print(
             f"Fetching {object_class.namespace()} for {entry.object_class.model_name()} {entry.identifier}..."
         )
-        if entry.object_class is Organization:
+
+        if entry.object_class in (Dataset, Dataservice) and entry.object_class is object_class:
+            obj = datagouv.get_object(entry.identifier, entry.object_class)
+            if not obj:
+                print(
+                    f"Unknown {entry.object_class.model_name()} {entry.identifier}", file=sys.stderr
+                )
+                continue
+            universe_ids.add(obj.id)
+            if org := obj.organization:
+                universe_orgs.add(org)
+
+        elif entry.object_class is Organization:
             org = datagouv.get_organization(entry.identifier)
             if not org:
                 print(
@@ -81,6 +96,17 @@ def get_upcoming_universe_perimeter(
                         id=org.id, slug=org.slug, name=org.name, category=entry.category
                     )
                 )
+
+        elif entry.object_class is Tag:
+            objs = datagouv.get_tagged_objects(entry.identifier, object_class)
+            universe_ids |= {obj.id for obj in objs}
+            universe_orgs |= {org for obj in objs if (org := obj.organization)}
+
+        elif entry.object_class is Topic:
+            objs = datagouv.get_topic_objects(entry.identifier, object_class)
+            universe_ids |= {obj.id for obj in objs}
+            universe_orgs |= {org for obj in objs if (org := obj.organization)}
+
         else:
             continue
 
