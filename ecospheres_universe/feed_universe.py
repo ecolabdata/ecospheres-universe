@@ -60,7 +60,6 @@ def get_upcoming_universe_perimeter(
     datagouv: DatagouvApi,
     grist_entries: Iterable[GristEntry],
     object_class: type[TopicObject],
-    keep_empty: bool = False,
 ) -> tuple[Sequence[str], Sequence[Organization]]:
     inclusions = dict[str, Organization | None]()
     exclusions = set[str]()
@@ -123,13 +122,10 @@ def get_upcoming_universe_perimeter(
         else:
             continue
 
-    # FIXME: keep keep_empty?
-    if keep_empty:
-        organizations = {org for org in inclusions.values() if org is not None}
-        _ = [inclusions.pop(id, None) for id in exclusions]
-    else:
-        _ = [inclusions.pop(id, None) for id in exclusions]
-        organizations = {org for org in inclusions.values() if org is not None}
+    for id in exclusions:
+        inclusions.pop(id, None)
+
+    organizations = {org for org in inclusions.values() if org is not None}
 
     return list(inclusions.keys()), list(organizations)
 
@@ -138,7 +134,6 @@ def get_upcoming_universe_perimeter(
 def feed_universe(
     universe: Path,
     *extra_configs: Path,
-    keep_empty: bool = False,
     fail_on_errors: bool = False,
     dry_run: bool = False,
     reset: bool = False,
@@ -148,7 +143,6 @@ def feed_universe(
 
     :universe: Universe yaml config file
     :extra_configs: Additional config files (optional overrides)
-    :keep_empty: Keep empty organizations in the list
     :fail_on_errors: Fail the run on http errors
     :dry_run: Perform a trial run without actual feeding
     :reset: Empty topic before refeeding it
@@ -165,7 +159,6 @@ def feed_universe(
 
     feed(
         conf=conf,
-        keep_empty=keep_empty,
         fail_on_errors=fail_on_errors,
         dry_run=dry_run,
         reset=reset,
@@ -174,7 +167,6 @@ def feed_universe(
 
 def feed(
     conf: Config,
-    keep_empty: bool = False,
     fail_on_errors: bool = False,
     dry_run: bool = False,
     reset: bool = False,
@@ -215,7 +207,7 @@ def feed(
         for object_class in Topic.object_classes():
             verbose_print(f"Fetching upcoming {object_class.namespace()}...")
             upcoming_object_ids, upcoming_orgs = get_upcoming_universe_perimeter(
-                datagouv, grist_entries, object_class, keep_empty
+                datagouv, grist_entries, object_class
             )
             print(
                 f"Found {len(upcoming_object_ids)} {object_class.namespace()} matching the upcoming universe."
