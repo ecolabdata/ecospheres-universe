@@ -17,7 +17,12 @@ class GristMock:
     def entry(
         self, object: DatagouvObject, exclude: bool = False, category: str | None = None
     ) -> GristEntry:
-        return GristEntry(object.id, type(object), exclude, category)
+        return GristEntry(
+            identifier=object.id,
+            object_class=type(object),
+            exclude=exclude,
+            category=category,
+        )
 
     def raw_entry(
         self,
@@ -26,7 +31,12 @@ class GristMock:
         exclude: bool = False,
         category: str | None = None,
     ) -> GristEntry:
-        return GristEntry(identifier, object_class, exclude, category)
+        return GristEntry(
+            identifier=identifier,
+            object_class=object_class,
+            exclude=exclude,
+            category=category,
+        )
 
     def mock(self, universe: list[GristEntry]) -> None:
         # grist.get_entries()

@@ -9,11 +9,17 @@ from ecospheres_universe.util import uniquify
 
 
 class GristAction(StrEnum):
+    """
+    Grist Action column values.
+    The main use for this class is to map/validate the grist input before it is converted to a
+    simple flag in GristEntry.exclude.
+    """
+
     INCLURE = auto()
     EXCLURE = auto()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class GristEntry[T: DatagouvObject]:
     identifier: str
     object_class: type[T]
@@ -39,8 +45,9 @@ class GristApi:
 
     @staticmethod
     def _make_entry(record: dict[str, str]) -> GristEntry:
-        identifier = record["Identifiant"]
-        object_class = DatagouvObject.class_from_name(record["Type"])
-        exclude = GristAction(record["Action"]) is GristAction.EXCLURE
-        category = record.get("Categorie")
-        return GristEntry(identifier, object_class, exclude, category)
+        return GristEntry(
+            identifier=record["Identifiant"],
+            object_class=DatagouvObject.class_from_name(record["Type"]),
+            exclude=GristAction(record["Action"]) is GristAction.EXCLURE,
+            category=record.get("Categorie"),
+        )
