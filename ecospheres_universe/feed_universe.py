@@ -98,7 +98,7 @@ def get_upcoming_universe_perimeter(
                 )
 
         elif entry.object_class is Tag:
-            objs = datagouv.get_tag_objects(entry.identifier, object_class)
+            objs = datagouv.get_tagged_objects(entry.identifier, object_class)
             universe_ids |= {obj.id for obj in objs}
             universe_orgs |= {org for obj in objs if (org := obj.organization)}
 

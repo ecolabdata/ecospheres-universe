@@ -186,7 +186,7 @@ class DatagouvApi:
         objs = self._get_objects(url=url)
         return uniquify(o["id"] for o in objs)
 
-    def get_tag_objects[T: AddressableTagged](
+    def get_tagged_objects[T: AddressableTagged](
         self, tag_id: str, object_class: type[T]
     ) -> Sequence[T]:
         url = f"{self.base_url}/api/1/{object_class.namespace()}/?tag={tag_id}"

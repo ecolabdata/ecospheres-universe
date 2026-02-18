@@ -36,6 +36,8 @@ class DatagouvMock:
     responses: RequestsMock
     config: Config
     _id_counter: int
+    # _objects is the register of all mocked objects, keyed by object id.
+    # proxies keep track of the actual object, and children of those objects when applicable.
     _objects: dict[str, Proxy]
 
     def __init__(self, responses: RequestsMock, config: Config):
@@ -354,6 +356,10 @@ class DatagouvMock:
         tags: list[Tag] | None = None,
         topics: list[Topic] | None = None,
     ) -> None:
+        """
+        Add object to the _objects register, and register it as child of its declared organization,
+        tags and topics.
+        """
         self._objects[object.id] = Proxy(object)
         if organization:
             proxy = self._objects[organization.id]
