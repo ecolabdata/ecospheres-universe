@@ -24,39 +24,9 @@
     "type": null
   },
   {
-    "id": "5c812a16634f416583ed1876",
-    "name": "Cerema",
-    "slug": "cerema",
-    "type": null
-  },
-  {
-    "id": "558add63c751df7c4fa453c8",
-    "name": "Direction Départementale des Territoires et de la Mer des Bouches-du-Rhône",
-    "slug": "direction-departementale-des-territoires-et-de-la-mer-des-bouches-du-rhone",
-    "type": null
-  },
-  {
     "id": "67373f9ab57ae6297e2a31e7",
     "name": "Docurba",
     "slug": "docurba",
-    "type": null
-  },
-  {
-    "id": "67884b4da4fca9c97bbef479",
-    "name": "Ecolab",
-    "slug": "ecolab-1",
-    "type": null
-  },
-  {
-    "id": "560d929ac751df40ef756894",
-    "name": "Enedis",
-    "slug": "electricite-reseau-distribution-france",
-    "type": null
-  },
-  {
-    "id": "67190943354b432071592b0c",
-    "name": "Les Greniers d'Abondance",
-    "slug": "les-greniers-dabondance",
     "type": null
   },
   {
@@ -90,21 +60,9 @@
     "type": null
   },
   {
-    "id": "68dfb79bc3329f32f833d31d",
-    "name": "Open Data Surchauffe Urbaine",
-    "slug": "open-data-surchauffe-urbaine",
-    "type": null
-  },
-  {
     "id": "580735be88ee3814295ff490",
     "name": "Rennes Métropole en accès libre",
     "slug": "rennes-metropole-en-acces-libre-1",
-    "type": null
-  },
-  {
-    "id": "66c35108b375912c281edb22",
-    "name": "Réseau des Agences Régionales de l'Énergie et de l'Environnement (RARE)",
-    "slug": "reseau-des-agences-regionales-de-lenergie-et-de-lenvironnement-rare",
     "type": null
   },
   {
