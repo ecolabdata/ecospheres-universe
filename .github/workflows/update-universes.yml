@@ -59,15 +59,22 @@ jobs:
           uv run ecospheres-universe feed-universe ${{ env.CONFIG_FILE }} --fail-on-errors 2>&1 | tee ${{ env.LOG_FILE }}
           exit ${PIPESTATUS[0]}
 
+      - name: Create artifacts worktree
+        id: create-worktree
+        env:
+          ARTIFACTS_WORKTREE: ${{ runner.temp }}/${{ env.ARTIFACTS_BRANCH }}-worktree
+        run: |
+          git fetch origin ${{ env.ARTIFACTS_BRANCH }}
+          git worktree add --track -b ${{ env.ARTIFACTS_BRANCH }} $ARTIFACTS_WORKTREE origin/${{ env.ARTIFACTS_BRANCH }}
+          echo "ARTIFACTS_WORKTREE=${{ env.ARTIFACTS_WORKTREE }}" >> $GITHUB_ENV
+
       - name: Commit artifacts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          WORKTREE: ${{ runner.temp }}/worktree
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git worktree add ${{ env.WORKTREE }} ${{ env.ARTIFACTS_BRANCH }}
-          cp -a dist logs ${{ env.WORKTREE }}
+          cp -a dist logs $ARTIFACTS_WORKTREE
           # FIXME: remove when front uses the new artifacts branch
           # -- start remove --
           git add ${{ env.DIST_FILES }} ${{ env.DIST_FILES_COMPAT }} ${{ env.LOG_FILE }}
@@ -75,10 +82,13 @@ jobs:
           git pull --rebase origin ${{ github.ref_name }}
           git push
           # -- end remove --
-          pushd ${{ env.WORKTREE }}
+          pushd $ARTIFACTS_WORKTREE
           git add .
           git commit --no-verify -m "workflow: update daily run for ${{ matrix.universe }}"
           git pull --rebase origin ${{ env.ARTIFACTS_BRANCH }}
           git push
           popd
-          git worktree remove ${{ env.WORKTREE }}
+
+      - name: Delete worktree
+        if: always() && steps.create-worktree.outcome == 'success'
+        run: git worktree remove $ARTIFACTS_WORKTREE
