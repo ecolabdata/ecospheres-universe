@@ -792,6 +792,12 @@
     "type": "DREAL, DRIEAT"
   },
   {
+    "id": "69020898521fbd7568b1dc26",
+    "name": "Ecobalyse",
+    "slug": "ecobalyse",
+    "type": "Administration centrale"
+  },
+  {
     "id": "67884b4da4fca9c97bbef479",
     "name": "Ecolab",
     "slug": "ecolab-1",
@@ -1048,6 +1054,12 @@
     "name": "Régie autonome des transports parisiens (RATP)",
     "slug": "regie-autonome-des-transports-parisiens-ratp",
     "type": "EPIC"
+  },
+  {
+    "id": "534fffa8a3a7292c64a780c8",
+    "name": "Région Île-de-France",
+    "slug": "region-ile-de-france",
+    "type": null
   },
   {
     "id": "61937d50e54eade2bbf8e8df",
