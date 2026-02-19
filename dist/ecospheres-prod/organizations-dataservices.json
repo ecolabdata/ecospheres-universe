@@ -42,6 +42,12 @@
     "type": "EPA"
   },
   {
+    "id": "69020898521fbd7568b1dc26",
+    "name": "Ecobalyse",
+    "slug": "ecobalyse",
+    "type": "Administration centrale"
+  },
+  {
     "id": "67884b4da4fca9c97bbef479",
     "name": "Ecolab",
     "slug": "ecolab-1",
