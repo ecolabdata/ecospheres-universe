@@ -157,6 +157,8 @@ INACTIVE_OBJECT_MARKERS = [
     "extras{geop:dataset_id}",  # dataset
 ]
 
+DEFAULT_PAGE_SIZE = 1000
+
 
 class DatagouvApi:
     def __init__(
@@ -182,15 +184,17 @@ class DatagouvApi:
     def get_organization_object_ids(
         self, org_id: str, object_class: type[AddressableOwned]
     ) -> Sequence[str]:
-        url = f"{self.base_url}/api/2/{object_class.namespace()}/search/?organization={org_id}"
-        objs = self._get_objects(url=url)
+        url = f"{self.base_url}/api/2/{object_class.namespace()}/search/"
+        params = {"organization": org_id}
+        objs = self._get_objects(url, params=params)
         return uniquify(o["id"] for o in objs)
 
     def get_tagged_objects[T: AddressableTagged](
         self, tag_id: str, object_class: type[T]
     ) -> Sequence[T]:
-        url = f"{self.base_url}/api/1/{object_class.namespace()}/?tag={tag_id}"
-        objs = self._get_objects(url=url, fields=["id", "organization{id,name,slug}"])
+        url = f"{self.base_url}/api/1/{object_class.namespace()}/"
+        params = {"tag": tag_id}
+        objs = self._get_objects(url, params=params, fields=["id", "organization{id,name,slug}"])
         return [dacite.from_dict(object_class, o) for o in objs]
 
     def get_topic_id(self, topic_id_or_slug: str) -> str:
@@ -200,8 +204,9 @@ class DatagouvApi:
         return r.json()["id"]
 
     def get_topic_datasets_count(self, topic_id: str, org_id: str, use_search: bool = False) -> int:
-        url = f"{self.base_url}/api/2/datasets{'/search' if use_search else ''}/?topic={topic_id}&organization={org_id}&page_size=1"
-        r = session.get(url)
+        url = f"{self.base_url}/api/2/datasets{'/search' if use_search else ''}/"
+        params = {"topic": topic_id, "organization": org_id, "page_size": 1}
+        r = session.get(url, params=params)
         r.raise_for_status()
         return int(r.json()["total"])
 
@@ -209,15 +214,17 @@ class DatagouvApi:
     def get_topic_elements(
         self, topic_id_or_slug: str, object_class: type[TopicObject]
     ) -> Sequence[TopicElement]:
-        url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/elements/?class={object_class.model_name()}"
-        objs = self._get_objects(url=url, fields=["id", "element{id}"])
+        url = f"{self.base_url}/api/2/topics/{topic_id_or_slug}/elements/"
+        params = {"class": object_class.model_name()}
+        objs = self._get_objects(url, params=params, fields=["id", "element{id}"])
         return [TopicElement(id=o["id"], object=object_class(o["element"]["id"])) for o in objs]
 
     def get_topic_objects[T: TopicObject](
         self, topic_id: str, object_class: type[T]
     ) -> Sequence[T]:
-        url = f"{self.base_url}/api/2/{object_class.namespace()}/?topic={topic_id}"
-        objs = self._get_objects(url=url, fields=["id", "organization{id,name,slug}"])
+        url = f"{self.base_url}/api/2/{object_class.namespace()}/"
+        params = {"topic": topic_id}
+        objs = self._get_objects(url, params=params, fields=["id", "organization{id,name,slug}"])
         return [dacite.from_dict(object_class, o) for o in objs]
 
     @elapsed_and_count
@@ -259,13 +266,17 @@ class DatagouvApi:
     @elapsed_and_count
     def get_bouquets(self, universe_tag: str, include_private: bool = True) -> Sequence[Topic]:
         """Fetch all bouquets (topics) tagged with the universe tag"""
-        url = f"{self.base_url}/api/2/topics/?tag={universe_tag}"
+        url = f"{self.base_url}/api/2/topics/"
+        params = {"tag": universe_tag}
         headers = {}
         if include_private:
-            url = f"{url}&include_private=yes"
+            params["include_private"] = "yes"
             headers["X-API-KEY"] = self.token
         objs = self._get_objects(
-            url=url, headers=headers, fields=["id", "name", "slug", "organization{id,name,slug}"]
+            url,
+            params=params,
+            headers=headers,
+            fields=["id", "name", "slug", "organization{id,name,slug}"],
         )
         return [
             Topic(
@@ -282,10 +293,15 @@ class DatagouvApi:
     def _get_objects(
         self,
         url: str,
+        params: dict[str, Any] | None = None,
         headers: dict[str, Any] | None = None,
         fields: Iterable[str] | None = None,
         active: bool = True,
     ) -> Iterable[JSONObject]:
+        _params = dict(params or {})  # local copy
+        if "page_size" not in _params:
+            _params["page_size"] = DEFAULT_PAGE_SIZE
+
         _headers = dict(headers or {})  # local copy
         if fields or active:
             _fields = uniquify(
@@ -294,9 +310,10 @@ class DatagouvApi:
                 + (INACTIVE_OBJECT_MARKERS if active else [])
             )
             _headers["X-Fields"] = f"data{{{','.join(_fields)}}},next_page"
+
         try:
             while True:
-                r = session.get(url, headers=_headers)
+                r = session.get(url, params=params, headers=_headers)
                 r.raise_for_status()
                 data = r.json()
                 for obj in data["data"]:
