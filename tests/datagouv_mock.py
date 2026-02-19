@@ -331,7 +331,9 @@ class DatagouvMock:
                         "X-Fields": f"data{{id,name,slug,organization{{id,name,slug}},{','.join(INACTIVE_OBJECT_MARKERS)}}},next_page",
                     }
                 ),
-                query_param_matcher({"tag": self.config.tag, "include_private": "yes"}),
+                query_param_matcher(
+                    {"tag": self.config.tag, "include_private": "yes"}, strict_match=False
+                ),
             ],
             json={
                 "data": [

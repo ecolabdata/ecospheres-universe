@@ -313,7 +313,7 @@ class DatagouvApi:
 
         try:
             while True:
-                r = session.get(url, params=params, headers=_headers)
+                r = session.get(url, params=_params, headers=_headers)
                 r.raise_for_status()
                 data = r.json()
                 for obj in data["data"]:
