@@ -116,7 +116,13 @@ class DatagouvMock:
         return topic
 
     def universe_from(self, grist_universe: Iterable[GristEntry]) -> Topic:
-        objects = self._leaf_objects(*(entry.identifier for entry in grist_universe))
+        inclusions = self._leaf_objects(
+            *(entry.identifier for entry in grist_universe if not entry.exclude)
+        )
+        exclusions = self._leaf_objects(
+            *(entry.identifier for entry in grist_universe if entry.exclude)
+        )
+        objects = [obj for obj in inclusions if obj not in exclusions]
         return self.universe(objects)
 
     def mock[T: TopicObject](
