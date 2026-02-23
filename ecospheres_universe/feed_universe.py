@@ -6,7 +6,6 @@ import time
 
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from functools import cached_property
 from pathlib import Path
 from shutil import copyfile
 
@@ -49,15 +48,15 @@ class Perimeter:
         self._inclusions = {}
         self._exclusions = set()
 
-    @cached_property
+    @property
     def ids(self) -> Sequence[str]:
-        return [id for id in self.objects.keys() if id not in self._exclusions]
+        return self.objects.keys()
 
-    @cached_property
+    @property
     def organizations(self) -> Sequence[Organization]:
         return uniquify(org for org in self.objects.values() if org is not None)
 
-    @cached_property
+    @property
     def objects(self) -> dict[str, Organization | None]:
         return {id: org for id, org in self._inclusions.items() if id not in self._exclusions}
 
@@ -66,7 +65,6 @@ class Perimeter:
         objects: TopicObject | Sequence[TopicObject],
         override_organization: Organization | None = None,
     ) -> None:
-        self._clear_cached_properties()
         objs = objects if isinstance(objects, Sequence) else [objects]
         if override_organization:
             self._inclusions |= {obj.id: override_organization for obj in objs}
@@ -74,17 +72,8 @@ class Perimeter:
             self._inclusions |= {obj.id: obj.organization for obj in objs}
 
     def exclude(self, objects: TopicObject | Sequence[TopicObject]) -> None:
-        self._clear_cached_properties()
         objs = objects if isinstance(objects, Sequence) else [objects]
         self._exclusions |= {obj.id for obj in objs}
-
-    def _clear_cached_properties(self):
-        try:
-            del self.ids
-            del self.organizations
-            del self.objects
-        except AttributeError:
-            pass
 
 
 def write_organizations_file(filepath: Path, organizations: list[Organization]):
