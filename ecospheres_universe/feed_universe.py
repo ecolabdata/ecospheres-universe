@@ -40,6 +40,42 @@ class CategorizedOrganization(Organization):
     __hash__ = Organization.__hash__
 
 
+class Perimeter:
+    _inclusions: dict[str, Organization | None]
+    _exclusions: set[str]
+
+    def __init__(self):
+        self._inclusions = {}
+        self._exclusions = set()
+
+    @property
+    def ids(self) -> Sequence[str]:
+        return self.objects.keys()
+
+    @property
+    def organizations(self) -> Sequence[Organization]:
+        return uniquify(org for org in self.objects.values() if org is not None)
+
+    @property
+    def objects(self) -> dict[str, Organization | None]:
+        return {id: org for id, org in self._inclusions.items() if id not in self._exclusions}
+
+    def include(
+        self,
+        objects: TopicObject | Sequence[TopicObject],
+        override_organization: Organization | None = None,
+    ) -> None:
+        objs = objects if isinstance(objects, Sequence) else [objects]
+        if override_organization:
+            self._inclusions |= {obj.id: override_organization for obj in objs}
+        else:
+            self._inclusions |= {obj.id: obj.organization for obj in objs}
+
+    def exclude(self, objects: TopicObject | Sequence[TopicObject]) -> None:
+        objs = objects if isinstance(objects, Sequence) else [objects]
+        self._exclusions |= {obj.id for obj in objs}
+
+
 def write_organizations_file(filepath: Path, organizations: list[Organization]):
     """Write organizations list to a JSON file in dist/"""
     print(f"Generating output file {filepath} with {len(organizations)} entries...")
@@ -60,10 +96,8 @@ def get_upcoming_universe_perimeter(
     datagouv: DatagouvApi,
     grist_entries: Iterable[GristEntry],
     object_class: type[TopicObject],
-    keep_empty: bool = False,
-) -> tuple[Sequence[str], Sequence[Organization]]:
-    universe_ids = set[str]()
-    universe_orgs = set[Organization]()
+) -> Perimeter:
+    perimeter = Perimeter()
 
     for entry in grist_entries:
         verbose_print(
@@ -77,9 +111,10 @@ def get_upcoming_universe_perimeter(
                     f"Unknown {entry.object_class.model_name()} {entry.identifier}", file=sys.stderr
                 )
                 continue
-            universe_ids.add(obj.id)
-            if org := obj.organization:
-                universe_orgs.add(org)
+            if entry.exclude:
+                perimeter.exclude(obj)
+            else:
+                perimeter.include(obj)
 
         elif entry.object_class is Organization:
             org = datagouv.get_organization(entry.identifier)
@@ -88,36 +123,39 @@ def get_upcoming_universe_perimeter(
                     f"Unknown {entry.object_class.model_name()} {entry.identifier}", file=sys.stderr
                 )
                 continue
-            ids = datagouv.get_organization_object_ids(org.id, object_class)
-            universe_ids |= set(ids)
-            if ids or keep_empty:
-                universe_orgs.add(
-                    CategorizedOrganization(
-                        id=org.id, slug=org.slug, name=org.name, category=entry.category
-                    )
+            objs = datagouv.get_organization_objects(org.id, object_class)
+            if entry.exclude:
+                perimeter.exclude(objs)
+            else:
+                org = CategorizedOrganization(
+                    id=org.id, slug=org.slug, name=org.name, category=entry.category
                 )
+                perimeter.include(objs, override_organization=org)
 
         elif entry.object_class is Tag:
             objs = datagouv.get_tagged_objects(entry.identifier, object_class)
-            universe_ids |= {obj.id for obj in objs}
-            universe_orgs |= {org for obj in objs if (org := obj.organization)}
+            if entry.exclude:
+                perimeter.exclude(objs)
+            else:
+                perimeter.include(objs)
 
         elif entry.object_class is Topic:
             objs = datagouv.get_topic_objects(entry.identifier, object_class)
-            universe_ids |= {obj.id for obj in objs}
-            universe_orgs |= {org for obj in objs if (org := obj.organization)}
+            if entry.exclude:
+                perimeter.exclude(objs)
+            else:
+                perimeter.include(objs)
 
         else:
             continue
 
-    return list(universe_ids), list(universe_orgs)
+    return perimeter
 
 
 @cli
 def feed_universe(
     universe: Path,
     *extra_configs: Path,
-    keep_empty: bool = False,
     fail_on_errors: bool = False,
     dry_run: bool = False,
     reset: bool = False,
@@ -127,7 +165,6 @@ def feed_universe(
 
     :universe: Universe yaml config file
     :extra_configs: Additional config files (optional overrides)
-    :keep_empty: Keep empty organizations in the list
     :fail_on_errors: Fail the run on http errors
     :dry_run: Perform a trial run without actual feeding
     :reset: Empty topic before refeeding it
@@ -144,7 +181,6 @@ def feed_universe(
 
     feed(
         conf=conf,
-        keep_empty=keep_empty,
         fail_on_errors=fail_on_errors,
         dry_run=dry_run,
         reset=reset,
@@ -153,7 +189,6 @@ def feed_universe(
 
 def feed(
     conf: Config,
-    keep_empty: bool = False,
     fail_on_errors: bool = False,
     dry_run: bool = False,
     reset: bool = False,
@@ -193,11 +228,11 @@ def feed(
 
         for object_class in Topic.object_classes():
             verbose_print(f"Fetching upcoming {object_class.namespace()}...")
-            upcoming_object_ids, upcoming_orgs = get_upcoming_universe_perimeter(
-                datagouv, grist_entries, object_class, keep_empty
+            upcoming_perimeter = get_upcoming_universe_perimeter(
+                datagouv, grist_entries, object_class
             )
             print(
-                f"Found {len(upcoming_object_ids)} {object_class.namespace()} matching the upcoming universe."
+                f"Found {len(upcoming_perimeter.ids)} {object_class.namespace()} matching the upcoming universe."
             )
 
             verbose_print(f"Fetching existing {object_class.namespace()}...")
@@ -208,8 +243,8 @@ def feed(
             )
 
             verbose_print("Computing topic updates...")
-            additions = sorted(set(upcoming_object_ids) - set(existing_object_ids))
-            removals = sorted(set(existing_object_ids) - set(upcoming_object_ids))
+            additions = sorted(set(upcoming_perimeter.ids) - set(existing_object_ids))
+            removals = sorted(set(existing_object_ids) - set(upcoming_perimeter.ids))
             if (n := len(removals)) > REMOVALS_THRESHOLD:
                 raise Exception(f"Too many removals ({n} > {REMOVALS_THRESHOLD}), aborting.")
 
@@ -223,7 +258,7 @@ def feed(
 
             write_organizations_file(
                 conf.output_dir / f"organizations-{object_class.namespace()}.json",
-                sorted(upcoming_orgs),
+                sorted(upcoming_perimeter.organizations),
             )
             # FIXME: remove when front uses the new file path
             # retrocompatibility

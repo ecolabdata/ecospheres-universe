@@ -3,7 +3,7 @@ from responses.matchers import query_param_matcher
 
 from ecospheres_universe.config import Config
 from ecospheres_universe.datagouv import DatagouvObject
-from ecospheres_universe.grist import GristEntry
+from ecospheres_universe.grist import GristAction, GristEntry
 
 
 class GristMock:
@@ -14,13 +14,29 @@ class GristMock:
         self.responses = responses
         self.config = config
 
-    def entry(self, object: DatagouvObject, category: str | None = None) -> GristEntry:
-        return GristEntry(type(object), object.id, category)
+    def entry(
+        self, object: DatagouvObject, exclude: bool = False, category: str | None = None
+    ) -> GristEntry:
+        return GristEntry(
+            identifier=object.id,
+            object_class=type(object),
+            exclude=exclude,
+            category=category,
+        )
 
     def raw_entry(
-        self, identifier: str, object_class: type[DatagouvObject], category: str | None = None
+        self,
+        identifier: str,
+        object_class: type[DatagouvObject],
+        exclude: bool = False,
+        category: str | None = None,
     ) -> GristEntry:
-        return GristEntry(object_class, identifier, category)
+        return GristEntry(
+            identifier=identifier,
+            object_class=object_class,
+            exclude=exclude,
+            category=category,
+        )
 
     def mock(self, universe: list[GristEntry]) -> None:
         # grist.get_entries()
@@ -33,6 +49,7 @@ class GristMock:
                         "fields": {
                             "Type": entry.object_class.model_name(),
                             "Identifiant": entry.identifier,
+                            "Action": GristAction.EXCLURE if entry.exclude else GristAction.INCLURE,
                             "Categorie": entry.category,
                         }
                     }

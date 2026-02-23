@@ -180,14 +180,13 @@ class DatagouvApi:
     def get_organization(self, id_or_slug: str) -> Organization | None:
         return self.get_object(id_or_slug, Organization)
 
-    @elapsed_and_count
-    def get_organization_object_ids(
-        self, org_id: str, object_class: type[AddressableOwned]
-    ) -> Sequence[str]:
+    def get_organization_objects[T: AddressableTagged](
+        self, org_id: str, object_class: type[T]
+    ) -> Sequence[T]:
         url = f"{self.base_url}/api/2/{object_class.namespace()}/search/"
         params = {"organization": org_id}
         objs = self._get_objects(url, params=params)
-        return uniquify(o["id"] for o in objs)
+        return [dacite.from_dict(object_class, o) for o in objs]
 
     def get_tagged_objects[T: AddressableTagged](
         self, tag_id: str, object_class: type[T]
