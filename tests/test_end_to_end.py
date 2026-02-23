@@ -247,3 +247,65 @@ def test_exclude_entries_full_bootstrap(config: Config, datagouv: DatagouvMock, 
     feed(config)
 
     assert_outputs(datagouv, grist_universe)
+
+
+def test_exclude_organization(config: Config, datagouv: DatagouvMock, grist: GristMock):
+    org = datagouv.organization()
+    dataset = datagouv.dataset(organization=org)
+    dataservice = datagouv.dataservice(organization=org)
+
+    existing_universe = []
+    grist_universe = [
+        grist.entry(org, exclude=True),
+        grist.entry(dataset),
+        grist.entry(dataservice),
+    ]
+
+    grist.mock(grist_universe)
+    datagouv.mock(existing_universe, grist_universe)
+
+    feed(config)
+
+    assert_outputs(datagouv, grist_universe)
+
+
+def test_exclude_tag(config: Config, datagouv: DatagouvMock, grist: GristMock):
+    org = datagouv.organization()
+    tag = datagouv.tag()
+    dataset = datagouv.dataset(organization=org, tags=[tag])
+    dataservice = datagouv.dataservice(organization=org, tags=[tag])
+
+    existing_universe = []
+    grist_universe = [
+        grist.entry(tag, exclude=True),
+        grist.entry(dataset),
+        grist.entry(dataservice),
+    ]
+
+    grist.mock(grist_universe)
+    datagouv.mock(existing_universe, grist_universe)
+
+    feed(config)
+
+    assert_outputs(datagouv, grist_universe)
+
+
+def test_exclude_topic(config: Config, datagouv: DatagouvMock, grist: GristMock):
+    org = datagouv.organization()
+    topic = datagouv.topic()
+    dataset = datagouv.dataset(organization=org, topics=[topic])
+    dataservice = datagouv.dataservice(organization=org, topics=[topic])
+
+    existing_universe = []
+    grist_universe = [
+        grist.entry(topic, exclude=True),
+        grist.entry(dataset),
+        grist.entry(dataservice),
+    ]
+
+    grist.mock(grist_universe)
+    datagouv.mock(existing_universe, grist_universe)
+
+    feed(config)
+
+    assert_outputs(datagouv, grist_universe)
