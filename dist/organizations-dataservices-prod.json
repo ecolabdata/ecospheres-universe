@@ -138,6 +138,12 @@
     "type": "EPIC"
   },
   {
+    "id": "534fffafa3a7292c64a78103",
+    "name": "Shom",
+    "slug": "shom",
+    "type": "EPA"
+  },
+  {
     "id": "534fffb0a3a7292c64a78115",
     "name": "SNCF",
     "slug": "sncf",
