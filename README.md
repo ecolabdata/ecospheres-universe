@@ -24,7 +24,7 @@ La gestion d'un univers se fait par l'intérmédiaire d'un document Grist, dans 
 
 Pour définir un univers Grist :
 
-1. Sauvegarder une copie du [modèle Grist](https://grist.numerique.gouv.fr/o/ecospheres/gEY4qJF25TEX/Univers-TEMPLATE) depuis un compte qui servira à administrer l'univers.
+1. Sauvegarder une copie du [modèle Grist](https://grist.numerique.gouv.fr/o/ecospheres/gEY4qJF25TEX/Univers-TEMPLATE) depuis un compte qui servira à administrer l'univers :
 
    <img alt="Copier le modèle" src=".images/grist-copy-template.png" width="700">
 
@@ -32,13 +32,13 @@ Pour définir un univers Grist :
 
    <img alt="Ajouter le compte de service" src=".images/grist-service-account.png" width="700">
 
-3. Lister les entités composant l'univers dans la table correspondant à l'environnement data.gouv.fr ciblé.
+3. Lister les entités composant l'univers dans la table correspondant à l'environnement data.gouv.fr ciblé :
 
    <img alt="Définir l'univers" src=".images/grist-define-universe.png" width="700">
 
    Pour chaque entité, les trois champs requis sont : `Action`, `Type` et `Identifiant`.
 
-   Les champs optionnels `Label` et `URL` peuvent être automatiquement synchronisés depuis data.gouv.fr en cliquant sur le bouton "Synchroniser" en haut du document.
+   Les champs optionnels `Label` et `URL` peuvent être automatiquement synchronisés depuis data.gouv.fr en cliquant sur le bouton "Synchroniser" en haut du document :
 
    <img alt="Synchroniser les informations depuis data.gouv.fr" src=".images/grist-synchronize.png" width="700">
 
