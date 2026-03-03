@@ -21,18 +21,16 @@ La gestion d'un univers se fait par l'intérmédiaire d'un document Grist, dans 
 
 Pour définir un univers Grist :
 
-1. Sauvegarder une copie du [modèle Grist](https://grist.numerique.gouv.fr/o/ecospheres/gEY4qJF25TEX/Univers-TEMPLATE) depuis un compte qui servira à administrer l'univers.
+> [!WARNING]
+> Ne pas modifier les noms des tables et des champs du document Grist.
 
-   > [!WARNING]
-   > Ne pas modifier les noms des tables et des champs du document Grist.
+1. Sauvegarder une copie du [modèle Grist](https://grist.numerique.gouv.fr/o/ecospheres/gEY4qJF25TEX/Univers-TEMPLATE) depuis un compte qui servira à administrer l'univers.
 
    ![Copier le modèle](.images/grist-copy-template.png)
 
-2. Donner l'accès au document créé, en "lecture seule", au compte de service par défaut `4edf618b-6d1e-4914-b4e7-d6ec14e10289@serviceaccounts.invalid` :
+2. Donner l'accès au document créé, en "lecture seule", au compte de service par défaut `4edf618b-6d1e-4914-b4e7-d6ec14e10289@serviceaccounts.invalid` (Il est également possible d'utiliser un [compte de service dédié](https://forum.grist.libre.sh/t/comptes-de-services-une-cle-api-limitee-a-certains-documents-dossiers-organisations/2198/1)) :
 
    ![Ajouter le compte de service](.images/grist-service-account.png)
-
-   Il est également possible d'utiliser un [compte de service dédié](https://forum.grist.libre.sh/t/comptes-de-services-une-cle-api-limitee-a-certains-documents-dossiers-organisations/2198/1).
 
 3. Lister les entités composant l'univers souhaité dans la table correspondant à l'environnement data.gouv.fr cible.
 
@@ -53,10 +51,10 @@ La configuration du script de mise à jour est définie dans le fichier `configs
 
 Pour configurer la synchronisation de son univers :
 
-1. Créer un fichier de configuration `configs/{site}-{env}.yaml` sur le modèle suivant :
+> [!WARNING]
+> Ne mettez pas les clés d'API dans les fichiers versionnés sur GitHub!
 
-    > [!WARNING]
-    > Ne mettez pas les clés d'API dans les fichiers versionnés sur GitHub!
+1. Créer un fichier de configuration `configs/{site}-{env}.yaml` sur le modèle suivant :
 
    ```yaml
    topic: {mon-topic-univers}
@@ -101,6 +99,9 @@ uv sync
 
 ### Configuration
 
+> [!NOTE]
+> La clé d'API du compte de service Grist par défaut est disponible auprès des administrateurs de ce dépôt.
+
 Les fichiers de configuration versionnés ne devant pas contenir les clés d'API, il est nécessaire de les configurer localement. Soit :
 
 - Configurer les variables d'environnement `DATAGOUV_API_KEY` et `GRIST_API_KEY`.
@@ -113,10 +114,6 @@ Les fichiers de configuration versionnés ne devant pas contenir les clés d'API
   grist:
     token: {mon-token-grist}
   ```
-
-
-> [!NOTE]
-> La clé d'API du compte de service Grist par défaut est disponible auprès des administrateurs de ce dépôt.
 
 
 ### Utilisation du script
