@@ -26,7 +26,7 @@ Pour définir un univers Grist :
 
 1. Sauvegarder une copie du [modèle Grist](https://grist.numerique.gouv.fr/o/ecospheres/gEY4qJF25TEX/Univers-TEMPLATE) depuis un compte qui servira à administrer l'univers.
 
-   ![Copier le modèle](.images/grist-copy-template.png)
+   ![Copier le modèle](.images/grist-copy-template.png){width=700}
 
 2. Donner l'accès au document créé, en "lecture seule", au compte de service par défaut `4edf618b-6d1e-4914-b4e7-d6ec14e10289@serviceaccounts.invalid` (ou créer un [compte de service dédié](https://forum.grist.libre.sh/t/comptes-de-services-une-cle-api-limitee-a-certains-documents-dossiers-organisations/2198/1)) :
 
