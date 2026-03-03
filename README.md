@@ -5,12 +5,7 @@ Outils permettant de gérer l'univers d'une [verticale data.gouv.fr](https://git
 
 ## Architecture
 
-TODO: schema
-
-Composé de :
-1. définition Grist
-2. script de mise à jour
-3. github action
+<img alt="Architecture" src=".images/architecture.png" width="700">
 
 
 ## Mise en place d'un univers
