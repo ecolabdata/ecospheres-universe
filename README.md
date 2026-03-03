@@ -5,7 +5,7 @@ Outils permettant de gérer l'univers d'une [verticale data.gouv.fr](https://git
 
 ## Architecture
 
-<img alt="Architecture" src=".images/architecture.png">
+<img alt="Architecture" src=".images/architecture.png" width="700">
 
 
 ## Mise en place d'un univers
