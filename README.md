@@ -17,22 +17,22 @@ Composé de :
 
 ### Configuration Grist
 
-La gestion d'un univers se fait par l'intérmédiaire d'un document Grist, dans lequel sont listés les éléments devant être inclus ou exclus de la verticale cible, ceci pour chaque environnement data.gouv.fr actif.
-
-Pour définir un univers Grist :
+La gestion d'un univers se fait par l'intérmédiaire d'un document Grist, dans lequel sont listés les éléments devant être inclus ou exclus dans la verticale cible, ceci pour chaque environnement data.gouv.fr actif.
 
 > [!WARNING]
 > Ne pas modifier les noms des tables et des champs du document Grist.
+
+Pour définir un univers Grist :
 
 1. Sauvegarder une copie du [modèle Grist](https://grist.numerique.gouv.fr/o/ecospheres/gEY4qJF25TEX/Univers-TEMPLATE) depuis un compte qui servira à administrer l'univers.
 
    ![Copier le modèle](.images/grist-copy-template.png)
 
-2. Donner l'accès au document créé, en "lecture seule", au compte de service par défaut `4edf618b-6d1e-4914-b4e7-d6ec14e10289@serviceaccounts.invalid` (Il est également possible d'utiliser un [compte de service dédié](https://forum.grist.libre.sh/t/comptes-de-services-une-cle-api-limitee-a-certains-documents-dossiers-organisations/2198/1)) :
+2. Donner l'accès au document créé, en "lecture seule", au compte de service par défaut `4edf618b-6d1e-4914-b4e7-d6ec14e10289@serviceaccounts.invalid` (ou créer un [compte de service dédié](https://forum.grist.libre.sh/t/comptes-de-services-une-cle-api-limitee-a-certains-documents-dossiers-organisations/2198/1)) :
 
    ![Ajouter le compte de service](.images/grist-service-account.png)
 
-3. Lister les entités composant l'univers souhaité dans la table correspondant à l'environnement data.gouv.fr cible.
+3. Lister les entités composant l'univers dans la table correspondant à l'environnement data.gouv.fr ciblé.
 
    Pour chaque entité, les trois champs requis sont : `Action`, `Type` et `Identifiant`.
 
@@ -47,12 +47,12 @@ Pour définir un univers Grist :
 
 ### Configuration du script
 
-La configuration du script de mise à jour est définie dans le fichier `configs/{site}-{env}.yaml` correspondant à la verticale `site` et à l'environnement data.gouv.fr `env` (valant `demo` ou `prod`) cibles.
-
-Pour configurer la synchronisation de son univers :
+La configuration du script de mise à jour est définie dans un fichier `configs/{site}-{env}.yaml`, correspondant à la verticale `site` de l'environnement data.gouv.fr `env`.
 
 > [!WARNING]
 > Ne mettez pas les clés d'API dans les fichiers versionnés sur GitHub!
+
+Pour configurer le script pour un univers :
 
 1. Créer un fichier de configuration `configs/{site}-{env}.yaml` sur le modèle suivant :
 
@@ -60,7 +60,7 @@ Pour configurer la synchronisation de son univers :
    topic: {mon-topic-univers}
    tag: {mon-tag-univers}
    datagouv:
-     url: https://www.data.gouv.fr  # ou demo.data.gouv.fr
+     url: https://www.data.gouv.fr  # ou https://demo.data.gouv.fr
      token: CONFIGURE_ME
    grist:
      url: https://grist.numerique.gouv.fr/o/{mon-compte-grist}/api/docs/{identifiant-du-document}
@@ -69,23 +69,23 @@ Pour configurer la synchronisation de son univers :
    output_dir: dist/{mon-univers}-prod  # ou dist/{mon-univers}-demo
    ```
 
-2. Configurez vos clés d'API Grist et data.gouv.fr dans GitHub et/ou en local (voir ci-dessous).
+2. Configurez les clés d'API Grist et data.gouv.fr dans GitHub et/ou en local selon le mode d'exécution (voir ci-dessous).
 
 
 ### Configuration de l'exécution automatique
 
-L'exécution périodique du script de mise à jour est gérée par le [workflow GitHub Actions `update-universes`](https://github.com/ecolabdata/ecospheres-universe/blob/main/.github/workflows/update-universes.yml), qui met quotidiennement à jour les univers configurés.
+L'exécution périodique du script de mise à jour est gérée par le workflow GitHub Actions [`update-universes`](https://github.com/ecolabdata/ecospheres-universe/blob/main/.github/workflows/update-universes.yml), qui met quotidiennement à jour les univers configurés.
 
-Pour ajouter un univers au workflow :
+Pour ajouter une configuration d'univers au workflow :
 
 1. [Créer un environnement GitHub](https://github.com/ecolabdata/ecospheres-universe/settings/environments) en suivant la convention `{site}-{env}`.
 
 2. Configurer le secret `DATAGOUV_API_KEY` pour le nouvel environnement. Si Grist n'utilise pas le compte de service par défaut, configurer également le secret `GRIST_API_KEY`.
 
-3. Ajouter le nouvel environnement `{site}-{env}` à `jobs.run-update.strategy.matrix.universe` dans le [workflow]((https://github.com/ecolabdata/ecospheres-universe/blob/main/.github/workflows/update-universes.yml)).
+3. Ajouter le nouvel environnement `{site}-{env}` à `jobs.run-update.strategy.matrix.universe` dans le [workflow](https://github.com/ecolabdata/ecospheres-universe/blob/main/.github/workflows/update-universes.yml).
 
 
-## Utilisation locale
+## Utilisation en local
 
 Le script peut également être utilisé en local pour des tests ou une exécution ponctuelle.
 
@@ -106,7 +106,7 @@ Les fichiers de configuration versionnés ne devant pas contenir les clés d'API
 
 - Configurer les variables d'environnement `DATAGOUV_API_KEY` et `GRIST_API_KEY`.
 
-- Utiliser un fichier de configuration supplémentaire *non-versionné* (à passer en supplément lors de l'appel du script) :
+- Utiliser un fichier de configuration supplémentaire *non-versionné*, à passer en supplément lors de l'appel du script :
 
   ```yaml
   datagouv:
