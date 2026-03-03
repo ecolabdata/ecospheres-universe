@@ -60,13 +60,13 @@ Pour configurer le script pour un univers :
    topic: {mon-topic-univers}
    tag: {mon-tag-univers}
    datagouv:
-     url: https://www.data.gouv.fr  # ou https://demo.data.gouv.fr
+     url: https://demo.data.gouv.fr  # ou https://www.data.gouv.fr
      token: CONFIGURE_ME
    grist:
      url: https://grist.numerique.gouv.fr/o/{mon-compte-grist}/api/docs/{identifiant-du-document}
-     table: Prod  # ou Demo
+     table: Demo  # ou Prod
      token: CONFIGURE_ME
-   output_dir: dist/{mon-univers}-prod  # ou dist/{mon-univers}-demo
+   output_dir: dist/{mon-univers}-demo  # ou dist/{mon-univers}-prod
    ```
 
 2. Configurez les clés d'API Grist et data.gouv.fr dans GitHub et/ou en local selon le mode d'exécution (voir ci-dessous).
