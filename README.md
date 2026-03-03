@@ -17,43 +17,46 @@ Composé de :
 
 ### Configuration Grist
 
-La gestion d'un univers se fait par l'intérmédiaire d'un document Grist, dans lequel sont listés les éléments devant être inclus ou exclus de la verticale cible, ceci pour chaque environnement data.gouv.fr actif (*demo* et/ou *prod*).
+La gestion d'un univers se fait par l'intérmédiaire d'un document Grist, dans lequel sont listés les éléments devant être inclus ou exclus de la verticale cible, ceci pour chaque environnement data.gouv.fr actif.
 
 Pour définir un univers Grist :
 
 1. Sauvegarder une copie du [modèle Grist](https://grist.numerique.gouv.fr/o/ecospheres/gEY4qJF25TEX/Univers-TEMPLATE) depuis un compte qui servira à administrer l'univers.
 
-   > [!IMPORTANT]
+   > [!WARNING]
    > Ne pas modifier les noms des tables et des champs du document Grist.
 
    ![Copier le modèle](.images/grist-copy-template.png)
 
-2. Donner l'accès au document Grist au compte de service `4edf618b-6d1e-4914-b4e7-d6ec14e10289@serviceaccounts.invalid`, en "lecture seule" :
+2. Donner l'accès au document créé, en "lecture seule", au compte de service par défaut `4edf618b-6d1e-4914-b4e7-d6ec14e10289@serviceaccounts.invalid` :
 
    ![Ajouter le compte de service](.images/grist-service-account.png)
 
-   Si vous préférrez, vous pouvez créer un [compte de service dédié](https://forum.grist.libre.sh/t/comptes-de-services-une-cle-api-limitee-a-certains-documents-dossiers-organisations/2198/1), que vous devrez alors spécifier dans la configuration ci-dessous.
+   Il est également possible d'utiliser un [compte de service dédié](https://forum.grist.libre.sh/t/comptes-de-services-une-cle-api-limitee-a-certains-documents-dossiers-organisations/2198/1).
 
-3. Lister les entités constituant l'univers souhaité.
+3. Lister les entités composant l'univers souhaité dans la table correspondant à l'environnement data.gouv.fr cible.
 
    Pour chaque entité, les trois champs requis sont : `Action`, `Type` et `Identifiant`.
 
-   Les champs optionnels `Label` et `URL` peuvent être automatiquement synchronisés à partir de data.gouv.fr en cliquant sur le bouton "Synchroniser" en haut du document.
-
    ![Définir l'univers](.images/grist-define-universe.png)
+
+   Les champs optionnels `Label` et `URL` peuvent être automatiquement synchronisés depuis data.gouv.fr en cliquant sur le bouton "Synchroniser" en haut du document.
+
+   ![Synchroniser les informations depuis data.gouv.fr](.images/grist-synchronize.png)
 
    Il est également possible d'ajouter des champs personnalisés selon les besoins. Ces champs seront ignorés par les outils présents dans ce dépôt.
 
 
 ### Configuration du script
 
-La configuration du script de mise à jour est définie dans le fichier `configs/{site}-{env}.yaml` correspondant à la verticale (`site`) et à l'environnement data.gouv.fr (`env`, valant `demo` ou `prod`) cibles.
+La configuration du script de mise à jour est définie dans le fichier `configs/{site}-{env}.yaml` correspondant à la verticale `site` et à l'environnement data.gouv.fr `env` (valant `demo` ou `prod`) cibles.
 
 Pour configurer la synchronisation de son univers :
 
-1. Créer un fichier de configuration `configs/{site}-{env}.yaml` sur le modèle suivant (exemple pour l'environnement `prod`) :
+1. Créer un fichier de configuration `configs/{site}-{env}.yaml` sur le modèle suivant :
 
-   > [!IMPORTANT] Ne mettez pas les clés d'API dans les fichiers versionnés sur GitHub!
+    > [!WARNING]
+    > Ne mettez pas les clés d'API dans les fichiers versionnés sur GitHub!
 
    ```yaml
    topic: {mon-topic-univers}
@@ -95,13 +98,14 @@ Le script peut également être utilisé en local pour des tests ou une exécuti
 uv sync
 ```
 
+
 ### Configuration
 
-Les fichiers de configuration versionnés ne contenant pas les clés d'API, vous devez les configurer locallement de l'une des manières suivantes :
+Les fichiers de configuration versionnés ne devant pas contenir les clés d'API, il est nécessaire de les configurer localement. Soit :
 
 - Configurer les variables d'environnement `DATAGOUV_API_KEY` et `GRIST_API_KEY`.
 
-- Utiliser un fichier de configuration supplémentaire *non-versionné*, pour surcharger la configuration principale (à passer lors de l'appel du script) :
+- Utiliser un fichier de configuration supplémentaire *non-versionné* (à passer en supplément lors de l'appel du script) :
 
   ```yaml
   datagouv:
@@ -109,6 +113,10 @@ Les fichiers de configuration versionnés ne contenant pas les clés d'API, vous
   grist:
     token: {mon-token-grist}
   ```
+
+
+> [!NOTE]
+> La clé d'API du compte de service Grist par défaut est disponible auprès des administrateurs de ce dépôt.
 
 
 ### Utilisation du script
