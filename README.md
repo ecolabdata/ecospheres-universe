@@ -26,21 +26,21 @@ Pour définir un univers Grist :
 
 1. Sauvegarder une copie du [modèle Grist](https://grist.numerique.gouv.fr/o/ecospheres/gEY4qJF25TEX/Univers-TEMPLATE) depuis un compte qui servira à administrer l'univers.
 
-   <img alt="Copier le modèle" src=".images/grist-copy-template.png" width="600">
+   <img alt="Copier le modèle" src=".images/grist-copy-template.png" width="700">
 
 2. Donner l'accès au document créé, en "lecture seule", au compte de service par défaut `4edf618b-6d1e-4914-b4e7-d6ec14e10289@serviceaccounts.invalid` (ou créer un [compte de service dédié](https://forum.grist.libre.sh/t/comptes-de-services-une-cle-api-limitee-a-certains-documents-dossiers-organisations/2198/1)) :
 
-   <img alt="Ajouter le compte de service" src=".images/grist-service-account.png" width="600">
+   <img alt="Ajouter le compte de service" src=".images/grist-service-account.png" width="700">
 
 3. Lister les entités composant l'univers dans la table correspondant à l'environnement data.gouv.fr ciblé.
 
-   Pour chaque entité, les trois champs requis sont : `Action`, `Type` et `Identifiant`.
+   <img alt="Définir l'univers" src=".images/grist-define-universe.png" width="700">
 
-   <img alt="Définir l'univers" src=".images/grist-define-universe.png" width="600">
+   Pour chaque entité, les trois champs requis sont : `Action`, `Type` et `Identifiant`.
 
    Les champs optionnels `Label` et `URL` peuvent être automatiquement synchronisés depuis data.gouv.fr en cliquant sur le bouton "Synchroniser" en haut du document.
 
-   <img alt="Synchroniser les informations depuis data.gouv.fr" src=".images/grist-synchronize.png" width="600">
+   <img alt="Synchroniser les informations depuis data.gouv.fr" src=".images/grist-synchronize.png" width="700">
 
    Il est également possible d'ajouter des champs personnalisés selon les besoins. Ces champs seront ignorés par les outils présents dans ce dépôt.
 
