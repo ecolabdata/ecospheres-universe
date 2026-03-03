@@ -50,7 +50,7 @@ Pour définir un univers Grist :
 La configuration du script de mise à jour est définie dans un fichier `configs/{site}-{env}.yaml`, correspondant à la verticale `site` de l'environnement data.gouv.fr `env`.
 
 > [!WARNING]
-> Ne mettez pas les clés d'API dans les fichiers versionnés sur GitHub!
+> Ne pas mettre les clés d'API dans les fichiers versionnés sur GitHub!
 
 Pour configurer le script pour un univers :
 
