@@ -78,7 +78,7 @@ L'exécution périodique du script de mise à jour est gérée par le workflow G
 
 Pour ajouter une configuration d'univers au workflow :
 
-1. [Créer un environnement GitHub](https://github.com/ecolabdata/ecospheres-universe/settings/environments) en suivant la convention `{site}-{env}`.
+1. Créer un [environnement GitHub](https://github.com/ecolabdata/ecospheres-universe/settings/environments) en suivant la convention `{site}-{env}`.
 
 2. Configurer le secret `DATAGOUV_API_KEY` pour le nouvel environnement. Si Grist n'utilise pas le compte de service par défaut, configurer également le secret `GRIST_API_KEY`.
 
