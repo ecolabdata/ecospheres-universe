@@ -5,7 +5,7 @@ datagouv:
   url: https://demo.data.gouv.fr
   token: CONFIGURE_ME
 grist:
-  url: https://grist.numerique.gouv.fr/o/culture-datagouv/api/docs/wF1qSdabBrfe
+  url: https://grist.numerique.gouv.fr/o/culture-datagouv/api/docs/wF1qSdabBrfeiGVAMdm7xN
   table: Demo
   token: CONFIGURE_ME
 output_dir: dist/culture-demo
