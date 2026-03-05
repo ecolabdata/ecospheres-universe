@@ -4,8 +4,8 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import auto, StrEnum
 
-from ecospheres_universe.datagouv import DatagouvObject
-from ecospheres_universe.util import uniquify
+from universe.datagouv import DatagouvObject
+from universe.util import uniquify
 
 
 class GristAction(StrEnum):

@@ -10,7 +10,7 @@ from typing import get_args, Any, Protocol, TypeAlias
 
 import dacite
 
-from ecospheres_universe.util import (
+from universe.util import (
     JSONObject,
     elapsed,
     elapsed_and_count,

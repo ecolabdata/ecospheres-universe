@@ -5,8 +5,8 @@ from typing import cast
 from responses import RequestsMock
 from responses.matchers import header_matcher, json_params_matcher, query_param_matcher
 
-from ecospheres_universe.config import Config
-from ecospheres_universe.datagouv import (
+from universe.config import Config
+from universe.datagouv import (
     INACTIVE_OBJECT_MARKERS,
     DatagouvObject,
     Dataservice,
@@ -18,8 +18,8 @@ from ecospheres_universe.datagouv import (
     TopicElement,
     TopicObject,
 )
-from ecospheres_universe.grist import GristEntry
-from ecospheres_universe.util import JSONObject, uniquify
+from universe.grist import GristEntry
+from universe.util import JSONObject, uniquify
 
 
 @dataclass(frozen=True)
