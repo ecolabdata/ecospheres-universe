@@ -73,7 +73,8 @@ async function resolve(env, row) {
   const object = `${type}s`
   const version = type == "topic" ? "2" : "1";
 
-  let result;
+  let label = "<error>";
+  let url = "<error>";
   try {
     const response = await fetch(
       `https://${env}.data.gouv.fr/api/${version}/${object}/${identifier}/`,
@@ -85,21 +86,19 @@ async function resolve(env, row) {
         }
       }
     );
-    if (!response.ok) {
+    if (response.ok) {
+      const result = await response.json();
+      // fields used here must be declared in the X-Fields request header above
+      label = result.name || result.title || "<missing>";
+      url = result.page || result.self_web_url || result.uri || "<missing>";
+    } else {
       console.warn(`DatagouvSync: Failed request for ${object}/${identifier}: ${response.statusText || response.status}`);
-      return;
     }
-    result = await response.json();
   } catch (err) {
     console.error(`DatagouvSync: Error processing ${object}/${identifier}:`, err);
-    return;
   }
 
-  // fields used here must be declared in the X-Fields request header above
-  const label = result.name || result.title || "<missing>";
-  const url = result.page || result.self_web_url || result.uri || "<missing>";
-
-  console.log(`DatagouvSync: Found ${object}/${identifier}: label="${label}", url=${url}`);
+  console.log(`DatagouvSync: Result for ${object}/${identifier}: label="${label}", url=${url}`);
   return {id: row.id, Label: label, URL: url};
 }
 
