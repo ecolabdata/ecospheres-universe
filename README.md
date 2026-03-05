@@ -1,4 +1,4 @@
-# ecospheres-universe
+# udata-front-kit-universe
 
 Outils permettant de gérer l'univers d'une [verticale data.gouv.fr](https://github.com/opendatateam/udata-front-kit).
 
@@ -69,15 +69,15 @@ Pour configurer le script pour un univers :
 
 ### Configuration de l'exécution automatique
 
-L'exécution périodique du script de mise à jour est gérée par le workflow GitHub Actions [`update-universes`](https://github.com/ecolabdata/ecospheres-universe/blob/main/.github/workflows/update-universes.yml), qui met quotidiennement à jour les univers configurés.
+L'exécution périodique du script de mise à jour est gérée par le workflow GitHub Actions [`update-universes`](https://github.com/opendatateam/udata-front-kit-universe/blob/main/.github/workflows/update-universes.yml), qui met quotidiennement à jour les univers configurés.
 
 Pour ajouter une configuration d'univers au workflow :
 
-1. Créer un [environnement GitHub](https://github.com/ecolabdata/ecospheres-universe/settings/environments) en suivant la convention `{site}-{env}`.
+1. Créer un [environnement GitHub](https://github.com/opendatateam/udata-front-kit-universe/settings/environments) en suivant la convention `{site}-{env}`.
 
 2. Configurer le secret `DATAGOUV_API_KEY` pour le nouvel environnement. Si Grist n'utilise pas le compte de service par défaut, configurer également le secret `GRIST_API_KEY`.
 
-3. Ajouter le nouvel environnement `{site}-{env}` à `jobs.run-update.strategy.matrix.universe` dans le [workflow](https://github.com/ecolabdata/ecospheres-universe/blob/main/.github/workflows/update-universes.yml).
+3. Ajouter le nouvel environnement `{site}-{env}` à `jobs.run-update.strategy.matrix.universe` dans le [workflow](https://github.com/opendatateam/udata-front-kit-universe/blob/main/.github/workflows/update-universes.yml).
 
 
 ## Utilisation en local
@@ -118,7 +118,7 @@ Les fichiers de configuration versionnés ne devant pas contenir les clés d'API
 Crée ou met à jour un univers à partir de sa définition Grist.
 
 ```shell
-uv run ecospheres-universe feed-universe [options] configs/{site}-{env}.yaml [config-overrides.yaml ...]
+uv run universe feed-universe [options] configs/{site}-{env}.yaml [config-overrides.yaml ...]
 ```
 
 Options :
@@ -135,5 +135,5 @@ En plus de la mise à jour de l'univers sur data.gouv.fr, le script génère plu
 Vérifie la synchronisation des organisations de l'univers entre l'index Elasticsearch et la base de données MongoDB de data.gouv.fr.
 
 ```shell
-uv run ecospheres-universe check-sync configs/{site}-{env}.yaml [config-overrides.yaml ...]
+uv run universe check-sync configs/{site}-{env}.yaml [config-overrides.yaml ...]
 ```

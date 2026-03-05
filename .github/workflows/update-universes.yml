@@ -56,7 +56,7 @@ jobs:
           GRIST_API_KEY: ${{ secrets.GRIST_API_KEY }}
           PYTHONUNBUFFERED: 1
         run: |
-          uv run ecospheres-universe feed-universe ${{ env.CONFIG_FILE }} --fail-on-errors 2>&1 | tee ${{ env.LOG_FILE }}
+          uv run universe feed-universe ${{ env.CONFIG_FILE }} --fail-on-errors 2>&1 | tee ${{ env.LOG_FILE }}
           exit ${PIPESTATUS[0]}
 
       - name: Create artifacts worktree

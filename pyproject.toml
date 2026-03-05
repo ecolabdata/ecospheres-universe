@@ -1,7 +1,7 @@
 [project]
-name = "ecospheres-universe"
-version = "0.1.0"
-description = "Manage ecospheres universe topics on data.gouv.fr"
+name = "udata-front-kit-universe"
+version = "1.0.0"
+description = "Manage udata-front-kit universe topics on data.gouv.fr"
 readme = "README.md"
 requires-python = ">= 3.13"
 dependencies = [
@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [project.scripts]
-ecospheres-universe = "ecospheres_universe.__main__:main"
+universe = "universe.__main__:main"
 
 [dependency-groups]
 dev = [
@@ -35,7 +35,7 @@ addopts = [
 line-length = 100
 
 [tool.setuptools]
-packages = ["ecospheres_universe"]
+packages = ["universe"]
 
 [tool.uv]
 package = true

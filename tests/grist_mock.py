@@ -1,9 +1,9 @@
 from responses import RequestsMock
 from responses.matchers import query_param_matcher
 
-from ecospheres_universe.config import Config
-from ecospheres_universe.datagouv import DatagouvObject
-from ecospheres_universe.grist import GristAction, GristEntry
+from universe.config import Config
+from universe.datagouv import DatagouvObject
+from universe.grist import GristAction, GristEntry
 
 
 class GristMock:
