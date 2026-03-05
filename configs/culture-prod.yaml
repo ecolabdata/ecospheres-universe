@@ -5,7 +5,7 @@ datagouv:
   url: https://www.data.gouv.fr
   token: CONFIGURE_ME
 grist:
-  url: https://grist.numerique.gouv.fr/o/docs/api/docs/3HCEq5FxSQ51
+  url: https://grist.numerique.gouv.fr/o/culture-datagouv/api/docs/wF1qSdabBrfe
   table: Prod
   token: CONFIGURE_ME
 output_dir: dist/culture-prod
