@@ -1,6 +1,6 @@
 import pytest
 
-from ecospheres_universe.datagouv import (
+from universe.datagouv import (
     DatagouvObject,
     Dataservice,
     Dataset,

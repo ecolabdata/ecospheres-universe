@@ -1,6 +1,6 @@
-from ecospheres_universe.config import Config
-from ecospheres_universe.datagouv import Organization
-from ecospheres_universe.feed_universe import feed
+from universe.config import Config
+from universe.datagouv import Organization
+from universe.feed_universe import feed
 
 from .conftest import assert_outputs
 from .datagouv_mock import DatagouvMock

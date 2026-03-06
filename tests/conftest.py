@@ -7,10 +7,10 @@ from responses import RequestsMock
 
 import pytest
 
-from ecospheres_universe.config import Config, DatagouvConfig, GristConfig
-from ecospheres_universe.datagouv import Organization, Topic
-from ecospheres_universe.grist import GristEntry
-from ecospheres_universe.util import JSONObject, uniquify
+from universe.config import Config, DatagouvConfig, GristConfig
+from universe.datagouv import Organization, Topic
+from universe.grist import GristEntry
+from universe.util import JSONObject, uniquify
 
 
 from .datagouv_mock import DatagouvMock

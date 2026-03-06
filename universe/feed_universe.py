@@ -11,8 +11,8 @@ from shutil import copyfile
 
 from minicli import cli, run
 
-from ecospheres_universe.config import Config
-from ecospheres_universe.datagouv import (
+from universe.config import Config
+from universe.datagouv import (
     DatagouvApi,
     Dataservice,
     Dataset,
@@ -21,8 +21,8 @@ from ecospheres_universe.datagouv import (
     Topic,
     TopicObject,
 )
-from ecospheres_universe.grist import GristApi, GristEntry
-from ecospheres_universe.util import (
+from universe.grist import GristApi, GristEntry
+from universe.util import (
     uniquify,
     verbose_print,  # noqa: F401
 )
