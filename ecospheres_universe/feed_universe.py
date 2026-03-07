@@ -267,22 +267,22 @@ def feed(
                 f"dist/organizations-{object_class.namespace()}-{env}.json",
             )
 
-        # TODO: custom ecologie => make that an option?
-        # TODO: can this be handled by the main update loop? datasets/services in bouquets should also be in universe?
-        verbose_print("Fetching additional organizations from bouquets...")
-        bouquets = datagouv.get_bouquets(conf.tag)
-        print(f"Found {len(bouquets)} bouquets with the universe tag.")
-        bouquet_orgs = uniquify(org for b in bouquets if (org := b.organization))
-        write_organizations_file(
-            conf.output_dir / "organizations-bouquets.json",
-            sorted(bouquet_orgs),
-        )
-        # FIXME: remove when front uses the new file path
-        # retrocompatibility
-        copyfile(
-            conf.output_dir / "organizations-bouquets.json",
-            f"dist/organizations-bouquets-{env}.json",
-        )
+        if conf.tag:
+            # TODO: can this be handled by the main update loop? datasets/services in bouquets should also be in universe?
+            verbose_print("Fetching additional organizations from bouquets...")
+            bouquets = datagouv.get_bouquets(conf.tag)
+            print(f"Found {len(bouquets)} bouquets with the universe tag.")
+            bouquet_orgs = uniquify(org for b in bouquets if (org := b.organization))
+            write_organizations_file(
+                conf.output_dir / "organizations-bouquets.json",
+                sorted(bouquet_orgs),
+            )
+            # FIXME: remove when front uses the new file path
+            # retrocompatibility
+            copyfile(
+                conf.output_dir / "organizations-bouquets.json",
+                f"dist/organizations-bouquets-{env}.json",
+            )
 
     finally:
         print(f"Done at {datetime.datetime.now():%c} in {time.time() - t_all:.0f} seconds.")
