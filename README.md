@@ -10,6 +10,23 @@ Outils permettant de gérer l'univers d'une [verticale data.gouv.fr](https://git
 
 ## Mise en place d'un univers
 
+### Configuration data.gouv.fr
+
+Un univers correspond à un *topic* data.gouv.fr, qui va référencer tous les objects data.gouv.fr appartenant à une verticale donnée.
+
+Pour créer le topic univers de la verticale `{site}` sur data.gouv.fr :
+
+```
+curl -X POST \
+  https://{env}.data.gouv.fr/api/2/topics/ \
+  -H "Content-Type: application/json" \
+  -H "X-API-KEY: {mon-token-datagouv}" \
+  -d '{"name": "{mon-topic-univers}", "description": "Topic univers pour {site}.data.gouv.fr", "private": true, "tags": ["topic-univers"]}'
+```
+
+Sauf exception, le nom du topic univers doit suivre la convention `univers-{site}`.
+
+
 ### Configuration Grist
 
 La gestion d'un univers se fait par l'intérmédiaire d'un document Grist, dans lequel sont listés les éléments devant être inclus ou exclus dans la verticale cible, ceci pour chaque environnement data.gouv.fr actif.
@@ -61,7 +78,7 @@ Pour configurer le script pour un univers :
      url: https://grist.numerique.gouv.fr/o/{mon-compte-grist}/api/docs/{identifiant-du-document}
      table: Demo  # ou Prod
      token: CONFIGURE_ME
-   output_dir: dist/{mon-univers}-demo  # ou dist/{mon-univers}-prod
+   output_dir: dist/{site}-demo  # ou dist/{site}-prod
    ```
 
 2. Configurez les clés d'API Grist et data.gouv.fr dans GitHub et/ou en local selon le mode d'exécution (voir ci-dessous).
@@ -70,6 +87,9 @@ Pour configurer le script pour un univers :
 ### Configuration de l'exécution automatique
 
 L'exécution périodique du script de mise à jour est gérée par le workflow GitHub Actions [`update-universes`](https://github.com/ecolabdata/ecospheres-universe/blob/main/.github/workflows/update-universes.yml), qui met quotidiennement à jour les univers configurés.
+
+> [!NOTE]
+>  Si vous n'avez pas les droits, contactez un administrateur du dépôt pour réaliser les étapes 1 et 2.
 
 Pour ajouter une configuration d'univers au workflow :
 
