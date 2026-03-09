@@ -22,7 +22,7 @@ class GristConfig:
 @dataclass
 class Config:
     topic: str
-    tag: str
+    tag: str | None
     datagouv: DatagouvConfig
     grist: GristConfig
     output_dir: Path = Path("dist")
