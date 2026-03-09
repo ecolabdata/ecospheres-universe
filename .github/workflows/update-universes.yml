@@ -22,6 +22,7 @@ jobs:
         universe:
           - ecospheres-demo
           - ecospheres-prod
+          - culture-prod
     environment: ${{ matrix.universe }}
     env:
       CONFIG_FILE: configs/${{ matrix.universe }}.yaml
