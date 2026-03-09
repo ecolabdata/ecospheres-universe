@@ -91,6 +91,9 @@ L'exécution périodique du script de mise à jour est gérée par le workflow G
 > [!NOTE]
 >  Si vous n'avez pas les droits, contactez un administrateur du dépôt pour réaliser les étapes 1 et 2.
 
+> [!NOTE]
+>  Si vous n'avez pas les droits, contactez un administrateur du dépôt pour réaliser les étapes 1 et 2.
+
 Pour ajouter une configuration d'univers au workflow :
 
 1. Créer un [environnement GitHub](https://github.com/opendatateam/udata-front-kit-universe/settings/environments) en suivant la convention `{site}-{env}`.
