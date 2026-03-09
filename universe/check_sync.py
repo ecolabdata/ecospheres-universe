@@ -5,9 +5,9 @@ from pathlib import Path
 
 from minicli import cli, run
 
-from ecospheres_universe.config import Config
-from ecospheres_universe.datagouv import DatagouvApi, Organization
-from ecospheres_universe.grist import GristApi
+from universe.config import Config
+from universe.datagouv import DatagouvApi, Organization
+from universe.grist import GristApi
 
 
 @cli
