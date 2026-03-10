@@ -84,6 +84,7 @@ jobs:
           git push
           # -- end remove --
           pushd $ARTIFACTS_WORKTREE
+          # force add since dist/ is in .gitignore
           git add -f .
           git commit --no-verify -m "workflow: update daily run for ${{ matrix.universe }}"
           git pull --rebase origin ${{ env.ARTIFACTS_BRANCH }}
