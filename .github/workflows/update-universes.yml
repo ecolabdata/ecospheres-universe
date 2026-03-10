@@ -78,13 +78,14 @@ jobs:
           cp -a dist logs $ARTIFACTS_WORKTREE
           # FIXME: remove when front uses the new artifacts branch
           # -- start remove --
-          git add ${{ env.DIST_FILES }} ${{ env.DIST_FILES_COMPAT }} ${{ env.LOG_FILE }}
+          git add -f ${{ env.DIST_FILES }} ${{ env.DIST_FILES_COMPAT }} ${{ env.LOG_FILE }}
           git commit --no-verify -m "workflow: update daily run for ${{ matrix.universe }}"
           git pull --rebase origin ${{ github.ref_name }}
           git push
           # -- end remove --
           pushd $ARTIFACTS_WORKTREE
-          git add .
+          # force add since dist/ is in .gitignore
+          git add -f .
           git commit --no-verify -m "workflow: update daily run for ${{ matrix.universe }}"
           git pull --rebase origin ${{ env.ARTIFACTS_BRANCH }}
           git push
