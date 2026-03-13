@@ -7,7 +7,6 @@ import time
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from shutil import copyfile
 
 from minicli import cli, run
 
@@ -88,6 +87,7 @@ def write_organizations_file(filepath: Path, organizations: list[Organization]):
         }
         for org in organizations
     ]
+    filepath.parent.mkdir(parents=True, exist_ok=True)
     with filepath.open("w") as f:
         json.dump(orgs, f, indent=2, ensure_ascii=False)
 
@@ -193,10 +193,6 @@ def feed(
     dry_run: bool = False,
     reset: bool = False,
 ) -> None:
-    # FIXME: remove when front uses the new file path
-    # retrocompatibility
-    env = conf.output_dir.name.rsplit("-", 1)[1] if "-" in conf.output_dir.name else "unknown"
-
     datagouv = DatagouvApi(
         base_url=conf.datagouv.url,
         token=conf.datagouv.token,
@@ -260,12 +256,6 @@ def feed(
                 conf.output_dir / f"organizations-{object_class.namespace()}.json",
                 sorted(upcoming_perimeter.organizations),
             )
-            # FIXME: remove when front uses the new file path
-            # retrocompatibility
-            copyfile(
-                conf.output_dir / f"organizations-{object_class.namespace()}.json",
-                f"dist/organizations-{object_class.namespace()}-{env}.json",
-            )
 
         if conf.tag:
             # TODO: can this be handled by the main update loop? datasets/services in bouquets should also be in universe?
@@ -276,12 +266,6 @@ def feed(
             write_organizations_file(
                 conf.output_dir / "organizations-bouquets.json",
                 sorted(bouquet_orgs),
-            )
-            # FIXME: remove when front uses the new file path
-            # retrocompatibility
-            copyfile(
-                conf.output_dir / "organizations-bouquets.json",
-                f"dist/organizations-bouquets-{env}.json",
             )
 
     finally:

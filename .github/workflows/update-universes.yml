@@ -25,15 +25,8 @@ jobs:
           - ecospheres-prod
     environment: ${{ matrix.universe }}
     env:
-      CONFIG_FILE: configs/${{ matrix.universe }}.yaml
       ARTIFACTS_BRANCH: artifacts
-      # FIXME: remove when front uses the new artifacts branch
-      # -- start remove --
-      DIST_FILES: dist/${{ matrix.universe }}/organizations-*.json
-      # TODO: remove once front has moved to new dist files
-      DIST_FILES_COMPAT: dist/organizations-*-{demo,prod}.json
-      LOG_FILE: logs/${{ matrix.universe }}.log
-      # -- end remove --
+      CONFIG_FILE: configs/${{ matrix.universe }}.yaml
 
     steps:
       - uses: actions/checkout@v6
@@ -48,8 +41,7 @@ jobs:
 
       - name: Ensure expected dirs exists
         run: |
-          mkdir -p dist/${{ matrix.universe }}
-          mkdir -p logs
+          mkdir -p dist logs
 
       - name: Update ${{ matrix.universe }} universe
         env:
@@ -75,17 +67,9 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          cp -a dist logs $ARTIFACTS_WORKTREE
-          # FIXME: remove when front uses the new artifacts branch
-          # -- start remove --
-          git add -f ${{ env.DIST_FILES }} ${{ env.DIST_FILES_COMPAT }} ${{ env.LOG_FILE }}
-          git commit --no-verify -m "workflow: update daily run for ${{ matrix.universe }}"
-          git pull --rebase origin ${{ github.ref_name }}
-          git push
-          # -- end remove --
+          mv dist logs $ARTIFACTS_WORKTREE
           pushd $ARTIFACTS_WORKTREE
-          # force add since dist/ is in .gitignore
-          git add -f .
+          git add .
           git commit --no-verify -m "workflow: update daily run for ${{ matrix.universe }}"
           git pull --rebase origin ${{ env.ARTIFACTS_BRANCH }}
           git push
