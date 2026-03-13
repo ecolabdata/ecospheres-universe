@@ -210,6 +210,12 @@
     "type": null
   },
   {
+    "id": "58aeedd088ee3820f0d3e7cd",
+    "name": "DDTM Pas-de-Calais",
+    "slug": "ddtm-pas-de-calais",
+    "type": null
+  },
+  {
     "id": "59087a45c751df5a2a2c425f",
     "name": "Département de l'Hérault",
     "slug": "departement-de-lherault",
@@ -447,12 +453,6 @@
     "id": "5a0467d188ee38711f65672c",
     "name": "Métropole Rouen Normandie",
     "slug": "metropole-rouen-normandie",
-    "type": null
-  },
-  {
-    "id": "534fff8ca3a7292c64a77edf",
-    "name": "Ministère de l'Agriculture, de l'agro-alimentaire et de la souveraineté alimentaire",
-    "slug": "ministere-de-lagriculture-de-lagro-alimentaire-et-de-la-souverainete-alimentaire",
     "type": null
   },
   {
