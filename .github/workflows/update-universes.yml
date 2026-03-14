@@ -67,7 +67,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          mv dist logs $ARTIFACTS_WORKTREE
+          cp -a dist logs $ARTIFACTS_WORKTREE
           pushd $ARTIFACTS_WORKTREE
           git add .
           git commit --no-verify -m "workflow: update daily run for ${{ matrix.universe }}"
