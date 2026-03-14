@@ -1,11 +1,5 @@
 [
   {
-    "id": "5b1138d9c751df2618dc4662",
-    "name": "Agence ORE",
-    "slug": "agence-ore-3",
-    "type": null
-  },
-  {
     "id": "64355e0cea19cd729c707cdb",
     "name": "Association Qualitel",
     "slug": "association-qualitel",
@@ -15,6 +9,12 @@
     "id": "5b0d11f688ee382af4b18c95",
     "name": "Bordeaux Métropole",
     "slug": "bordeaux-metropole",
+    "type": null
+  },
+  {
+    "id": "558add63c751df7c4fa453c8",
+    "name": "Direction Départementale des Territoires et de la Mer des Bouches-du-Rhône",
+    "slug": "direction-departementale-des-territoires-et-de-la-mer-des-bouches-du-rhone",
     "type": null
   },
   {
@@ -39,12 +39,6 @@
     "id": "534fff8da3a7292c64a77eee",
     "name": "Ministère de la Transition écologique",
     "slug": "ministere-de-la-transition-ecologique",
-    "type": null
-  },
-  {
-    "id": "690dcb99e86615a80853ec34",
-    "name": "MobSci Dat Factory",
-    "slug": "mobsci-dat-factory",
     "type": null
   },
   {
