@@ -27,6 +27,7 @@ jobs:
     env:
       ARTIFACTS_BRANCH: artifacts
       CONFIG_FILE: configs/${{ matrix.universe }}.yaml
+      LOG_FILE: logs/${{ matrix.universe }}.log
 
     steps:
       - uses: actions/checkout@v6
