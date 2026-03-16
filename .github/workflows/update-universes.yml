@@ -27,6 +27,7 @@ jobs:
     environment: ${{ matrix.universe }}
     env:
       ARTIFACTS_BRANCH: artifacts
+      ARTIFACTS_DIRS: dist logs
       CONFIG_FILE: configs/${{ matrix.universe }}.yaml
       LOG_FILE: logs/${{ matrix.universe }}.log
 
@@ -41,9 +42,10 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Ensure expected dirs exists
+      - name: Ensure clean artifact dirs
         run: |
-          mkdir -p dist logs
+          rm -rf ${{ env.ARTIFACTS_DIRS }}
+          mkdir ${{ env.ARTIFACTS_DIRS }}
 
       - name: Update ${{ matrix.universe }} universe
         env:
@@ -69,9 +71,9 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          cp -a dist logs $ARTIFACTS_WORKTREE
+          cp -a ${{ env.ARTIFACTS_DIRS }} $ARTIFACTS_WORKTREE
           pushd $ARTIFACTS_WORKTREE
-          git add .
+          git add ${{ env.ARTIFACTS_DIRS }}
           git commit --no-verify -m "workflow: update daily run for ${{ matrix.universe }}"
           git pull --rebase origin ${{ env.ARTIFACTS_BRANCH }}
           git push
@@ -79,4 +81,4 @@ jobs:
 
       - name: Delete worktree
         if: always() && steps.create-worktree.outcome == 'success'
-        run: git worktree remove $ARTIFACTS_WORKTREE
+        run: git worktree remove -f $ARTIFACTS_WORKTREE
