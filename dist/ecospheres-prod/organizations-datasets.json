@@ -1134,6 +1134,12 @@
     "type": "EPA"
   },
   {
+    "id": "67c5ea43c8e7b1f1830d4739",
+    "name": "Tableau de bord des mobilités durables",
+    "slug": "tableau-de-bord-des-mobilites-durables",
+    "type": ""
+  },
+  {
     "id": "6200dfeba70a9f33f0854650",
     "name": "Trackdéchets",
     "slug": "trackdechets",
