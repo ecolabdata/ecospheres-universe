@@ -720,6 +720,12 @@
     "type": "Administration centrale"
   },
   {
+    "id": "57fe2a35c751df21e179df72",
+    "name": "Direction interministérielle du numérique",
+    "slug": "direction-interministerielle-du-numerique",
+    "type": null
+  },
+  {
     "id": "67a34f4cfe9d312c39d50e50",
     "name": "Direction régionale de l'environnement, de l'aménagement et du logement de Bretagne",
     "slug": "direction-regionale-de-lenvironnement-de-lamenagement-et-du-logement-de-bretagne",
@@ -856,6 +862,12 @@
     "name": "GRDF",
     "slug": "grdf",
     "type": "SA"
+  },
+  {
+    "id": "6410a71de7707043d449bfa7",
+    "name": "Haut-commissariat à la Stratégie et au Plan",
+    "slug": "haut-commissariat-a-la-strategie-et-au-plan",
+    "type": null
   },
   {
     "id": "568e5e9488ee38033aaf0bf4",
@@ -1137,7 +1149,7 @@
     "id": "67c5ea43c8e7b1f1830d4739",
     "name": "Tableau de bord des mobilités durables",
     "slug": "tableau-de-bord-des-mobilites-durables",
-    "type": ""
+    "type": "Autre"
   },
   {
     "id": "6200dfeba70a9f33f0854650",
